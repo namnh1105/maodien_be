@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: maodien_postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-maodien}
+      POSTGRES_USER: ${POSTGRES_USER:-maodien}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-maodien123}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - maodien-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-maodien} -d ${POSTGRES_DB:-maodien}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: maodien_redis
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - maodien-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  maodien:
+    image: maodien:latest
+    container_name: maodien_app
+    user: "1001:1001"
+    env_file:
+      - .env
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    volumes:
+      - /opt/maodien/logs:/opt/maodien/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - maodien-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+
+networks:
+  maodien-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:
