@@ -13,6 +13,6 @@ public class GoogleOAuth2Properties {
     @Value("${GOOGLE_OAUTH2_CLIENT_SECRET:}")
     private String clientSecret;
 
-    @Value("${GOOGLE_OAUTH2_REDIRECT_URI:http://localhost:8080/auth/google/callback}")
+    @Value("${GOOGLE_OAUTH2_REDIRECT_URI:http://localhost:8083/auth/google/callback}")
     private String redirectUri;
 }

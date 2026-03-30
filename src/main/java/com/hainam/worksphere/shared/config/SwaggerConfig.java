@@ -15,7 +15,7 @@ import java.util.List;
 @Configuration
 public class SwaggerConfig {
 
-    @Value("${server.port:8080}")
+    @Value("${server.port:8083}")
     private String serverPort;
 
     @Value("${APP_NAME:Worksphere API}")

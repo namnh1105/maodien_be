@@ -40,11 +40,11 @@ COPY --from=builder /app/build/libs/*.jar /opt/maodien/maodien.jar
 USER maodien
 
 # Expose the port
-EXPOSE 8080
+EXPOSE 8083
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8083/actuator/health || exit 1
 
 # Run the application
 ENTRYPOINT ["java", "-Dspring.profiles.active=production", "-jar", "/opt/maodien/maodien.jar"]
