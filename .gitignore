@@ -56,3 +56,7 @@ application-local.properties
 # Deployment configs (server-specific, not for repo)
 deployment/
 
+*.bat
+*.sh
+*.sql
+.gradle/

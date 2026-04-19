@@ -1,0 +1,22 @@
+package com.hainam.worksphere.area.dto.request;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class CreateAreaRequest {
+
+    @NotBlank(message = "Area code is required")
+    private String areaCode;
+
+    @NotBlank(message = "Area name is required")
+    private String name;
+
+    private String description;
+}
