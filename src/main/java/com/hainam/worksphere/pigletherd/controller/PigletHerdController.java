@@ -3,7 +3,10 @@ package com.hainam.worksphere.pigletherd.controller;
 import com.hainam.worksphere.auth.security.UserPrincipal;
 import com.hainam.worksphere.authorization.security.RequirePermission;
 import com.hainam.worksphere.pigletherd.dto.request.CreatePigletHerdRequest;
+import com.hainam.worksphere.pigletherd.dto.request.MergePigletHerdRequest;
+import com.hainam.worksphere.pigletherd.dto.request.SplitPigletHerdRequest;
 import com.hainam.worksphere.pigletherd.dto.request.UpdatePigletHerdRequest;
+import com.hainam.worksphere.pigletherd.dto.response.PigletHerdDetailResponse;
 import com.hainam.worksphere.pigletherd.dto.response.PigletHerdResponse;
 import com.hainam.worksphere.pigletherd.service.PigletHerdService;
 import com.hainam.worksphere.shared.constant.PermissionType;
@@ -61,6 +64,13 @@ public class PigletHerdController {
         return ResponseEntity.ok(ApiResponse.success(pigletHerdService.getById(id)));
     }
 
+    @GetMapping("/{id}/detail")
+    @Operation(summary = "Get piglet herd detail")
+    @RequirePermission(PermissionType.VIEW_PIGLET_HERD)
+    public ResponseEntity<ApiResponse<PigletHerdDetailResponse>> getDetailById(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success(pigletHerdService.getDetailById(id)));
+    }
+
     @PutMapping("/{id}")
     @Operation(summary = "Update piglet herd")
     @RequirePermission(PermissionType.UPDATE_PIGLET_HERD)
@@ -82,5 +92,27 @@ public class PigletHerdController {
     ) {
         pigletHerdService.delete(id, userPrincipal.getId());
         return ResponseEntity.ok(ApiResponse.success("Piglet herd deleted successfully", null));
+    }
+
+    @PostMapping("/split")
+    @Operation(summary = "Split piglet herd")
+    @RequirePermission(PermissionType.UPDATE_PIGLET_HERD)
+    public ResponseEntity<ApiResponse<PigletHerdResponse>> split(
+            @Valid @RequestBody SplitPigletHerdRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        PigletHerdResponse response = pigletHerdService.splitHerd(request, userPrincipal.getId());
+        return ResponseEntity.ok(ApiResponse.success("Piglet herd split successfully", response));
+    }
+
+    @PostMapping("/merge")
+    @Operation(summary = "Merge piglet herds")
+    @RequirePermission(PermissionType.UPDATE_PIGLET_HERD)
+    public ResponseEntity<ApiResponse<PigletHerdResponse>> merge(
+            @Valid @RequestBody MergePigletHerdRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        PigletHerdResponse response = pigletHerdService.mergeHerd(request, userPrincipal.getId());
+        return ResponseEntity.ok(ApiResponse.success("Piglet herds merged successfully", response));
     }
 }

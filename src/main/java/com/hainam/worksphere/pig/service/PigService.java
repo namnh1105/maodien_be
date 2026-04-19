@@ -1,8 +1,8 @@
 package com.hainam.worksphere.pig.service;
 
 import com.hainam.worksphere.pig.domain.Pig;
-import com.hainam.worksphere.pig.domain.PigGender;
 import com.hainam.worksphere.pig.domain.PigStatus;
+import com.hainam.worksphere.pig.domain.PigType;
 import com.hainam.worksphere.pig.dto.request.CreatePigRequest;
 import com.hainam.worksphere.pig.dto.request.UpdatePigRequest;
 import com.hainam.worksphere.pig.dto.response.PigResponse;
@@ -31,16 +31,12 @@ public class PigService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "PIG")
     public PigResponse create(CreatePigRequest request, UUID createdBy) {
-        if (pigRepository.existsActiveByPigCode(request.getPigCode())) {
-            throw new BusinessRuleViolationException("Pig code already exists: " + request.getPigCode());
-        }
-
         Pig pig = Pig.builder()
-                .pigCode(request.getPigCode())
                 .earTag(request.getEarTag())
                 .birthWeight(request.getBirthWeight())
                 .birthDate(request.getBirthDate())
-                .gender(parsePigGender(request.getGender()))
+                .type(parsePigType(request.getType()))
+                .origin(request.getOrigin())
                 .species(request.getSpecies())
                 .nippleCount(request.getNippleCount())
                 .herdEntryDate(request.getHerdEntryDate())
@@ -49,6 +45,8 @@ public class PigService {
                 .build();
 
         Pig saved = pigRepository.save(pig);
+        saved.setPigCode(generatePigCode(saved.getId()));
+        saved = pigRepository.save(saved);
         AuditContext.registerCreated(saved);
         return pigMapper.toResponse(saved);
     }
@@ -82,7 +80,8 @@ public class PigService {
         if (request.getEarTag() != null) pig.setEarTag(request.getEarTag());
         if (request.getBirthWeight() != null) pig.setBirthWeight(request.getBirthWeight());
         if (request.getBirthDate() != null) pig.setBirthDate(request.getBirthDate());
-        if (request.getGender() != null) pig.setGender(parsePigGender(request.getGender()));
+        if (request.getType() != null) pig.setType(parsePigType(request.getType()));
+        if (request.getOrigin() != null) pig.setOrigin(request.getOrigin());
         if (request.getSpecies() != null) pig.setSpecies(request.getSpecies());
         if (request.getNippleCount() != null) pig.setNippleCount(request.getNippleCount());
         if (request.getHerdEntryDate() != null) pig.setHerdEntryDate(request.getHerdEntryDate());
@@ -108,15 +107,20 @@ public class PigService {
         pigRepository.save(pig);
     }
 
-    private PigGender parsePigGender(String rawGender) {
-        if (rawGender == null || rawGender.isBlank()) {
-            throw new BusinessRuleViolationException("Pig gender is required");
+    private PigType parsePigType(String rawType) {
+        if (rawType == null || rawType.isBlank()) {
+            throw new BusinessRuleViolationException("Pig type is required");
         }
         try {
-            return PigGender.valueOf(rawGender.trim().toUpperCase());
+            return PigType.valueOf(rawType.trim().toUpperCase());
         } catch (IllegalArgumentException ex) {
-            throw new BusinessRuleViolationException("Invalid pig gender: " + rawGender);
+            throw new BusinessRuleViolationException("Invalid pig type: " + rawType);
         }
+    }
+
+    private String generatePigCode(UUID id) {
+        String shortId = id.toString().replace("-", "").substring(0, 8).toUpperCase();
+        return "PIG-" + shortId;
     }
 
     private PigStatus parsePigStatus(String rawStatus) {

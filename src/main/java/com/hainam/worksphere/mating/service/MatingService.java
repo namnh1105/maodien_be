@@ -6,6 +6,8 @@ import com.hainam.worksphere.mating.dto.request.UpdateMatingRequest;
 import com.hainam.worksphere.mating.dto.response.MatingResponse;
 import com.hainam.worksphere.mating.mapper.MatingMapper;
 import com.hainam.worksphere.mating.repository.MatingRepository;
+import com.hainam.worksphere.pig.domain.Pig;
+import com.hainam.worksphere.pig.repository.PigRepository;
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
@@ -24,6 +26,7 @@ import java.util.UUID;
 public class MatingService {
 
     private final MatingRepository matingRepository;
+    private final PigRepository pigRepository;
     private final MatingMapper matingMapper;
 
     @Transactional
@@ -61,6 +64,17 @@ public class MatingService {
                 .orElseThrow(() -> new ResourceNotFoundException("Mating", id.toString()));
         return matingMapper.toResponse(mating);
     }
+
+        @Transactional(readOnly = true)
+        public List<MatingResponse> getByMaLon(String maLon) {
+        Pig pig = pigRepository.findActiveByPigCode(maLon)
+            .or(() -> pigRepository.findActiveByEarTag(maLon))
+            .orElseThrow(() -> new ResourceNotFoundException("Pig", maLon));
+
+        return matingRepository.findActiveBySowPigId(pig.getId()).stream()
+            .map(matingMapper::toResponse)
+            .toList();
+        }
 
     @Transactional
     @AuditAction(type = ActionType.UPDATE, entity = "MATING")

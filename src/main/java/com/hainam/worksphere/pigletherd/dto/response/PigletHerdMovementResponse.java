@@ -13,21 +13,16 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PigletHerdResponse {
+public class PigletHerdMovementResponse {
 
     private UUID id;
-    private String herdCode;
-    private String reproductionCode;
-    private String herdName;
-    private Integer litterNumber;
-    private UUID motherId;
-    private String motherCode;
-    private UUID fatherId;
-    private String fatherCode;
+    private UUID herdId;
+    private String movementType;
+    private UUID sourceHerdId;
+    private UUID targetHerdId;
+    private LocalDate movementDate;
     private Integer quantity;
-    private String genderNote;
-    private Double averageBirthWeight;
-    private LocalDate birthDate;
+    private String reason;
     private Instant createdAt;
     private Instant updatedAt;
 }

@@ -9,12 +9,10 @@ import lombok.NoArgsConstructor;
 
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
 public class CreatePenRequest {
-    @NotBlank(message = "Mã chuồng không được để trống") @Size(max = 30)
-    private String penCode;
     @NotBlank(message = "Tên chuồng không được để trống") @Size(max = 100)
     private String name;
-    private Double length;
-    private Double width;
+    private Double area;
+    private java.util.UUID areaId;
     private String penType;
     private String status;
 }

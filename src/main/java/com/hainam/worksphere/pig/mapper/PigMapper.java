@@ -9,7 +9,7 @@ import org.mapstruct.MappingConstants;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface PigMapper {
 
-    @Mapping(target = "gender", expression = "java(pig.getGender() != null ? pig.getGender().name() : null)")
+    @Mapping(target = "type", expression = "java(pig.getType() != null ? pig.getType().name() : null)")
     @Mapping(target = "status", expression = "java(pig.getStatus() != null ? pig.getStatus().name() : null)")
     PigResponse toResponse(Pig pig);
 }

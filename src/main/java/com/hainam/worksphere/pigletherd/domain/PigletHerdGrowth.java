@@ -1,6 +1,5 @@
 package com.hainam.worksphere.pigletherd.domain;
 
-import com.hainam.worksphere.pig.domain.Pig;
 import com.hainam.worksphere.shared.audit.annotation.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -15,52 +14,32 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "piglet_herds")
+@Table(name = "piglet_herd_growth_tracking")
 @AuditableEntity(ignoreFields = {
-    "id", "updatedAt", "updatedBy", "createdAt", "createdBy",
-    "isDeleted", "deletedAt", "deletedBy"
+        "id", "updatedAt", "updatedBy", "createdAt", "createdBy",
+        "isDeleted", "deletedAt", "deletedBy"
 })
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PigletHerd {
+public class PigletHerdGrowth {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "herd_code", nullable = false, unique = true, length = 30)
-    private String herdCode;
+    @Column(name = "herd_id", nullable = false)
+    private UUID herdId;
 
-    @Column(name = "reproduction_code", length = 30)
-    private String reproductionCode;
+    @Column(name = "tracking_date", nullable = false)
+    private LocalDate trackingDate;
 
-    @Column(name = "herd_name", length = 100)
-    private String herdName;
+    @Column(name = "average_weight")
+    private Double averageWeight;
 
-    @Column(name = "litter_number")
-    private Integer litterNumber;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "mother_id")
-    private Pig mother;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "father_id")
-    private Pig father;
-
-    @Column(name = "quantity")
-    private Integer quantity;
-
-    @Column(name = "gender_note", length = 100)
-    private String genderNote;
-
-    @Column(name = "average_birth_weight")
-    private Double averageBirthWeight;
-
-    @Column(name = "birth_date")
-    private LocalDate birthDate;
+    @Column(name = "note", columnDefinition = "TEXT")
+    private String note;
 
     @CreationTimestamp
     @Column(name = "created_at")

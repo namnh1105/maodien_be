@@ -4,7 +4,9 @@ import com.hainam.worksphere.auth.security.UserPrincipal;
 import com.hainam.worksphere.authorization.security.RequirePermission;
 import com.hainam.worksphere.pen.dto.request.CreatePenRequest;
 import com.hainam.worksphere.pen.dto.request.UpdatePenRequest;
+import com.hainam.worksphere.pen.dto.response.PenDetailResponse;
 import com.hainam.worksphere.pen.dto.response.PenResponse;
+import com.hainam.worksphere.pen.service.PenDetailService;
 import com.hainam.worksphere.pen.service.PenService;
 import com.hainam.worksphere.shared.constant.PermissionType;
 import com.hainam.worksphere.shared.dto.ApiResponse;
@@ -29,6 +31,7 @@ import java.util.UUID;
 public class PenController {
 
     private final PenService penService;
+    private final PenDetailService penDetailService;
 
     @PostMapping
     @Operation(summary = "Create pen")
@@ -54,6 +57,13 @@ public class PenController {
     @RequirePermission(PermissionType.VIEW_PEN)
     public ResponseEntity<ApiResponse<PenResponse>> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success(penService.getById(id)));
+    }
+
+    @GetMapping("/{id}/detail")
+    @Operation(summary = "Get pen detail")
+    @RequirePermission(PermissionType.VIEW_PEN)
+    public ResponseEntity<ApiResponse<PenDetailResponse>> getDetail(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success(penDetailService.getDetail(id)));
     }
 
     @PutMapping("/{id}")

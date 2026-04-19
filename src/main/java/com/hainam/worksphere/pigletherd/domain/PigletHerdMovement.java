@@ -1,6 +1,5 @@
 package com.hainam.worksphere.pigletherd.domain;
 
-import com.hainam.worksphere.pig.domain.Pig;
 import com.hainam.worksphere.shared.audit.annotation.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -15,52 +14,42 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "piglet_herds")
+@Table(name = "piglet_herd_movements")
 @AuditableEntity(ignoreFields = {
-    "id", "updatedAt", "updatedBy", "createdAt", "createdBy",
-    "isDeleted", "deletedAt", "deletedBy"
+        "id", "updatedAt", "updatedBy", "createdAt", "createdBy",
+        "isDeleted", "deletedAt", "deletedBy"
 })
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PigletHerd {
+public class PigletHerdMovement {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "herd_code", nullable = false, unique = true, length = 30)
-    private String herdCode;
+    @Column(name = "herd_id", nullable = false)
+    private UUID herdId;
 
-    @Column(name = "reproduction_code", length = 30)
-    private String reproductionCode;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "movement_type", nullable = false, length = 20)
+    private PigletHerdMovementType movementType;
 
-    @Column(name = "herd_name", length = 100)
-    private String herdName;
+    @Column(name = "source_herd_id")
+    private UUID sourceHerdId;
 
-    @Column(name = "litter_number")
-    private Integer litterNumber;
+    @Column(name = "target_herd_id")
+    private UUID targetHerdId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "mother_id")
-    private Pig mother;
+    @Column(name = "movement_date", nullable = false)
+    private LocalDate movementDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "father_id")
-    private Pig father;
-
-    @Column(name = "quantity")
+    @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    @Column(name = "gender_note", length = 100)
-    private String genderNote;
-
-    @Column(name = "average_birth_weight")
-    private Double averageBirthWeight;
-
-    @Column(name = "birth_date")
-    private LocalDate birthDate;
+    @Column(name = "reason", columnDefinition = "TEXT")
+    private String reason;
 
     @CreationTimestamp
     @Column(name = "created_at")

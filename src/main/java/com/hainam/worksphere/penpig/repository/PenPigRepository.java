@@ -21,4 +21,10 @@ public interface PenPigRepository extends JpaRepository<PenPig, UUID> {
 
     @Query("SELECT CASE WHEN COUNT(pp) > 0 THEN true ELSE false END FROM PenPig pp WHERE pp.assignmentCode = :code AND pp.isDeleted = false")
     boolean existsActiveByAssignmentCode(@Param("code") String code);
+
+    @Query("SELECT pp FROM PenPig pp WHERE pp.penId = :penId AND pp.isDeleted = false AND pp.exitDate IS NULL")
+    List<PenPig> findCurrentByPenId(@Param("penId") UUID penId);
+
+    @Query("SELECT pp FROM PenPig pp WHERE pp.pigId = :pigId AND pp.isDeleted = false AND pp.exitDate IS NULL")
+    List<PenPig> findCurrentByPigId(@Param("pigId") UUID pigId);
 }

@@ -1,6 +1,5 @@
 package com.hainam.worksphere.pig.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -16,10 +15,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class CreatePigRequest {
 
-    @NotBlank(message = "Mã lợn không được để trống")
-    @Size(max = 30)
-    private String pigCode;
-
     @Size(max = 50)
     private String earTag;
 
@@ -27,8 +22,11 @@ public class CreatePigRequest {
 
     private LocalDate birthDate;
 
-    @NotNull(message = "Giới tính không được để trống")
-    private String gender;
+    @NotNull(message = "Loại lợn không được để trống")
+    private String type;
+
+    @Size(max = 255)
+    private String origin;
 
     @Size(max = 100)
     private String species;

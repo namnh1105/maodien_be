@@ -23,9 +23,15 @@ public interface PigRepository extends JpaRepository<Pig, UUID> {
     @Query("SELECT p FROM Pig p WHERE p.pigCode = :code AND p.isDeleted = false")
     Optional<Pig> findActiveByPigCode(@Param("code") String code);
 
+    @Query("SELECT p FROM Pig p WHERE p.earTag = :earTag AND p.isDeleted = false")
+    Optional<Pig> findActiveByEarTag(@Param("earTag") String earTag);
+
     @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Pig p WHERE p.pigCode = :code AND p.isDeleted = false")
     boolean existsActiveByPigCode(@Param("code") String code);
 
     @Query("SELECT p FROM Pig p WHERE p.status = :status AND p.isDeleted = false")
     List<Pig> findActiveByStatus(@Param("status") PigStatus status);
+
+    @Query("SELECT p FROM Pig p WHERE p.id IN :ids AND p.isDeleted = false")
+    List<Pig> findActiveByIds(@Param("ids") List<UUID> ids);
 }

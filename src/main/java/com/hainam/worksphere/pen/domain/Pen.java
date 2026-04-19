@@ -34,11 +34,11 @@ public class Pen {
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
-    @Column(name = "length")
-    private Double length;
+    @Column(name = "area")
+    private Double area;
 
-    @Column(name = "width")
-    private Double width;
+    @Column(name = "area_id")
+    private UUID areaId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "pen_type", length = 20)

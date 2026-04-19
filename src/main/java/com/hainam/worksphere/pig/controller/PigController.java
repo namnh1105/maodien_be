@@ -4,7 +4,9 @@ import com.hainam.worksphere.auth.security.UserPrincipal;
 import com.hainam.worksphere.authorization.security.RequirePermission;
 import com.hainam.worksphere.pig.dto.request.CreatePigRequest;
 import com.hainam.worksphere.pig.dto.request.UpdatePigRequest;
+import com.hainam.worksphere.pig.dto.response.PigDetailResponse;
 import com.hainam.worksphere.pig.dto.response.PigResponse;
+import com.hainam.worksphere.pig.service.PigDetailService;
 import com.hainam.worksphere.pig.service.PigService;
 import com.hainam.worksphere.shared.constant.PermissionType;
 import com.hainam.worksphere.shared.dto.ApiResponse;
@@ -29,6 +31,7 @@ import java.util.UUID;
 public class PigController {
 
     private final PigService pigService;
+    private final PigDetailService pigDetailService;
 
     @PostMapping
     @Operation(summary = "Create pig")
@@ -59,6 +62,13 @@ public class PigController {
     @RequirePermission(PermissionType.VIEW_PIG)
     public ResponseEntity<ApiResponse<PigResponse>> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success(pigService.getById(id)));
+    }
+
+    @GetMapping("/{id}/detail")
+    @Operation(summary = "Get pig detail")
+    @RequirePermission(PermissionType.VIEW_PIG)
+    public ResponseEntity<ApiResponse<PigDetailResponse>> getDetail(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success(pigDetailService.getDetail(id)));
     }
 
     @PutMapping("/{id}")

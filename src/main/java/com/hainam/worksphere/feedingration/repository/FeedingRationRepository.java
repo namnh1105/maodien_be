@@ -18,4 +18,7 @@ public interface FeedingRationRepository extends JpaRepository<FeedingRation, UU
 
     @Query("SELECT fr FROM FeedingRation fr WHERE fr.id = :id AND fr.isDeleted = false")
     Optional<FeedingRation> findActiveById(@Param("id") UUID id);
+
+    @Query("SELECT fr FROM FeedingRation fr WHERE fr.penId = :penId AND fr.isDeleted = false ORDER BY fr.rationDate DESC, fr.createdAt DESC")
+    List<FeedingRation> findActiveByPenIdOrderByLatest(@Param("penId") UUID penId);
 }

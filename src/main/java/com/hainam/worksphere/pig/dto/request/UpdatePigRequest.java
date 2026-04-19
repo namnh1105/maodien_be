@@ -21,7 +21,10 @@ public class UpdatePigRequest {
 
     private LocalDate birthDate;
 
-    private String gender;
+    private String type;
+
+    @Size(max = 255)
+    private String origin;
 
     @Size(max = 100)
     private String species;

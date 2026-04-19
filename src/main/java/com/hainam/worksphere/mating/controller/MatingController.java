@@ -45,6 +45,12 @@ public class MatingController {
         return ResponseEntity.ok(ApiResponse.success(matingService.getAll()));
     }
 
+    @GetMapping("/by-ma-lon/{maLon}")
+    @Operation(summary = "Get mating records by pig code/ear tag")
+    public ResponseEntity<ApiResponse<List<MatingResponse>>> getByMaLon(@PathVariable String maLon) {
+        return ResponseEntity.ok(ApiResponse.success(matingService.getByMaLon(maLon)));
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get mating record by id")
     public ResponseEntity<ApiResponse<MatingResponse>> getById(@PathVariable UUID id) {

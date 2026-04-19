@@ -42,8 +42,11 @@ public class Pig {
     private LocalDate birthDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "gender", length = 10)
-    private PigGender gender;
+    @Column(name = "pig_type", length = 10)
+    private PigType type;
+
+    @Column(name = "origin", length = 255)
+    private String origin;
 
     @Column(name = "species", length = 100)
     private String species;

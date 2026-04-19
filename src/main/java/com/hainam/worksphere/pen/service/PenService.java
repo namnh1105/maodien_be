@@ -31,21 +31,18 @@ public class PenService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "PEN")
     public PenResponse create(CreatePenRequest request, UUID createdBy) {
-        if (penRepository.existsActiveByPenCode(request.getPenCode())) {
-            throw new BusinessRuleViolationException("Pen code already exists: " + request.getPenCode());
-        }
-
         Pen pen = Pen.builder()
-                .penCode(request.getPenCode())
                 .name(request.getName())
-                .length(request.getLength())
-                .width(request.getWidth())
+                .area(request.getArea())
+                .areaId(request.getAreaId())
                 .penType(parsePenType(request.getPenType()))
                 .status(parsePenStatus(request.getStatus()))
                 .createdBy(createdBy)
                 .build();
 
         Pen saved = penRepository.save(pen);
+        saved.setPenCode(generatePenCode(saved.getId()));
+        saved = penRepository.save(saved);
         AuditContext.registerCreated(saved);
         return penMapper.toResponse(saved);
     }
@@ -71,8 +68,8 @@ public class PenService {
         AuditContext.snapshot(pen);
 
         if (request.getName() != null) pen.setName(request.getName());
-        if (request.getLength() != null) pen.setLength(request.getLength());
-        if (request.getWidth() != null) pen.setWidth(request.getWidth());
+        if (request.getArea() != null) pen.setArea(request.getArea());
+        if (request.getAreaId() != null) pen.setAreaId(request.getAreaId());
         if (request.getPenType() != null) pen.setPenType(parsePenType(request.getPenType()));
         if (request.getStatus() != null) pen.setStatus(parsePenStatus(request.getStatus()));
         pen.setUpdatedBy(updatedBy);
@@ -116,5 +113,10 @@ public class PenService {
         } catch (IllegalArgumentException ex) {
             throw new BusinessRuleViolationException("Invalid pen status: " + rawStatus);
         }
+    }
+
+    private String generatePenCode(UUID id) {
+        String shortId = id.toString().replace("-", "").substring(0, 8).toUpperCase();
+        return "PEN-" + shortId;
     }
 }

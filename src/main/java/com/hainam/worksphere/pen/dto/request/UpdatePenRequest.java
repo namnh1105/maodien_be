@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 public class UpdatePenRequest {
     @Size(max = 100)
     private String name;
-    private Double length;
-    private Double width;
+    private Double area;
+    private java.util.UUID areaId;
     private String penType;
     private String status;
 }

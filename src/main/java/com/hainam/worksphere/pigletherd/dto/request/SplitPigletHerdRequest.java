@@ -2,7 +2,6 @@ package com.hainam.worksphere.pigletherd.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,29 +14,25 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreatePigletHerdRequest {
+public class SplitPigletHerdRequest {
 
-    @NotBlank(message = "Herd code is required")
-    @Size(max = 30)
-    private String herdCode;
+    @NotNull(message = "Source herd id is required")
+    private UUID sourceHerdId;
+
+    @NotBlank(message = "New herd code is required")
+    private String newHerdCode;
 
     @NotBlank(message = "Reproduction code is required")
-    @Size(max = 30)
     private String reproductionCode;
 
     @NotNull(message = "Litter number is required")
     private Integer litterNumber;
 
-    private UUID motherId;
-
-    private UUID fatherId;
-
+    @NotNull(message = "Quantity is required")
     private Integer quantity;
 
-    @Size(max = 100)
-    private String genderNote;
+    @NotNull(message = "Movement date is required")
+    private LocalDate movementDate;
 
-    private Double averageBirthWeight;
-
-    private LocalDate birthDate;
+    private String reason;
 }

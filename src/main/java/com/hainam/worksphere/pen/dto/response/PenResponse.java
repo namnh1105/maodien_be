@@ -13,8 +13,8 @@ public class PenResponse {
     private UUID id;
     private String penCode;
     private String name;
-    private Double length;
-    private Double width;
+    private Double area;
+    private UUID areaId;
     private String penType;
     private String status;
     private Instant createdAt;

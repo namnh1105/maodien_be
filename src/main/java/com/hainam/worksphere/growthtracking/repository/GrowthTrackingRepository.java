@@ -21,4 +21,7 @@ public interface GrowthTrackingRepository extends JpaRepository<GrowthTracking, 
 
     @Query("SELECT CASE WHEN COUNT(gt) > 0 THEN true ELSE false END FROM GrowthTracking gt WHERE gt.trackingCode = :code AND gt.isDeleted = false")
     boolean existsActiveByTrackingCode(@Param("code") String code);
+
+    @Query("SELECT gt FROM GrowthTracking gt WHERE gt.pigId = :pigId AND gt.isDeleted = false ORDER BY gt.trackingDate DESC, gt.createdAt DESC")
+    List<GrowthTracking> findActiveByPigId(@Param("pigId") UUID pigId);
 }

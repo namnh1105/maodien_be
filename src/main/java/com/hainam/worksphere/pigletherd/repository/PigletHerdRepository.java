@@ -24,4 +24,7 @@ public interface PigletHerdRepository extends JpaRepository<PigletHerd, UUID> {
 
     @Query("SELECT h FROM PigletHerd h WHERE h.mother.id = :motherId AND h.isDeleted = false")
     List<PigletHerd> findActiveByMotherId(@Param("motherId") UUID motherId);
+
+    @Query("SELECT h FROM PigletHerd h WHERE h.mother.id IN :motherIds AND h.isDeleted = false")
+    List<PigletHerd> findActiveByMotherIds(@Param("motherIds") List<UUID> motherIds);
 }

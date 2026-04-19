@@ -20,7 +20,8 @@ public class PigResponse {
     private String earTag;
     private Double birthWeight;
     private LocalDate birthDate;
-    private String gender;
+    private String type;
+    private String origin;
     private String species;
     private Integer nippleCount;
     private LocalDate herdEntryDate;
