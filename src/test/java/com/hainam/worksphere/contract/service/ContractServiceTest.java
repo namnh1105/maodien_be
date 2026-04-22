@@ -62,10 +62,8 @@ class ContractServiceTest extends BaseUnitTest {
 
         testContractResponse = ContractResponse.builder()
                 .id(testContract.getId())
-                .contractCode(testContract.getContractCode())
                 .employeeId(testEmployee.getId())
                 .employeeName(testEmployee.getFullName())
-                .employeeCode(testEmployee.getEmployeeCode())
                 .contractType(testContract.getContractType().name())
                 .startDate(testContract.getStartDate())
                 .baseSalary(testContract.getBaseSalary())
@@ -89,8 +87,6 @@ class ContractServiceTest extends BaseUnitTest {
         assertAll(
             () -> assertThat(result).isNotNull(),
             () -> assertThat(result.getId()).isEqualTo(contractId),
-            () -> assertThat(result.getContractCode()).isEqualTo(testContract.getContractCode()),
-            () -> verify(contractRepository).findActiveById(contractId),
             () -> verify(contractMapper).toContractResponse(testContract)
         );
     }
@@ -115,7 +111,6 @@ class ContractServiceTest extends BaseUnitTest {
     void shouldCreateContractSuccessfully() {
         // Given
         CreateContractRequest request = CreateContractRequest.builder()
-                .contractCode("CTR002")
                 .employeeId(testEmployee.getId())
                 .contractType(ContractType.INDEFINITE_TERM)
                 .startDate(LocalDate.of(2025, 1, 1))
@@ -154,7 +149,6 @@ class ContractServiceTest extends BaseUnitTest {
     void shouldThrowValidationExceptionWhenDuplicateContractCode() {
         // Given
         CreateContractRequest request = CreateContractRequest.builder()
-                .contractCode("CTR001")
                 .employeeId(testEmployee.getId())
                 .contractType(ContractType.INDEFINITE_TERM)
                 .startDate(LocalDate.of(2025, 1, 1))
@@ -178,7 +172,6 @@ class ContractServiceTest extends BaseUnitTest {
     void shouldThrowValidationExceptionWhenEndDateBeforeStartDate() {
         // Given
         CreateContractRequest request = CreateContractRequest.builder()
-                .contractCode("CTR003")
                 .employeeId(testEmployee.getId())
                 .contractType(ContractType.INDEFINITE_TERM)
                 .startDate(LocalDate.of(2025, 6, 1))

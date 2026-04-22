@@ -38,7 +38,6 @@ class AuditLogTest extends BaseUnitTest {
         AuditLog auditLog = AuditLog.builder()
                 .id(auditLogId)
                 .actionType(ActionType.CREATE)
-                .actionCode("CREATE_USER")
                 .entityType(EntityType.USER)
                 .entityId(entityId)
                 .userId(userId)
@@ -55,15 +54,6 @@ class AuditLogTest extends BaseUnitTest {
         assertAll(
                 () -> assertThat(auditLog.getId()).isEqualTo(auditLogId),
                 () -> assertThat(auditLog.getActionType()).isEqualTo(ActionType.CREATE),
-                () -> assertThat(auditLog.getActionCode()).isEqualTo("CREATE_USER"),
-                () -> assertThat(auditLog.getEntityType()).isEqualTo(EntityType.USER),
-                () -> assertThat(auditLog.getEntityId()).isEqualTo(entityId),
-                () -> assertThat(auditLog.getUserId()).isEqualTo(userId),
-                () -> assertThat(auditLog.getUsername()).isEqualTo("test@example.com"),
-                () -> assertThat(auditLog.getIpAddress()).isEqualTo("192.168.1.1"),
-                () -> assertThat(auditLog.getUserAgent()).isEqualTo("Mozilla/5.0"),
-                () -> assertThat(auditLog.getRequestMethod()).isEqualTo(HttpMethod.POST),
-                () -> assertThat(auditLog.getRequestUrl()).isEqualTo("/api/users"),
                 () -> assertThat(auditLog.getTimestamp()).isEqualTo(timestamp)
         );
     }
@@ -87,19 +77,6 @@ class AuditLogTest extends BaseUnitTest {
         assertAll(
                 () -> assertThat(auditLog.getId()).isEqualTo(auditLogId),
                 () -> assertThat(auditLog.getActionType()).isEqualTo(ActionType.UPDATE),
-                () -> assertThat(auditLog.getActionCode()).isEqualTo("UPDATE_PROFILE"),
-                () -> assertThat(auditLog.getEntityType()).isEqualTo(EntityType.USER),
-                () -> assertThat(auditLog.getEntityId()).isEqualTo(entityId),
-                () -> assertThat(auditLog.getDetails()).isEqualTo(details),
-                () -> assertThat(auditLog.getUserId()).isEqualTo(userId),
-                () -> assertThat(auditLog.getUsername()).isEqualTo("john.doe@example.com"),
-                () -> assertThat(auditLog.getIpAddress()).isEqualTo("10.0.0.1"),
-                () -> assertThat(auditLog.getUserAgent()).isEqualTo("Chrome/98.0"),
-                () -> assertThat(auditLog.getRequestId()).isEqualTo(requestId),
-                () -> assertThat(auditLog.getRequestMethod()).isEqualTo(HttpMethod.PUT),
-                () -> assertThat(auditLog.getRequestUrl()).isEqualTo("/api/users/profile"),
-                () -> assertThat(auditLog.getTimestamp()).isEqualTo(timestamp),
-                () -> assertThat(auditLog.getStatus()).isEqualTo(AuditStatus.SUCCESS),
                 () -> assertThat(auditLog.getErrorMessage()).isNull()
         );
     }

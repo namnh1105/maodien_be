@@ -99,7 +99,6 @@ public class TestFixtures {
     public static Employee createTestEmployee() {
         return Employee.builder()
                 .id(UUID.randomUUID())
-                .employeeCode("EMP001")
                 .firstName("Nguyen")
                 .lastName("Van A")
                 .fullName("Nguyen Van A")
@@ -151,7 +150,6 @@ public class TestFixtures {
     // Contract fixtures
     public static Contract createTestContract() {
         return Contract.builder()
-                .contractCode("CTR001")
                 .employee(createTestEmployee())
                 .contractType(ContractType.INDEFINITE_TERM)
                 .startDate(LocalDate.of(2023, 1, 1))

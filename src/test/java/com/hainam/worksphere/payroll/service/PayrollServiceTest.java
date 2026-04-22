@@ -67,7 +67,6 @@ class PayrollServiceTest extends BaseUnitTest {
                 .id(testPayroll.getId())
                 .employeeId(testEmployee.getId())
                 .employeeName(testEmployee.getFullName())
-                .employeeCode(testEmployee.getEmployeeCode())
                 .month(testPayroll.getMonth())
                 .year(testPayroll.getYear())
                 .baseSalary(testPayroll.getBaseSalary())

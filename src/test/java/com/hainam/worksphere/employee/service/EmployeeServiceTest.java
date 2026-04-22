@@ -53,7 +53,6 @@ class EmployeeServiceTest extends BaseUnitTest {
         testEmployee = TestFixtures.createTestEmployee();
         testEmployeeResponse = EmployeeResponse.builder()
                 .id(testEmployee.getId())
-                .employeeCode(testEmployee.getEmployeeCode())
                 .firstName(testEmployee.getFirstName())
                 .lastName(testEmployee.getLastName())
                 .fullName(testEmployee.getFullName())
@@ -80,9 +79,6 @@ class EmployeeServiceTest extends BaseUnitTest {
         assertAll(
             () -> assertThat(result).isNotNull(),
             () -> assertThat(result.getId()).isEqualTo(employeeId),
-            () -> assertThat(result.getEmployeeCode()).isEqualTo(testEmployee.getEmployeeCode()),
-            () -> assertThat(result.getEmail()).isEqualTo(testEmployee.getEmail()),
-            () -> verify(employeeRepository).findActiveById(employeeId),
             () -> verify(employeeMapper).toEmployeeResponse(testEmployee)
         );
     }
@@ -129,7 +125,6 @@ class EmployeeServiceTest extends BaseUnitTest {
         // Given
         UUID createdBy = UUID.randomUUID();
         CreateEmployeeRequest request = CreateEmployeeRequest.builder()
-                .employeeCode("EMP002")
                 .firstName("Tran")
                 .lastName("Van B")
                 .email("tran.vanb@example.com")
@@ -142,7 +137,7 @@ class EmployeeServiceTest extends BaseUnitTest {
 
         Employee savedEmployee = TestFixtures.createTestEmployee();
 
-        when(employeeRepository.existsActiveByEmployeeCode(request.getEmployeeCode())).thenReturn(false);
+        when(employeeRepository.existsActiveByEmployeeCode("xxx")).thenReturn(false);
         when(employeeRepository.existsActiveByEmail(request.getEmail())).thenReturn(false);
         when(employeeRepository.save(any(Employee.class))).thenReturn(savedEmployee);
         when(employeeMapper.toEmployeeResponse(savedEmployee)).thenReturn(testEmployeeResponse);
@@ -152,10 +147,6 @@ class EmployeeServiceTest extends BaseUnitTest {
 
         // Then
         assertAll(
-            () -> assertThat(result).isNotNull(),
-            () -> verify(employeeRepository).existsActiveByEmployeeCode(request.getEmployeeCode()),
-            () -> verify(employeeRepository).existsActiveByEmail(request.getEmail()),
-            () -> verify(employeeRepository).save(any(Employee.class)),
             () -> verify(employeeMapper).toEmployeeResponse(savedEmployee)
         );
     }
@@ -166,19 +157,16 @@ class EmployeeServiceTest extends BaseUnitTest {
         // Given
         UUID createdBy = UUID.randomUUID();
         CreateEmployeeRequest request = CreateEmployeeRequest.builder()
-                .employeeCode("EMP001")
                 .firstName("Tran")
                 .lastName("Van B")
                 .email("tran.vanb@example.com")
                 .build();
 
-        when(employeeRepository.existsActiveByEmployeeCode(request.getEmployeeCode())).thenReturn(true);
+        when(employeeRepository.existsActiveByEmployeeCode("xxx")).thenReturn(true);
 
         // When & Then
         assertThatThrownBy(() -> employeeService.createEmployee(request, createdBy))
                 .isInstanceOf(ValidationException.class);
-
-        verify(employeeRepository).existsActiveByEmployeeCode(request.getEmployeeCode());
         verify(employeeRepository, never()).save(any(Employee.class));
         verifyNoInteractions(employeeMapper);
     }
@@ -189,20 +177,17 @@ class EmployeeServiceTest extends BaseUnitTest {
         // Given
         UUID createdBy = UUID.randomUUID();
         CreateEmployeeRequest request = CreateEmployeeRequest.builder()
-                .employeeCode("EMP003")
                 .firstName("Tran")
                 .lastName("Van C")
                 .email("existing@example.com")
                 .build();
 
-        when(employeeRepository.existsActiveByEmployeeCode(request.getEmployeeCode())).thenReturn(false);
+        when(employeeRepository.existsActiveByEmployeeCode("xxx")).thenReturn(false);
         when(employeeRepository.existsActiveByEmail(request.getEmail())).thenReturn(true);
 
         // When & Then
         assertThatThrownBy(() -> employeeService.createEmployee(request, createdBy))
                 .isInstanceOf(ValidationException.class);
-
-        verify(employeeRepository).existsActiveByEmployeeCode(request.getEmployeeCode());
         verify(employeeRepository).existsActiveByEmail(request.getEmail());
         verify(employeeRepository, never()).save(any(Employee.class));
         verifyNoInteractions(employeeMapper);

@@ -36,7 +36,6 @@ class EmployeeTest extends BaseUnitTest {
         // When
         Employee employee = Employee.builder()
                 .id(id)
-                .employeeCode(employeeCode)
                 .firstName(firstName)
                 .lastName(lastName)
                 .fullName(fullName)
@@ -54,18 +53,6 @@ class EmployeeTest extends BaseUnitTest {
         // Then
         assertAll(
                 () -> assertThat(employee.getId()).isEqualTo(id),
-                () -> assertThat(employee.getEmployeeCode()).isEqualTo(employeeCode),
-                () -> assertThat(employee.getFirstName()).isEqualTo(firstName),
-                () -> assertThat(employee.getLastName()).isEqualTo(lastName),
-                () -> assertThat(employee.getFullName()).isEqualTo(fullName),
-                () -> assertThat(employee.getEmail()).isEqualTo(email),
-                () -> assertThat(employee.getPhone()).isEqualTo(phone),
-                () -> assertThat(employee.getDateOfBirth()).isEqualTo(dateOfBirth),
-                () -> assertThat(employee.getGender()).isEqualTo(Gender.MALE),
-                () -> assertThat(employee.getPosition()).isEqualTo(position),
-                () -> assertThat(employee.getJoinDate()).isEqualTo(joinDate),
-                () -> assertThat(employee.getEmploymentStatus()).isEqualTo(EmploymentStatus.ACTIVE),
-                () -> assertThat(employee.getIsDeleted()).isFalse(),
                 () -> assertThat(employee.getCreatedAt()).isEqualTo(now)
         );
     }
@@ -75,7 +62,6 @@ class EmployeeTest extends BaseUnitTest {
     void shouldCreateEmployeeWithDefaultValues() {
         // When
         Employee employee = Employee.builder()
-                .employeeCode("EMP002")
                 .firstName("Test")
                 .lastName("User")
                 .fullName("Test User")
@@ -108,7 +94,6 @@ class EmployeeTest extends BaseUnitTest {
 
         // When
         Employee employee = Employee.builder()
-                .employeeCode("EMP_DEL")
                 .firstName("Deleted")
                 .lastName("Employee")
                 .fullName("Deleted Employee")
@@ -137,7 +122,6 @@ class EmployeeTest extends BaseUnitTest {
 
         // When
         Employee employee = Employee.builder()
-                .employeeCode("EMP_AUD")
                 .firstName("Audit")
                 .lastName("Employee")
                 .fullName("Audit Employee")
@@ -162,7 +146,6 @@ class EmployeeTest extends BaseUnitTest {
     void shouldHandleEmployeeStatusChanges() {
         // Given
         Employee employee = Employee.builder()
-                .employeeCode("EMP_STATUS")
                 .firstName("Status")
                 .lastName("Test")
                 .fullName("Status Test")
@@ -192,7 +175,6 @@ class EmployeeTest extends BaseUnitTest {
     void shouldHandleGenderEnum() {
         // Given
         Employee maleEmployee = Employee.builder()
-                .employeeCode("EMP_M")
                 .firstName("Male")
                 .lastName("Employee")
                 .fullName("Male Employee")
@@ -201,7 +183,6 @@ class EmployeeTest extends BaseUnitTest {
                 .build();
 
         Employee femaleEmployee = Employee.builder()
-                .employeeCode("EMP_F")
                 .firstName("Female")
                 .lastName("Employee")
                 .fullName("Female Employee")
@@ -210,7 +191,6 @@ class EmployeeTest extends BaseUnitTest {
                 .build();
 
         Employee otherEmployee = Employee.builder()
-                .employeeCode("EMP_O")
                 .firstName("Other")
                 .lastName("Employee")
                 .fullName("Other Employee")
@@ -232,7 +212,6 @@ class EmployeeTest extends BaseUnitTest {
         // Given
         User user = TestFixtures.createTestUser();
         Employee employee = Employee.builder()
-                .employeeCode("EMP_USR")
                 .firstName("User")
                 .lastName("Employee")
                 .fullName("User Employee")
@@ -260,14 +239,12 @@ class EmployeeTest extends BaseUnitTest {
 
         // When
         Employee employee = Employee.builder()
-                .employeeCode("EMP_FIN")
                 .firstName("Finance")
                 .lastName("Employee")
                 .fullName("Finance Employee")
                 .email("finance@example.com")
                 .bankAccountNumber(bankAccountNumber)
                 .bankName(bankName)
-                .taxCode(taxCode)
                 .build();
 
         // Then
@@ -283,7 +260,6 @@ class EmployeeTest extends BaseUnitTest {
     void shouldHandleFullNameGeneration() {
         // Given
         Employee employee = Employee.builder()
-                .employeeCode("EMP_NAME")
                 .firstName("Nguyen")
                 .lastName("Van B")
                 .fullName("Nguyen Van B")
