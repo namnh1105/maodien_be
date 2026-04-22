@@ -99,6 +99,7 @@ public class TestFixtures {
     public static Employee createTestEmployee() {
         return Employee.builder()
                 .id(UUID.randomUUID())
+                .employeeCode("EMP001")
                 .firstName("Nguyen")
                 .lastName("Van A")
                 .fullName("Nguyen Van A")

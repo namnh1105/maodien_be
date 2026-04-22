@@ -245,6 +245,7 @@ class EmployeeTest extends BaseUnitTest {
                 .email("finance@example.com")
                 .bankAccountNumber(bankAccountNumber)
                 .bankName(bankName)
+                .taxCode(taxCode)
                 .build();
 
         // Then

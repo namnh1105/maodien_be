@@ -122,7 +122,6 @@ class ContractServiceTest extends BaseUnitTest {
                 .attachmentUrl("https://example.com/contract.pdf")
                 .build();
 
-        when(contractRepository.existsActiveByContractCode("CTR002")).thenReturn(false);
         when(employeeRepository.findActiveById(testEmployee.getId())).thenReturn(Optional.of(testEmployee));
         when(contractRepository.save(any(Contract.class))).thenAnswer(invocation -> {
             Contract saved = invocation.getArgument(0);
@@ -137,7 +136,6 @@ class ContractServiceTest extends BaseUnitTest {
         // Then
         assertAll(
             () -> assertThat(result).isNotNull(),
-            () -> verify(contractRepository).existsActiveByContractCode("CTR002"),
             () -> verify(employeeRepository).findActiveById(testEmployee.getId()),
             () -> verify(contractRepository).save(any(Contract.class)),
             () -> verify(contractMapper).toContractResponse(any(Contract.class))
@@ -145,8 +143,8 @@ class ContractServiceTest extends BaseUnitTest {
     }
 
     @Test
-    @DisplayName("Should throw ValidationException when duplicate contract code")
-    void shouldThrowValidationExceptionWhenDuplicateContractCode() {
+    @DisplayName("Should throw EmployeeNotFoundException when employee does not exist")
+    void shouldThrowEmployeeNotFoundExceptionWhenEmployeeDoesNotExist() {
         // Given
         CreateContractRequest request = CreateContractRequest.builder()
                 .employeeId(testEmployee.getId())
@@ -155,16 +153,14 @@ class ContractServiceTest extends BaseUnitTest {
                 .baseSalary(15000000.0)
                 .build();
 
-        when(contractRepository.existsActiveByContractCode("CTR001")).thenReturn(true);
+        when(employeeRepository.findActiveById(testEmployee.getId())).thenReturn(Optional.empty());
 
         // When & Then
         assertThatThrownBy(() -> contractService.createContract(request, createdBy))
-                .isInstanceOf(ValidationException.class)
-                .hasMessageContaining("Contract code already exists");
+                .isInstanceOf(com.hainam.worksphere.shared.exception.EmployeeNotFoundException.class);
 
-        verify(contractRepository).existsActiveByContractCode("CTR001");
         verify(contractRepository, never()).save(any(Contract.class));
-        verifyNoInteractions(employeeRepository);
+        verify(employeeRepository).findActiveById(testEmployee.getId());
     }
 
     @Test
@@ -179,7 +175,6 @@ class ContractServiceTest extends BaseUnitTest {
                 .baseSalary(15000000.0)
                 .build();
 
-        when(contractRepository.existsActiveByContractCode("CTR003")).thenReturn(false);
         when(employeeRepository.findActiveById(testEmployee.getId())).thenReturn(Optional.of(testEmployee));
 
         // When & Then
