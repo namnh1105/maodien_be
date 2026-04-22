@@ -22,7 +22,6 @@ class ContractTest extends BaseUnitTest {
         // Given
         UUID id = UUID.randomUUID();
         Employee employee = TestFixtures.createTestEmployee();
-        String contractCode = "CTR001";
         LocalDate startDate = LocalDate.of(2023, 1, 1);
         LocalDate endDate = LocalDate.of(2025, 12, 31);
         LocalDate signingDate = LocalDate.of(2022, 12, 15);
@@ -150,8 +149,7 @@ class ContractTest extends BaseUnitTest {
         // Then
         assertAll(
                 () -> assertThat(contract.getEmployee()).isNotNull(),
-                () -> assertThat(contract.getEmployee().getFullName()).isEqualTo("Nguyen Van A"),
-                () -> assertThat(contract.getEmployee().getEmployeeCode()).isEqualTo("EMP001")
+                () -> assertThat(contract.getEmployee().getFullName()).isEqualTo("Nguyen Van A")
         );
     }
 

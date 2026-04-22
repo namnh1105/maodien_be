@@ -29,8 +29,8 @@ public class LivestockMaterialService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "LIVESTOCK_MATERIAL")
     public LivestockMaterialResponse create(CreateLivestockMaterialRequest request, UUID createdBy) {
-        if (livestockMaterialRepository.existsActiveByMaterialCode(null)) {
-            throw new BusinessRuleViolationException("Material code already exists: " + null);
+        if (livestockMaterialRepository.existsActiveByName(request.getName())) {
+            throw new BusinessRuleViolationException("Material name already exists: " + request.getName());
         }
 
         LivestockMaterial material = LivestockMaterial.builder()

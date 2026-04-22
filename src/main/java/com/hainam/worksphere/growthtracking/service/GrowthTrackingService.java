@@ -9,7 +9,6 @@ import com.hainam.worksphere.growthtracking.repository.GrowthTrackingRepository;
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
-import com.hainam.worksphere.shared.exception.BusinessRuleViolationException;
 import com.hainam.worksphere.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,10 +28,6 @@ public class GrowthTrackingService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "GROWTH_TRACKING")
     public GrowthTrackingResponse create(CreateGrowthTrackingRequest request, UUID createdBy) {
-        if (growthTrackingRepository.existsActiveByTrackingCode(null)) {
-            throw new BusinessRuleViolationException("Growth tracking code already exists: " + null);
-        }
-
         GrowthTracking tracking = GrowthTracking.builder()
                 .pigId(request.getPigId())
                 .trackingDate(request.getTrackingDate())

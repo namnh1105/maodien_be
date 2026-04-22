@@ -125,7 +125,6 @@ class EmployeeServiceTest extends BaseUnitTest {
         // Given
         UUID createdBy = UUID.randomUUID();
         CreateEmployeeRequest request = CreateEmployeeRequest.builder()
-            .employeeCode("EMP100")
                 .firstName("Tran")
                 .lastName("Van B")
                 .email("tran.vanb@example.com")
@@ -138,7 +137,6 @@ class EmployeeServiceTest extends BaseUnitTest {
 
         Employee savedEmployee = TestFixtures.createTestEmployee();
 
-    when(employeeRepository.existsActiveByEmployeeCode(request.getEmployeeCode())).thenReturn(false);
         when(employeeRepository.existsActiveByEmail(request.getEmail())).thenReturn(false);
         when(employeeRepository.save(any(Employee.class))).thenReturn(savedEmployee);
         when(employeeMapper.toEmployeeResponse(savedEmployee)).thenReturn(testEmployeeResponse);
@@ -149,30 +147,8 @@ class EmployeeServiceTest extends BaseUnitTest {
         // Then
         assertAll(
             () -> assertThat(result).isNotNull(),
-            () -> verify(employeeRepository).existsActiveByEmployeeCode(request.getEmployeeCode()),
             () -> verify(employeeMapper).toEmployeeResponse(savedEmployee)
         );
-    }
-
-    @Test
-    @DisplayName("Should throw ValidationException when duplicate employee code")
-    void shouldThrowValidationExceptionWhenDuplicateEmployeeCode() {
-        // Given
-        UUID createdBy = UUID.randomUUID();
-        CreateEmployeeRequest request = CreateEmployeeRequest.builder()
-            .employeeCode("EMP101")
-                .firstName("Tran")
-                .lastName("Van B")
-                .email("tran.vanb@example.com")
-                .build();
-
-        when(employeeRepository.existsActiveByEmployeeCode(request.getEmployeeCode())).thenReturn(true);
-
-        // When & Then
-        assertThatThrownBy(() -> employeeService.createEmployee(request, createdBy))
-                .isInstanceOf(ValidationException.class);
-        verify(employeeRepository, never()).save(any(Employee.class));
-        verifyNoInteractions(employeeMapper);
     }
 
     @Test
@@ -181,13 +157,11 @@ class EmployeeServiceTest extends BaseUnitTest {
         // Given
         UUID createdBy = UUID.randomUUID();
         CreateEmployeeRequest request = CreateEmployeeRequest.builder()
-            .employeeCode("EMP102")
                 .firstName("Tran")
                 .lastName("Van C")
                 .email("existing@example.com")
                 .build();
 
-        when(employeeRepository.existsActiveByEmployeeCode(request.getEmployeeCode())).thenReturn(false);
         when(employeeRepository.existsActiveByEmail(request.getEmail())).thenReturn(true);
 
         // When & Then

@@ -99,7 +99,6 @@ public class TestFixtures {
     public static Employee createTestEmployee() {
         return Employee.builder()
                 .id(UUID.randomUUID())
-                .employeeCode("EMP001")
                 .firstName("Nguyen")
                 .lastName("Van A")
                 .fullName("Nguyen Van A")
@@ -118,7 +117,6 @@ public class TestFixtures {
     public static Employee createTestEmployee(String email) {
         return Employee.builder()
                 .id(UUID.randomUUID())
-                .employeeCode("EMP" + UUID.randomUUID().toString().substring(0, 5).toUpperCase())
                 .firstName("Nguyen")
                 .lastName("Van A")
                 .fullName("Nguyen Van A")

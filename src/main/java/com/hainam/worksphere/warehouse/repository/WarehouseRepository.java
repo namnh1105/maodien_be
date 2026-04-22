@@ -19,6 +19,6 @@ public interface WarehouseRepository extends JpaRepository<Warehouse, UUID> {
     @Query("SELECT w FROM Warehouse w WHERE w.id = :id AND w.isDeleted = false")
     Optional<Warehouse> findActiveById(@Param("id") UUID id);
 
-    @Query("SELECT CASE WHEN COUNT(w) > 0 THEN true ELSE false END FROM Warehouse w WHERE w.warehouseCode = :code AND w.isDeleted = false")
-    boolean existsActiveByWarehouseCode(@Param("code") String code);
+    @Query("SELECT CASE WHEN COUNT(w) > 0 THEN true ELSE false END FROM Warehouse w WHERE w.name = :name AND w.isDeleted = false")
+    boolean existsActiveByName(@Param("name") String name);
 }

@@ -19,6 +19,6 @@ public interface SupplierRepository extends JpaRepository<Supplier, UUID> {
     @Query("SELECT s FROM Supplier s WHERE s.id = :id AND s.isDeleted = false")
     Optional<Supplier> findActiveById(@Param("id") UUID id);
 
-    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM Supplier s WHERE s.supplierCode = :code AND s.isDeleted = false")
-    boolean existsActiveBySupplierCode(@Param("code") String code);
+    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM Supplier s WHERE s.name = :name AND s.isDeleted = false")
+    boolean existsActiveByName(@Param("name") String name);
 }

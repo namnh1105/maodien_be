@@ -21,8 +21,6 @@ public class EmployeeSalaryResponse {
 
     private String employeeName;
 
-    private String employeeCode;
-
     private Double baseSalary;
 
     private LocalDate effectiveDate;

@@ -3,7 +3,6 @@ package com.hainam.worksphere.supplier.service;
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
-import com.hainam.worksphere.shared.exception.BusinessRuleViolationException;
 import com.hainam.worksphere.shared.exception.SupplierNotFoundException;
 import com.hainam.worksphere.supplier.domain.Supplier;
 import com.hainam.worksphere.supplier.dto.request.CreateSupplierRequest;
@@ -29,10 +28,6 @@ public class SupplierService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "SUPPLIER")
     public SupplierResponse create(CreateSupplierRequest request, UUID createdBy) {
-        if (supplierRepository.existsActiveBySupplierCode(null)) {
-            throw new BusinessRuleViolationException("Supplier code already exists: " + null);
-        }
-
         Supplier supplier = Supplier.builder()
                 .name(request.getName())
                 .address(request.getAddress())

@@ -9,7 +9,6 @@ import com.hainam.worksphere.pigloss.repository.PigLossRepository;
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
-import com.hainam.worksphere.shared.exception.BusinessRuleViolationException;
 import com.hainam.worksphere.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,10 +28,6 @@ public class PigLossService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "PIG_LOSS")
     public PigLossResponse create(CreatePigLossRequest request, UUID createdBy) {
-        if (pigLossRepository.existsActiveByLossCode(null)) {
-            throw new BusinessRuleViolationException("Pig loss code already exists: " + null);
-        }
-
         PigLoss entity = PigLoss.builder()
                 .pigId(request.getPigId())
                 .lossDate(request.getLossDate())

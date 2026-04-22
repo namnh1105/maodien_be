@@ -19,6 +19,6 @@ public interface MedicineRepository extends JpaRepository<Medicine, UUID> {
     @Query("SELECT m FROM Medicine m WHERE m.id = :id AND m.isDeleted = false")
     Optional<Medicine> findActiveById(@Param("id") UUID id);
 
-    @Query("SELECT CASE WHEN COUNT(m) > 0 THEN true ELSE false END FROM Medicine m WHERE m.medicineCode = :code AND m.isDeleted = false")
-    boolean existsActiveByMedicineCode(@Param("code") String code);
+    @Query("SELECT CASE WHEN COUNT(m) > 0 THEN true ELSE false END FROM Medicine m WHERE m.name = :name AND m.isDeleted = false")
+    boolean existsActiveByName(@Param("name") String name);
 }

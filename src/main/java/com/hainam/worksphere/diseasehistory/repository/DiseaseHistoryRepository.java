@@ -15,8 +15,6 @@ public interface DiseaseHistoryRepository extends JpaRepository<DiseaseHistory, 
     @Query("SELECT d FROM DiseaseHistory d WHERE d.id = :id AND d.isDeleted = false")
     Optional<DiseaseHistory> findActiveById(@Param("id") UUID id);
 
-    @Query("SELECT CASE WHEN COUNT(d) > 0 THEN true ELSE false END FROM DiseaseHistory d WHERE d.historyCode = :code AND d.isDeleted = false")
-    boolean existsActiveByHistoryCode(@Param("code") String code);
 
     @Query("SELECT d FROM DiseaseHistory d WHERE d.pigId = :pigId AND d.isDeleted = false ORDER BY d.sickDate DESC, d.createdAt DESC")
     List<DiseaseHistory> findActiveByPigId(@Param("pigId") UUID pigId);

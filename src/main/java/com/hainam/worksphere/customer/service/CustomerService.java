@@ -30,10 +30,6 @@ public class CustomerService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "CUSTOMER")
     public CustomerResponse create(CreateCustomerRequest request, UUID createdBy) {
-        if (customerRepository.existsActiveByCustomerCode(null)) {
-            throw new BusinessRuleViolationException("Customer code already exists: " + null);
-        }
-
         Customer customer = Customer.builder()
                 .name(request.getName())
                 .address(request.getAddress())

@@ -29,8 +29,8 @@ public class BreedService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "BREED")
     public BreedResponse create(CreateBreedRequest request, UUID createdBy) {
-        if (breedRepository.existsActiveByBreedCode(null)) {
-            throw new BusinessRuleViolationException("Breed code already exists: " + null);
+        if (breedRepository.existsActiveByName(request.getName())) {
+            throw new BusinessRuleViolationException("Breed name already exists: " + request.getName());
         }
 
         Breed breed = Breed.builder()

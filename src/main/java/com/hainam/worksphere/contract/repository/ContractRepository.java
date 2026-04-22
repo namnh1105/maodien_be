@@ -29,6 +29,5 @@ public interface ContractRepository extends JpaRepository<Contract, UUID> {
     @Query("SELECT c FROM Contract c WHERE c.status = :status AND c.isDeleted = false")
     List<Contract> findActiveByStatus(@Param("status") ContractStatus status);
 
-    @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM Contract c WHERE c.contractCode = :contractCode AND c.isDeleted = false")
-    boolean existsActiveByContractCode(@Param("contractCode") String contractCode);
+
 }

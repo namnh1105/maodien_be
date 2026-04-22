@@ -34,9 +34,6 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "employee_code", nullable = false, unique = true, length = 20)
-    private String employeeCode;
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", unique = true)
     private User user;

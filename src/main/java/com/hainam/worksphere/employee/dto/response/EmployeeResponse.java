@@ -17,8 +17,6 @@ public class EmployeeResponse {
 
     private UUID id;
 
-    private String employeeCode;
-
     private UUID userId;
 
     private String firstName;

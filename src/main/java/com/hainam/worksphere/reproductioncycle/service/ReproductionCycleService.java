@@ -9,7 +9,6 @@ import com.hainam.worksphere.reproductioncycle.repository.ReproductionCycleRepos
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
-import com.hainam.worksphere.shared.exception.BusinessRuleViolationException;
 import com.hainam.worksphere.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,10 +28,6 @@ public class ReproductionCycleService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "REPRODUCTION_CYCLE")
     public ReproductionCycleResponse create(CreateReproductionCycleRequest request, UUID createdBy) {
-        if (reproductionCycleRepository.existsActiveByCycleCode(null)) {
-            throw new BusinessRuleViolationException("Cycle code already exists: " + null);
-        }
-
         ReproductionCycle cycle = ReproductionCycle.builder()
                 .matingId(request.getMatingId())
                 .conceptionDate(request.getConceptionDate())

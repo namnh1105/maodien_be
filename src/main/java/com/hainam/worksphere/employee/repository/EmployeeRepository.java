@@ -20,17 +20,12 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     @Query("SELECT e FROM Employee e WHERE e.id = :id AND e.isDeleted = false")
     Optional<Employee> findActiveById(@Param("id") UUID id);
 
-    @Query("SELECT e FROM Employee e WHERE e.employeeCode = :code AND e.isDeleted = false")
-    Optional<Employee> findActiveByEmployeeCode(@Param("code") String code);
 
     @Query("SELECT e FROM Employee e WHERE e.email = :email AND e.isDeleted = false")
     Optional<Employee> findActiveByEmail(@Param("email") String email);
 
     @Query("SELECT e FROM Employee e WHERE e.user.id = :userId AND e.isDeleted = false")
     Optional<Employee> findActiveByUserId(@Param("userId") UUID userId);
-
-    @Query("SELECT CASE WHEN COUNT(e) > 0 THEN true ELSE false END FROM Employee e WHERE e.employeeCode = :code AND e.isDeleted = false")
-    boolean existsActiveByEmployeeCode(@Param("code") String code);
 
     @Query("SELECT CASE WHEN COUNT(e) > 0 THEN true ELSE false END FROM Employee e WHERE e.email = :email AND e.isDeleted = false")
     boolean existsActiveByEmail(@Param("email") String email);

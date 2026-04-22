@@ -11,7 +11,6 @@ import com.hainam.worksphere.pig.repository.PigRepository;
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
-import com.hainam.worksphere.shared.exception.BusinessRuleViolationException;
 import com.hainam.worksphere.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,10 +31,6 @@ public class MatingService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "MATING")
     public MatingResponse create(CreateMatingRequest request, UUID createdBy) {
-        if (matingRepository.existsActiveByMatingCode(null)) {
-            throw new BusinessRuleViolationException("Mating code already exists: " + null);
-        }
-
         Mating mating = Mating.builder()
                 .sowPigId(request.getSowPigId())
                 .boarBreedId(request.getBoarBreedId())
@@ -64,16 +59,15 @@ public class MatingService {
         return matingMapper.toResponse(mating);
     }
 
-        @Transactional(readOnly = true)
-        public List<MatingResponse> getByMaLon(String maLon) {
-        Pig pig = pigRepository.findActiveByPigCode(maLon)
-            .or(() -> pigRepository.findActiveByEarTag(maLon))
+    @Transactional(readOnly = true)
+    public List<MatingResponse> getByMaLon(String maLon) {
+        Pig pig = pigRepository.findActiveByEarTag(maLon)
             .orElseThrow(() -> new ResourceNotFoundException("Pig", maLon));
 
         return matingRepository.findActiveBySowPigId(pig.getId()).stream()
             .map(matingMapper::toResponse)
             .toList();
-        }
+    }
 
     @Transactional
     @AuditAction(type = ActionType.UPDATE, entity = "MATING")

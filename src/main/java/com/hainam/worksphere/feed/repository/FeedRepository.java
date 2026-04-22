@@ -19,6 +19,6 @@ public interface FeedRepository extends JpaRepository<Feed, UUID> {
     @Query("SELECT f FROM Feed f WHERE f.id = :id AND f.isDeleted = false")
     Optional<Feed> findActiveById(@Param("id") UUID id);
 
-    @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM Feed f WHERE f.feedCode = :code AND f.isDeleted = false")
-    boolean existsActiveByFeedCode(@Param("code") String code);
+    @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM Feed f WHERE f.name = :name AND f.isDeleted = false")
+    boolean existsActiveByName(@Param("name") String name);
 }

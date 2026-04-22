@@ -9,7 +9,6 @@ import com.hainam.worksphere.penpig.repository.PenPigRepository;
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
-import com.hainam.worksphere.shared.exception.BusinessRuleViolationException;
 import com.hainam.worksphere.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,10 +28,6 @@ public class PenPigService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "PEN_PIG")
     public PenPigResponse create(CreatePenPigRequest request, UUID createdBy) {
-        if (penPigRepository.existsActiveByAssignmentCode(null)) {
-            throw new BusinessRuleViolationException("Pen pig assignment code already exists: " + null);
-        }
-
         PenPig entity = PenPig.builder()
                 .penId(request.getPenId())
                 .pigId(request.getPigId())

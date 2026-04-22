@@ -19,6 +19,5 @@ public interface PigLossRepository extends JpaRepository<PigLoss, UUID> {
     @Query("SELECT p FROM PigLoss p WHERE p.id = :id AND p.isDeleted = false")
     Optional<PigLoss> findActiveById(@Param("id") UUID id);
 
-    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM PigLoss p WHERE p.lossCode = :code AND p.isDeleted = false")
-    boolean existsActiveByLossCode(@Param("code") String code);
+
 }

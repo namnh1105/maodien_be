@@ -22,6 +22,5 @@ public interface MatingRepository extends JpaRepository<Mating, UUID> {
     @Query("SELECT m FROM Mating m WHERE m.sowPigId = :sowPigId AND m.isDeleted = false")
     List<Mating> findActiveBySowPigId(@Param("sowPigId") UUID sowPigId);
 
-    @Query("SELECT CASE WHEN COUNT(m) > 0 THEN true ELSE false END FROM Mating m WHERE m.matingCode = :code AND m.isDeleted = false")
-    boolean existsActiveByMatingCode(@Param("code") String code);
+
 }

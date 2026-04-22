@@ -19,6 +19,6 @@ public interface VaccineRepository extends JpaRepository<Vaccine, UUID> {
     @Query("SELECT v FROM Vaccine v WHERE v.id = :id AND v.isDeleted = false")
     Optional<Vaccine> findActiveById(@Param("id") UUID id);
 
-    @Query("SELECT CASE WHEN COUNT(v) > 0 THEN true ELSE false END FROM Vaccine v WHERE v.vaccineCode = :code AND v.isDeleted = false")
-    boolean existsActiveByVaccineCode(@Param("code") String code);
+    @Query("SELECT CASE WHEN COUNT(v) > 0 THEN true ELSE false END FROM Vaccine v WHERE v.name = :name AND v.isDeleted = false")
+    boolean existsActiveByName(@Param("name") String name);
 }

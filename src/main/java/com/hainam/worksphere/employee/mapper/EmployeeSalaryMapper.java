@@ -11,7 +11,6 @@ public interface EmployeeSalaryMapper {
 
     @Mapping(target = "employeeId", source = "employee.id")
     @Mapping(target = "employeeName", source = "employee.fullName")
-    @Mapping(target = "employeeCode", source = "employee.employeeCode")
     EmployeeSalaryResponse toResponse(EmployeeSalary employeeSalary);
 }
 

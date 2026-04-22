@@ -19,6 +19,5 @@ public interface PenRepository extends JpaRepository<Pen, UUID> {
     @Query("SELECT p FROM Pen p WHERE p.id = :id AND p.isDeleted = false")
     Optional<Pen> findActiveById(@Param("id") UUID id);
 
-    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Pen p WHERE p.penCode = :code AND p.isDeleted = false")
-    boolean existsActiveByPenCode(@Param("code") String code);
+
 }

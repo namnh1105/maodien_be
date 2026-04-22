@@ -17,10 +17,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CreateEmployeeRequest {
 
-    @NotBlank(message = "Employee code is required")
-    @Size(max = 20)
-    private String employeeCode;
-
     private UUID userId;
 
     @NotBlank(message = "First name is required")

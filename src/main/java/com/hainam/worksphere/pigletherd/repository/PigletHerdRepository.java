@@ -19,8 +19,6 @@ public interface PigletHerdRepository extends JpaRepository<PigletHerd, UUID> {
     @Query("SELECT h FROM PigletHerd h WHERE h.id = :id AND h.isDeleted = false")
     Optional<PigletHerd> findActiveById(@Param("id") UUID id);
 
-    @Query("SELECT CASE WHEN COUNT(h) > 0 THEN true ELSE false END FROM PigletHerd h WHERE h.herdCode = :code AND h.isDeleted = false")
-    boolean existsActiveByHerdCode(@Param("code") String code);
 
     @Query("SELECT h FROM PigletHerd h WHERE h.mother.id = :motherId AND h.isDeleted = false")
     List<PigletHerd> findActiveByMotherId(@Param("motherId") UUID motherId);

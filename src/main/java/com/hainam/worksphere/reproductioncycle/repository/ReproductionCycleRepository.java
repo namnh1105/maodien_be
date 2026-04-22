@@ -19,6 +19,5 @@ public interface ReproductionCycleRepository extends JpaRepository<ReproductionC
     @Query("SELECT rc FROM ReproductionCycle rc WHERE rc.id = :id AND rc.isDeleted = false")
     Optional<ReproductionCycle> findActiveById(@Param("id") UUID id);
 
-    @Query("SELECT CASE WHEN COUNT(rc) > 0 THEN true ELSE false END FROM ReproductionCycle rc WHERE rc.cycleCode = :code AND rc.isDeleted = false")
-    boolean existsActiveByCycleCode(@Param("code") String code);
+
 }

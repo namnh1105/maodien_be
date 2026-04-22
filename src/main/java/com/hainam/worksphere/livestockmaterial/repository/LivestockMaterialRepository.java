@@ -19,6 +19,6 @@ public interface LivestockMaterialRepository extends JpaRepository<LivestockMate
     @Query("SELECT m FROM LivestockMaterial m WHERE m.id = :id AND m.isDeleted = false")
     Optional<LivestockMaterial> findActiveById(@Param("id") UUID id);
 
-    @Query("SELECT CASE WHEN COUNT(m) > 0 THEN true ELSE false END FROM LivestockMaterial m WHERE m.materialCode = :code AND m.isDeleted = false")
-    boolean existsActiveByMaterialCode(@Param("code") String code);
+    @Query("SELECT CASE WHEN COUNT(m) > 0 THEN true ELSE false END FROM LivestockMaterial m WHERE m.name = :name AND m.isDeleted = false")
+    boolean existsActiveByName(@Param("name") String name);
 }

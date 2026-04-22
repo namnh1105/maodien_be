@@ -59,15 +59,11 @@ public class EmployeeService {
     @CacheEvict(value = CacheConfig.EMPLOYEE_CACHE, allEntries = true)
     @AuditAction(type = ActionType.CREATE, entity = "EMPLOYEE")
     public EmployeeResponse createEmployee(CreateEmployeeRequest request, UUID createdBy) {
-        if (employeeRepository.existsActiveByEmployeeCode(request.getEmployeeCode())) {
-            throw ValidationException.duplicateField("employee_code", request.getEmployeeCode());
-        }
         if (employeeRepository.existsActiveByEmail(request.getEmail())) {
             throw ValidationException.duplicateField("email", request.getEmail());
         }
 
         Employee employee = Employee.builder()
-                .employeeCode(request.getEmployeeCode())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .fullName(request.getLastName() + " " + request.getFirstName())

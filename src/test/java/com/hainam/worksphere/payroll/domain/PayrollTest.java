@@ -6,7 +6,6 @@ import com.hainam.worksphere.employee.domain.Employee;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -139,8 +138,7 @@ class PayrollTest extends BaseUnitTest {
         // Then
         assertAll(
                 () -> assertThat(payroll.getEmployee()).isNotNull(),
-                () -> assertThat(payroll.getEmployee().getFullName()).isEqualTo("Nguyen Van A"),
-                () -> assertThat(payroll.getEmployee().getEmployeeCode()).isEqualTo("EMP001")
+                () -> assertThat(payroll.getEmployee().getFullName()).isEqualTo("Nguyen Van A")
         );
     }
 

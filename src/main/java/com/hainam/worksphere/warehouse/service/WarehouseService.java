@@ -30,10 +30,6 @@ public class WarehouseService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "WAREHOUSE")
     public WarehouseResponse create(CreateWarehouseRequest request, UUID createdBy) {
-        if (warehouseRepository.existsActiveByWarehouseCode(null)) {
-            throw new BusinessRuleViolationException("Warehouse code already exists: " + null);
-        }
-
         Warehouse warehouse = Warehouse.builder()
                 .name(request.getName())
                 .warehouseType(parseWarehouseType(request.getWarehouseType()))
