@@ -29,12 +29,11 @@ public class GrowthTrackingService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "GROWTH_TRACKING")
     public GrowthTrackingResponse create(CreateGrowthTrackingRequest request, UUID createdBy) {
-        if (growthTrackingRepository.existsActiveByTrackingCode(request.getTrackingCode())) {
-            throw new BusinessRuleViolationException("Growth tracking code already exists: " + request.getTrackingCode());
+        if (growthTrackingRepository.existsActiveByTrackingCode(null)) {
+            throw new BusinessRuleViolationException("Growth tracking code already exists: " + null);
         }
 
         GrowthTracking tracking = GrowthTracking.builder()
-                .trackingCode(request.getTrackingCode())
                 .pigId(request.getPigId())
                 .trackingDate(request.getTrackingDate())
                 .litterLength(request.getLitterLength())

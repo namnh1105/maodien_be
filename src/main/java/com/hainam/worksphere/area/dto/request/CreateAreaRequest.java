@@ -11,10 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateAreaRequest {
-
-    @NotBlank(message = "Area code is required")
-    private String areaCode;
-
     @NotBlank(message = "Area name is required")
     private String name;
 

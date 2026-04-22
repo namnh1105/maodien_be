@@ -10,8 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateDiseaseRequest {
-
-    private String diseaseCode;
     private String name;
     private String diseaseType;
     private String symptoms;

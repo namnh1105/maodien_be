@@ -15,10 +15,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateMaterialIssueRequest {
-
-    @NotBlank(message = "Issue code is required")
-    private String issueCode;
-
     @NotNull(message = "Issue date is required")
     private LocalDate issueDate;
 

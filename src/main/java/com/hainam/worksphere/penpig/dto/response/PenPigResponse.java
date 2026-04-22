@@ -16,7 +16,6 @@ import java.util.UUID;
 public class PenPigResponse {
 
     private UUID id;
-    private String assignmentCode;
     private UUID penId;
     private UUID pigId;
     private LocalDate entryDate;

@@ -15,10 +15,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateFeedingRationRequest {
-
-    @NotBlank(message = "Ration code is required")
-    private String rationCode;
-
     @NotNull(message = "Pen id is required")
     private UUID penId;
 

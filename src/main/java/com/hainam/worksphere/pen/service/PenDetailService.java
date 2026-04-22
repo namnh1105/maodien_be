@@ -78,7 +78,6 @@ public class PenDetailService {
 
         return PenDetailResponse.builder()
                 .id(pen.getId())
-                .penCode(pen.getPenCode())
                 .name(pen.getName())
                 .areaId(pen.getAreaId())
                 .area(pen.getArea())

@@ -27,10 +27,6 @@ public class Breed {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "breed_code", nullable = false, unique = true, length = 30)
-    private String breedCode;
-
     @Column(name = "name", nullable = false, length = 150)
     private String name;
 

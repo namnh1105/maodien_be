@@ -28,10 +28,6 @@ public class PigLoss {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "loss_code", nullable = false, unique = true, length = 30)
-    private String lossCode;
-
     @Column(name = "pig_id")
     private UUID pigId;
 

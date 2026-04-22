@@ -14,10 +14,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateVaccinationScheduleRequest {
-
-    @NotBlank(message = "Schedule code is required")
-    private String scheduleCode;
-
     @NotNull(message = "Pen id is required")
     private UUID penId;
 

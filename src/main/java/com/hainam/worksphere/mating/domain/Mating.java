@@ -28,10 +28,6 @@ public class Mating {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "mating_code", nullable = false, unique = true, length = 30)
-    private String matingCode;
-
     @Column(name = "sow_pig_id")
     private UUID sowPigId;
 

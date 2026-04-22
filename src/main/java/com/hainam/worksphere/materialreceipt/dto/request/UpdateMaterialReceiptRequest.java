@@ -13,8 +13,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateMaterialReceiptRequest {
-
-    private String receiptCode;
     private LocalDate receiptDate;
     private UUID employeeId;
     private UUID supplierId;

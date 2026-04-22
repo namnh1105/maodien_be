@@ -14,9 +14,6 @@ import lombok.NoArgsConstructor;
 public class CreateBreedRequest {
 
     @NotBlank(message = "Mã giống không được để trống")
-    @Size(max = 30)
-    private String breedCode;
-
     @NotBlank(message = "Tên giống không được để trống")
     @Size(max = 150)
     private String name;

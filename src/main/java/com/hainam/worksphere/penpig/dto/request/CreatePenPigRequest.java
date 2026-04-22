@@ -17,9 +17,6 @@ import java.util.UUID;
 public class CreatePenPigRequest {
 
     @NotBlank(message = "Mã phân chuồng không được để trống")
-    @Size(max = 30)
-    private String assignmentCode;
-
     private UUID penId;
     private UUID pigId;
     private LocalDate entryDate;

@@ -28,10 +28,6 @@ public class PenPig {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "assignment_code", nullable = false, unique = true, length = 30)
-    private String assignmentCode;
-
     @Column(name = "pen_id")
     private UUID penId;
 

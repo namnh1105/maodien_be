@@ -14,9 +14,6 @@ import lombok.NoArgsConstructor;
 public class CreateMedicineRequest {
 
     @NotBlank(message = "Mã thuốc không được để trống")
-    @Size(max = 30)
-    private String medicineCode;
-
     @NotBlank(message = "Tên thuốc không được để trống")
     @Size(max = 200)
     private String name;

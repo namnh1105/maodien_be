@@ -25,8 +25,8 @@ public class DiseaseHistoryService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "DISEASE_HISTORY")
     public DiseaseHistoryResponse create(CreateDiseaseHistoryRequest r, UUID createdBy) {
-        if (repo.existsActiveByHistoryCode(r.getHistoryCode())) throw new BusinessRuleViolationException("Disease history code already exists: " + r.getHistoryCode());
-        DiseaseHistory e = DiseaseHistory.builder().historyCode(r.getHistoryCode()).pigId(r.getPigId()).diseaseCode(r.getDiseaseCode()).diseaseName(r.getDiseaseName()).sickDate(r.getSickDate()).recoveryDate(r.getRecoveryDate()).severity(r.getSeverity()).expectedTreatmentDays(r.getExpectedTreatmentDays()).status(r.getStatus()).note(r.getNote()).createdBy(createdBy).build();
+        
+        DiseaseHistory e = DiseaseHistory.builder().pigId(r.getPigId()).diseaseName(r.getDiseaseName()).sickDate(r.getSickDate()).recoveryDate(r.getRecoveryDate()).severity(r.getSeverity()).expectedTreatmentDays(r.getExpectedTreatmentDays()).status(r.getStatus()).note(r.getNote()).createdBy(createdBy).build();
         e = repo.save(e); AuditContext.registerCreated(e); return mapper.toResponse(e);
     }
 
@@ -42,7 +42,7 @@ public class DiseaseHistoryService {
         DiseaseHistory e = repo.findActiveById(id).orElseThrow(() -> new ResourceNotFoundException("DiseaseHistory", id.toString()));
         AuditContext.snapshot(e);
         if (r.getPigId() != null) e.setPigId(r.getPigId());
-        if (r.getDiseaseCode() != null) e.setDiseaseCode(r.getDiseaseCode());
+        
         if (r.getDiseaseName() != null) e.setDiseaseName(r.getDiseaseName());
         if (r.getSickDate() != null) e.setSickDate(r.getSickDate());
         if (r.getRecoveryDate() != null) e.setRecoveryDate(r.getRecoveryDate());

@@ -18,13 +18,6 @@ public class SplitPigletHerdRequest {
 
     @NotNull(message = "Source herd id is required")
     private UUID sourceHerdId;
-
-    @NotBlank(message = "New herd code is required")
-    private String newHerdCode;
-
-    @NotBlank(message = "Reproduction code is required")
-    private String reproductionCode;
-
     @NotNull(message = "Litter number is required")
     private Integer litterNumber;
 

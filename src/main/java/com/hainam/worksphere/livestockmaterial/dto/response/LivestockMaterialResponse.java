@@ -15,7 +15,6 @@ import java.util.UUID;
 public class LivestockMaterialResponse {
 
     private UUID id;
-    private String materialCode;
     private String name;
     private String unit;
     private Instant createdAt;

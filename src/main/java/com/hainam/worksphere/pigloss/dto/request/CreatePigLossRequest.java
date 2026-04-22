@@ -17,9 +17,6 @@ import java.util.UUID;
 public class CreatePigLossRequest {
 
     @NotBlank(message = "Mã hao hụt không được để trống")
-    @Size(max = 30)
-    private String lossCode;
-
     private UUID pigId;
     private LocalDate lossDate;
     private String reason;

@@ -21,13 +21,8 @@ public class DiseaseHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "history_code", nullable = false, unique = true, length = 30)
-    private String historyCode;
     @Column(name = "pig_id")
     private UUID pigId;
-    @Column(name = "disease_code", length = 30)
-    private String diseaseCode;
     @Column(name = "disease_name", length = 200)
     private String diseaseName;
     @Column(name = "sick_date")

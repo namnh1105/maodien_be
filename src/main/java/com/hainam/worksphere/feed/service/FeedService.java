@@ -29,12 +29,11 @@ public class FeedService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "FEED")
     public FeedResponse create(CreateFeedRequest request, UUID createdBy) {
-        if (feedRepository.existsActiveByFeedCode(request.getFeedCode())) {
-            throw new BusinessRuleViolationException("Feed code already exists: " + request.getFeedCode());
+        if (feedRepository.existsActiveByFeedCode(null)) {
+            throw new BusinessRuleViolationException("Feed code already exists: " + null);
         }
 
         Feed feed = Feed.builder()
-                .feedCode(request.getFeedCode())
                 .name(request.getName())
                 .unit(request.getUnit())
                 .createdBy(createdBy)

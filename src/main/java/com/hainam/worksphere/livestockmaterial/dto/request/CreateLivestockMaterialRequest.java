@@ -14,9 +14,6 @@ import lombok.NoArgsConstructor;
 public class CreateLivestockMaterialRequest {
 
     @NotBlank(message = "Material code is required")
-    @Size(max = 30)
-    private String materialCode;
-
     @NotBlank(message = "Material name is required")
     @Size(max = 150)
     private String name;

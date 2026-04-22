@@ -63,7 +63,6 @@ public class PigDetailService {
         List<PigDiseaseHistoryItemResponse> diseaseHistory = diseases.stream()
                 .map(d -> PigDiseaseHistoryItemResponse.builder()
                         .id(d.getId())
-                        .diseaseCode(d.getDiseaseCode())
                         .diseaseName(d.getDiseaseName())
                         .sickDate(d.getSickDate())
                         .recoveryDate(d.getRecoveryDate())

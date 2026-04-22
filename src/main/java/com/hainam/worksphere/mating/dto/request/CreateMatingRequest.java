@@ -17,9 +17,6 @@ import java.util.UUID;
 public class CreateMatingRequest {
 
     @NotBlank(message = "Mã phối không được để trống")
-    @Size(max = 30)
-    private String matingCode;
-
     private UUID sowPigId;
 
     private UUID boarBreedId;

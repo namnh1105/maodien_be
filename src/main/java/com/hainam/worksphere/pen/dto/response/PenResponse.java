@@ -11,7 +11,6 @@ import java.util.UUID;
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
 public class PenResponse {
     private UUID id;
-    private String penCode;
     private String name;
     private Double area;
     private UUID areaId;

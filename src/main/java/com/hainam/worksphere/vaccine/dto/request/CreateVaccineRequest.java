@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
 public class CreateVaccineRequest {
     @NotBlank(message = "Mã thuốc không được để trống") @Size(max = 30)
-    private String vaccineCode;
     @NotBlank(message = "Tên thuốc không được để trống") @Size(max = 150)
     private String name;
     @Size(max = 50)

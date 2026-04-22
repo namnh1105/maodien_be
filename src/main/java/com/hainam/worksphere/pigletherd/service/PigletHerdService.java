@@ -49,13 +49,11 @@ public class PigletHerdService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "PIGLET_HERD")
     public PigletHerdResponse create(CreatePigletHerdRequest request, UUID createdBy) {
-        if (pigletHerdRepository.existsActiveByHerdCode(request.getHerdCode())) {
-            throw new BusinessRuleViolationException("Herd code already exists: " + request.getHerdCode());
-        }
+        
 
         PigletHerd herd = PigletHerd.builder()
-                .herdCode(request.getHerdCode())
-            .reproductionCode(request.getReproductionCode())
+                
+            
             .litterNumber(request.getLitterNumber())
                 .mother(findPigOrNull(request.getMotherId()))
                 .father(findPigOrNull(request.getFatherId()))
@@ -120,7 +118,7 @@ public class PigletHerdService {
 
         AuditContext.snapshot(herd);
 
-        if (request.getReproductionCode() != null) herd.setReproductionCode(request.getReproductionCode());
+        
         if (request.getLitterNumber() != null) herd.setLitterNumber(request.getLitterNumber());
         if (request.getMotherId() != null) herd.setMother(findPigOrNull(request.getMotherId()));
         if (request.getFatherId() != null) herd.setFather(findPigOrNull(request.getFatherId()));
@@ -156,9 +154,7 @@ public class PigletHerdService {
         PigletHerd source = pigletHerdRepository.findActiveById(request.getSourceHerdId())
                 .orElseThrow(() -> PigletHerdNotFoundException.byId(request.getSourceHerdId().toString()));
 
-        if (pigletHerdRepository.existsActiveByHerdCode(request.getNewHerdCode())) {
-            throw new BusinessRuleViolationException("Herd code already exists: " + request.getNewHerdCode());
-        }
+        
         if (request.getQuantity() == null || request.getQuantity() <= 0) {
             throw new BusinessRuleViolationException("Split quantity must be greater than 0");
         }
@@ -173,8 +169,8 @@ public class PigletHerdService {
         pigletHerdRepository.save(source);
 
         PigletHerd target = PigletHerd.builder()
-                .herdCode(request.getNewHerdCode())
-                .reproductionCode(request.getReproductionCode())
+                
+                
                 .litterNumber(request.getLitterNumber())
                 .mother(source.getMother())
                 .father(source.getFather())
@@ -265,7 +261,7 @@ public class PigletHerdService {
         }
         String motherTag = mother.getEarTag() != null && !mother.getEarTag().isBlank()
                 ? mother.getEarTag()
-                : mother.getPigCode();
+                : "";
         return motherTag + "-" + litterNumber;
     }
 

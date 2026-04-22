@@ -17,9 +17,7 @@ public class VaccinationResponse {
 
     private UUID id;
     private UUID pigId;
-    private String pigCode;
     private UUID vaccineId;
-    private String vaccineCode;
     private String vaccineName;
     private LocalDate vaccinationDate;
     private String dosage;

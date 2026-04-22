@@ -17,9 +17,6 @@ import java.util.UUID;
 public class CreateReproductionCycleRequest {
 
     @NotBlank(message = "Mã thai kỳ không được để trống")
-    @Size(max = 30)
-    private String cycleCode;
-
     private UUID matingId;
     private LocalDate conceptionDate;
     private LocalDate expectedFarrowDate;

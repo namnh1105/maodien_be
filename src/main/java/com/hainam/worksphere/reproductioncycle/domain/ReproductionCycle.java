@@ -28,10 +28,6 @@ public class ReproductionCycle {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "cycle_code", nullable = false, unique = true, length = 30)
-    private String cycleCode;
-
     @Column(name = "mating_id")
     private UUID matingId;
 

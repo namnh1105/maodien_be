@@ -17,9 +17,6 @@ import java.util.UUID;
 public class CreateGrowthTrackingRequest {
 
     @NotBlank(message = "Mã tăng trưởng không được để trống")
-    @Size(max = 30)
-    private String trackingCode;
-
     private UUID pigId;
     private LocalDate trackingDate;
     private Double litterLength;

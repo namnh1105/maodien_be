@@ -33,10 +33,6 @@ public class MaterialReceipt {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "receipt_code", nullable = false, unique = true, length = 50)
-    private String receiptCode;
-
     @Column(name = "receipt_date", nullable = false)
     private LocalDate receiptDate;
 

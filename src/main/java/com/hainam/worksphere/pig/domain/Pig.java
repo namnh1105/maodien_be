@@ -28,10 +28,6 @@ public class Pig {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "pig_code", nullable = false, unique = true, length = 30)
-    private String pigCode;
-
     @Column(name = "ear_tag", length = 50)
     private String earTag;
 

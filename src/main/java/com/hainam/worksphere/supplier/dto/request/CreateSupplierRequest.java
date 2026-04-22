@@ -14,9 +14,6 @@ import lombok.NoArgsConstructor;
 public class CreateSupplierRequest {
 
     @NotBlank(message = "Supplier code is required")
-    @Size(max = 30)
-    private String supplierCode;
-
     @NotBlank(message = "Supplier name is required")
     @Size(max = 150)
     private String name;

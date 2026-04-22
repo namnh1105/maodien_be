@@ -14,10 +14,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateCullingProposalRequest {
-
-    @NotBlank(message = "Proposal code is required")
-    private String proposalCode;
-
     @NotNull(message = "Pig id is required")
     private UUID pigId;
 

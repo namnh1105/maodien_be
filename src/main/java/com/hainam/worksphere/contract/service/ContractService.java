@@ -39,8 +39,8 @@ public class ContractService {
     @CacheEvict(value = CacheConfig.CONTRACT_CACHE, allEntries = true)
     @AuditAction(type = ActionType.CREATE, entity = "CONTRACT")
     public ContractResponse createContract(CreateContractRequest request, UUID createdBy) {
-        if (contractRepository.existsActiveByContractCode(request.getContractCode())) {
-            throw new ValidationException("Contract code already exists: " + request.getContractCode());
+        if (contractRepository.existsActiveByContractCode(null)) {
+            throw new ValidationException("Contract code already exists: " + null);
         }
 
         Employee employee = employeeRepository.findActiveById(request.getEmployeeId())
@@ -51,7 +51,6 @@ public class ContractService {
         }
 
         Contract contract = Contract.builder()
-                .contractCode(request.getContractCode())
                 .employee(employee)
                 .contractType(request.getContractType())
                 .startDate(request.getStartDate())

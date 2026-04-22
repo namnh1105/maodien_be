@@ -32,10 +32,6 @@ public class Disease {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "disease_code", nullable = false, unique = true, length = 50)
-    private String diseaseCode;
-
     @Column(name = "name", nullable = false, length = 150)
     private String name;
 

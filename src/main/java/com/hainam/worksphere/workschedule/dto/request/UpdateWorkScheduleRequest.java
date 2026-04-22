@@ -13,8 +13,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateWorkScheduleRequest {
-
-    private String scheduleCode;
     private UUID employeeId;
     private String workName;
     private UUID areaId;

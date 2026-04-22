@@ -27,10 +27,6 @@ public class LivestockMaterial {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "material_code", nullable = false, unique = true, length = 30)
-    private String materialCode;
-
     @Column(name = "name", nullable = false, length = 150)
     private String name;
 

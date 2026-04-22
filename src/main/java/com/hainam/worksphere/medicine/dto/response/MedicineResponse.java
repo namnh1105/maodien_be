@@ -15,7 +15,6 @@ import java.util.UUID;
 public class MedicineResponse {
 
     private UUID id;
-    private String medicineCode;
     private String name;
     private String medicineType;
     private String unit;

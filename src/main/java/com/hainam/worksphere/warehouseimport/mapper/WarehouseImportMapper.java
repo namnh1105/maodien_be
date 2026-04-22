@@ -10,11 +10,9 @@ import org.mapstruct.MappingConstants;
 public interface WarehouseImportMapper {
 
     @Mapping(target = "warehouseId", source = "warehouse.id")
-    @Mapping(target = "warehouseCode", source = "warehouse.warehouseCode")
     @Mapping(target = "warehouseName", source = "warehouse.name")
     @Mapping(target = "itemType", expression = "java(warehouseImport.getItemType() != null ? warehouseImport.getItemType().name() : null)")
     @Mapping(target = "supplierId", source = "supplier.id")
-    @Mapping(target = "supplierCode", source = "supplier.supplierCode")
     @Mapping(target = "supplierName", source = "supplier.name")
     WarehouseImportResponse toResponse(WarehouseImport warehouseImport);
 }

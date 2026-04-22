@@ -15,7 +15,6 @@ import java.util.UUID;
 public class UpdateDiseaseHistoryRequest {
 
     private UUID pigId;
-    private String diseaseCode;
     private String diseaseName;
     private LocalDate sickDate;
     private LocalDate recoveryDate;

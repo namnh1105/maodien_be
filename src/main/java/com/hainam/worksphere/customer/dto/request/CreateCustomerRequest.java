@@ -14,9 +14,6 @@ import lombok.NoArgsConstructor;
 public class CreateCustomerRequest {
 
     @NotBlank(message = "Customer code is required")
-    @Size(max = 30)
-    private String customerCode;
-
     @NotBlank(message = "Customer name is required")
     @Size(max = 150)
     private String name;

@@ -10,8 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateOrderRequest {
-
-    private String orderCode;
     private String customerName;
     private String phone;
     private String email;

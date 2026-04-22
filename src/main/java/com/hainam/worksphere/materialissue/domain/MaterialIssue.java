@@ -33,10 +33,6 @@ public class MaterialIssue {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "issue_code", nullable = false, unique = true, length = 50)
-    private String issueCode;
-
     @Column(name = "issue_date", nullable = false)
     private LocalDate issueDate;
 

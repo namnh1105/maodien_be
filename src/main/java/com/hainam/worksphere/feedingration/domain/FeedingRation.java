@@ -33,10 +33,6 @@ public class FeedingRation {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "ration_code", nullable = false, unique = true, length = 50)
-    private String rationCode;
-
     @Column(name = "pen_id", nullable = false)
     private UUID penId;
 

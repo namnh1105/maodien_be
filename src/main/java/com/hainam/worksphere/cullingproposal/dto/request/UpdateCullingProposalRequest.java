@@ -12,8 +12,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateCullingProposalRequest {
-
-    private String proposalCode;
     private UUID pigId;
     private String proposalType;
     private String reason;

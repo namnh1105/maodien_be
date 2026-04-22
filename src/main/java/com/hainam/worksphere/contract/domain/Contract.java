@@ -29,10 +29,6 @@ public class Contract {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "contract_code", nullable = false, unique = true, length = 30)
-    private String contractCode;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;

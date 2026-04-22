@@ -16,7 +16,6 @@ import java.util.UUID;
 public class MaterialReceiptResponse {
 
     private UUID id;
-    private String receiptCode;
     private LocalDate receiptDate;
     private UUID employeeId;
     private UUID supplierId;

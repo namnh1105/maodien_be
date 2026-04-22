@@ -16,7 +16,6 @@ import java.util.UUID;
 public class MaterialIssueResponse {
 
     private UUID id;
-    private String issueCode;
     private LocalDate issueDate;
     private UUID employeeId;
     private String reason;

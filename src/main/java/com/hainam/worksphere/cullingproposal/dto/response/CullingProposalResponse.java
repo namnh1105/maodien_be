@@ -15,7 +15,6 @@ import java.util.UUID;
 public class CullingProposalResponse {
 
     private UUID id;
-    private String proposalCode;
     private UUID pigId;
     private String proposalType;
     private String reason;

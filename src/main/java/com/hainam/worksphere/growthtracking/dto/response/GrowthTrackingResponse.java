@@ -16,7 +16,6 @@ import java.util.UUID;
 public class GrowthTrackingResponse {
 
     private UUID id;
-    private String trackingCode;
     private UUID pigId;
     private LocalDate trackingDate;
     private Double litterLength;

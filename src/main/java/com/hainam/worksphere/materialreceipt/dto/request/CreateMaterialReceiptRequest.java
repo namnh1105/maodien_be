@@ -15,10 +15,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateMaterialReceiptRequest {
-
-    @NotBlank(message = "Receipt code is required")
-    private String receiptCode;
-
     @NotNull(message = "Receipt date is required")
     private LocalDate receiptDate;
 

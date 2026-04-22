@@ -16,14 +16,10 @@ import java.util.UUID;
 public class PigletHerdResponse {
 
     private UUID id;
-    private String herdCode;
-    private String reproductionCode;
     private String herdName;
     private Integer litterNumber;
     private UUID motherId;
-    private String motherCode;
     private UUID fatherId;
-    private String fatherCode;
     private Integer quantity;
     private String genderNote;
     private Double averageBirthWeight;

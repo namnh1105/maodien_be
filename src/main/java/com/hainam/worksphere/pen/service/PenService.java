@@ -41,7 +41,6 @@ public class PenService {
                 .build();
 
         Pen saved = penRepository.save(pen);
-        saved.setPenCode(generatePenCode(saved.getId()));
         saved = penRepository.save(saved);
         AuditContext.registerCreated(saved);
         return penMapper.toResponse(saved);

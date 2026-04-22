@@ -14,9 +14,6 @@ import lombok.NoArgsConstructor;
 public class CreateWarehouseRequest {
 
     @NotBlank(message = "Warehouse code is required")
-    @Size(max = 30)
-    private String warehouseCode;
-
     @NotBlank(message = "Warehouse name is required")
     @Size(max = 150)
     private String name;

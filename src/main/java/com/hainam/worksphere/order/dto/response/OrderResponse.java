@@ -15,7 +15,6 @@ import java.util.UUID;
 public class OrderResponse {
 
     private UUID id;
-    private String orderCode;
     private String customerName;
     private String phone;
     private String email;

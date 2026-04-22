@@ -15,7 +15,6 @@ import java.util.UUID;
 public class BreedResponse {
 
     private UUID id;
-    private String breedCode;
     private String name;
     private String characteristics;
     private Instant createdAt;

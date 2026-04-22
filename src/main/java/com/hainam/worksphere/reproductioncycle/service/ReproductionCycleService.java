@@ -29,12 +29,11 @@ public class ReproductionCycleService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "REPRODUCTION_CYCLE")
     public ReproductionCycleResponse create(CreateReproductionCycleRequest request, UUID createdBy) {
-        if (reproductionCycleRepository.existsActiveByCycleCode(request.getCycleCode())) {
-            throw new BusinessRuleViolationException("Cycle code already exists: " + request.getCycleCode());
+        if (reproductionCycleRepository.existsActiveByCycleCode(null)) {
+            throw new BusinessRuleViolationException("Cycle code already exists: " + null);
         }
 
         ReproductionCycle cycle = ReproductionCycle.builder()
-                .cycleCode(request.getCycleCode())
                 .matingId(request.getMatingId())
                 .conceptionDate(request.getConceptionDate())
                 .expectedFarrowDate(request.getExpectedFarrowDate())

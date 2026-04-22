@@ -33,10 +33,6 @@ public class WorkSchedule {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "schedule_code", nullable = false, unique = true, length = 50)
-    private String scheduleCode;
-
     @Column(name = "employee_id", nullable = false)
     private UUID employeeId;
 

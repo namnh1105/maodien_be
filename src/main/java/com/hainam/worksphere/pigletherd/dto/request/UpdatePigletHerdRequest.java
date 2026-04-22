@@ -14,10 +14,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdatePigletHerdRequest {
-
-    @Size(max = 30)
-    private String reproductionCode;
-
     private Integer litterNumber;
 
     private UUID motherId;

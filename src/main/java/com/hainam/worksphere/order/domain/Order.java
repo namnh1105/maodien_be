@@ -32,10 +32,6 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "order_code", nullable = false, unique = true, length = 50)
-    private String orderCode;
-
     @Column(name = "customer_name", nullable = false, length = 150)
     private String customerName;
 

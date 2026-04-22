@@ -11,10 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateOrderRequest {
-
-    @NotBlank(message = "Order code is required")
-    private String orderCode;
-
     @NotBlank(message = "Customer name is required")
     private String customerName;
 

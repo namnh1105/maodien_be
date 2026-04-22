@@ -15,7 +15,6 @@ import java.util.UUID;
 public class FeedResponse {
 
     private UUID id;
-    private String feedCode;
     private String name;
     private String unit;
     private Instant createdAt;

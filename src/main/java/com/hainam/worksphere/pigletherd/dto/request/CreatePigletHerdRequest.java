@@ -18,13 +18,7 @@ import java.util.UUID;
 public class CreatePigletHerdRequest {
 
     @NotBlank(message = "Herd code is required")
-    @Size(max = 30)
-    private String herdCode;
-
     @NotBlank(message = "Reproduction code is required")
-    @Size(max = 30)
-    private String reproductionCode;
-
     @NotNull(message = "Litter number is required")
     private Integer litterNumber;
 

@@ -13,8 +13,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateFeedingRationRequest {
-
-    private String rationCode;
     private UUID penId;
     private LocalDate rationDate;
     private Double averageIntake;

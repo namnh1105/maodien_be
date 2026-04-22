@@ -27,10 +27,6 @@ public class Feed {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "feed_code", nullable = false, unique = true, length = 30)
-    private String feedCode;
-
     @Column(name = "name", nullable = false, length = 150)
     private String name;
 

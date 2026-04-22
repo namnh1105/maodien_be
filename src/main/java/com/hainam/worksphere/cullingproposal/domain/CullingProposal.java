@@ -32,10 +32,6 @@ public class CullingProposal {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "proposal_code", nullable = false, unique = true, length = 50)
-    private String proposalCode;
-
     @Column(name = "pig_id", nullable = false)
     private UUID pigId;
 

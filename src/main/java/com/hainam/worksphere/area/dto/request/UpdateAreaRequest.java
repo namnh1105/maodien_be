@@ -10,8 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateAreaRequest {
-
-    private String areaCode;
     private String name;
     private String description;
 }

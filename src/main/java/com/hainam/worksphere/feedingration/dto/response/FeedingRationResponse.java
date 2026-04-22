@@ -16,7 +16,6 @@ import java.util.UUID;
 public class FeedingRationResponse {
 
     private UUID id;
-    private String rationCode;
     private UUID penId;
     private LocalDate rationDate;
     private Double averageIntake;

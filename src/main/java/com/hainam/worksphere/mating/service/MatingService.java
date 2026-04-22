@@ -32,12 +32,11 @@ public class MatingService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "MATING")
     public MatingResponse create(CreateMatingRequest request, UUID createdBy) {
-        if (matingRepository.existsActiveByMatingCode(request.getMatingCode())) {
-            throw new BusinessRuleViolationException("Mating code already exists: " + request.getMatingCode());
+        if (matingRepository.existsActiveByMatingCode(null)) {
+            throw new BusinessRuleViolationException("Mating code already exists: " + null);
         }
 
         Mating mating = Mating.builder()
-                .matingCode(request.getMatingCode())
                 .sowPigId(request.getSowPigId())
                 .boarBreedId(request.getBoarBreedId())
                 .litterLength(request.getLitterLength())

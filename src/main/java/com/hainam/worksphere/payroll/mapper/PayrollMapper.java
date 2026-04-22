@@ -12,7 +12,6 @@ public interface PayrollMapper {
 
     @Mapping(target = "employeeId", source = "employee.id")
     @Mapping(target = "employeeName", source = "employee.fullName")
-    @Mapping(target = "employeeCode", source = "employee.employeeCode")
     @Mapping(target = "totalDeductions", source = ".", qualifiedByName = "calculateTotalDeductions")
     @Mapping(target = "totalIncome", source = ".", qualifiedByName = "calculateTotalIncome")
     @Mapping(target = "netSalary", source = ".", qualifiedByName = "calculateNetSalary")

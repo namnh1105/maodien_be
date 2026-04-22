@@ -15,7 +15,6 @@ import java.util.UUID;
 public class VaccinationScheduleResponse {
 
     private UUID id;
-    private String scheduleCode;
     private UUID penId;
     private UUID employeeId;
     private Instant createdAt;

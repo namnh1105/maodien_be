@@ -17,7 +17,6 @@ public class WarehouseImportResponse {
 
     private UUID id;
     private UUID warehouseId;
-    private String warehouseCode;
     private String warehouseName;
     private String itemType;
     private UUID itemId;
@@ -25,7 +24,6 @@ public class WarehouseImportResponse {
     private String unit;
     private LocalDate importDate;
     private UUID supplierId;
-    private String supplierCode;
     private String supplierName;
     private Instant createdAt;
     private Instant updatedAt;

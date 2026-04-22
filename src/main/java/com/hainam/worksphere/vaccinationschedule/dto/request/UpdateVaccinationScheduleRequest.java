@@ -12,8 +12,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateVaccinationScheduleRequest {
-
-    private String scheduleCode;
     private UUID penId;
     private UUID employeeId;
 }

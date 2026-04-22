@@ -14,7 +14,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class PenDetailResponse {
     private UUID id;
-    private String penCode;
     private String name;
     private UUID areaId;
     private Double area;

@@ -15,10 +15,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateWorkScheduleRequest {
-
-    @NotBlank(message = "Schedule code is required")
-    private String scheduleCode;
-
     @NotNull(message = "Employee id is required")
     private UUID employeeId;
 

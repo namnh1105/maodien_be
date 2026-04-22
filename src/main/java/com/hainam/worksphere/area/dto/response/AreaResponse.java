@@ -15,7 +15,6 @@ import java.util.UUID;
 public class AreaResponse {
 
     private UUID id;
-    private String areaCode;
     private String name;
     private String description;
     private Instant createdAt;

@@ -16,7 +16,6 @@ import java.util.UUID;
 public class MatingResponse {
 
     private UUID id;
-    private String matingCode;
     private UUID sowPigId;
     private UUID boarBreedId;
     private Double litterLength;

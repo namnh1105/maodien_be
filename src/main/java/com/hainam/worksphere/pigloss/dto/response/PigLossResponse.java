@@ -16,7 +16,6 @@ import java.util.UUID;
 public class PigLossResponse {
 
     private UUID id;
-    private String lossCode;
     private UUID pigId;
     private LocalDate lossDate;
     private String reason;

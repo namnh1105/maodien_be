@@ -16,7 +16,6 @@ import java.util.UUID;
 public class WorkScheduleResponse {
 
     private UUID id;
-    private String scheduleCode;
     private UUID employeeId;
     private String workName;
     private UUID areaId;

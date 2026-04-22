@@ -11,9 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class DiseaseHistoryResponse {
     private UUID id;
-    private String historyCode;
     private UUID pigId;
-    private String diseaseCode;
     private String diseaseName;
     private LocalDate sickDate;
     private LocalDate recoveryDate;

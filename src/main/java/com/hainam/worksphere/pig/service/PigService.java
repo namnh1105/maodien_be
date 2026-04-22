@@ -45,7 +45,6 @@ public class PigService {
                 .build();
 
         Pig saved = pigRepository.save(pig);
-        saved.setPigCode(generatePigCode(saved.getId()));
         saved = pigRepository.save(saved);
         AuditContext.registerCreated(saved);
         return pigMapper.toResponse(saved);

@@ -11,10 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateDiseaseRequest {
-
-    @NotBlank(message = "Disease code is required")
-    private String diseaseCode;
-
     @NotBlank(message = "Disease name is required")
     private String name;
 

@@ -29,12 +29,11 @@ public class MedicineService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "MEDICINE")
     public MedicineResponse create(CreateMedicineRequest request, UUID createdBy) {
-        if (medicineRepository.existsActiveByMedicineCode(request.getMedicineCode())) {
-            throw new BusinessRuleViolationException("Medicine code already exists: " + request.getMedicineCode());
+        if (medicineRepository.existsActiveByMedicineCode(null)) {
+            throw new BusinessRuleViolationException("Medicine code already exists: " + null);
         }
 
         Medicine entity = Medicine.builder()
-                .medicineCode(request.getMedicineCode())
                 .name(request.getName())
                 .medicineType(request.getMedicineType())
                 .unit(request.getUnit())

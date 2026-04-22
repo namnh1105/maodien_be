@@ -11,7 +11,6 @@ import java.util.UUID;
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
 public class VaccineResponse {
     private UUID id;
-    private String vaccineCode;
     private String name;
     private String unit;
     private String treatmentDisease;

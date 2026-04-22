@@ -29,12 +29,11 @@ public class VaccineService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "VACCINE")
     public VaccineResponse create(CreateVaccineRequest request, UUID createdBy) {
-        if (vaccineRepository.existsActiveByVaccineCode(request.getVaccineCode())) {
-            throw new BusinessRuleViolationException("Vaccine code already exists: " + request.getVaccineCode());
+        if (vaccineRepository.existsActiveByVaccineCode(null)) {
+            throw new BusinessRuleViolationException("Vaccine code already exists: " + null);
         }
 
         Vaccine vaccine = Vaccine.builder()
-                .vaccineCode(request.getVaccineCode())
                 .name(request.getName())
                 .unit(request.getUnit())
                 .treatmentDisease(request.getTreatmentDisease())

@@ -29,12 +29,11 @@ public class PigLossService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "PIG_LOSS")
     public PigLossResponse create(CreatePigLossRequest request, UUID createdBy) {
-        if (pigLossRepository.existsActiveByLossCode(request.getLossCode())) {
-            throw new BusinessRuleViolationException("Pig loss code already exists: " + request.getLossCode());
+        if (pigLossRepository.existsActiveByLossCode(null)) {
+            throw new BusinessRuleViolationException("Pig loss code already exists: " + null);
         }
 
         PigLoss entity = PigLoss.builder()
-                .lossCode(request.getLossCode())
                 .pigId(request.getPigId())
                 .lossDate(request.getLossDate())
                 .reason(request.getReason())

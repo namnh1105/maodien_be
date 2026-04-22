@@ -16,7 +16,6 @@ import java.util.UUID;
 public class PigResponse {
 
     private UUID id;
-    private String pigCode;
     private String earTag;
     private Double birthWeight;
     private LocalDate birthDate;

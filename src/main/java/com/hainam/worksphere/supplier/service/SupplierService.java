@@ -29,12 +29,11 @@ public class SupplierService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "SUPPLIER")
     public SupplierResponse create(CreateSupplierRequest request, UUID createdBy) {
-        if (supplierRepository.existsActiveBySupplierCode(request.getSupplierCode())) {
-            throw new BusinessRuleViolationException("Supplier code already exists: " + request.getSupplierCode());
+        if (supplierRepository.existsActiveBySupplierCode(null)) {
+            throw new BusinessRuleViolationException("Supplier code already exists: " + null);
         }
 
         Supplier supplier = Supplier.builder()
-                .supplierCode(request.getSupplierCode())
                 .name(request.getName())
                 .address(request.getAddress())
                 .phone(request.getPhone())

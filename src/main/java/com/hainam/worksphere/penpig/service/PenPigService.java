@@ -29,12 +29,11 @@ public class PenPigService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "PEN_PIG")
     public PenPigResponse create(CreatePenPigRequest request, UUID createdBy) {
-        if (penPigRepository.existsActiveByAssignmentCode(request.getAssignmentCode())) {
-            throw new BusinessRuleViolationException("Pen pig assignment code already exists: " + request.getAssignmentCode());
+        if (penPigRepository.existsActiveByAssignmentCode(null)) {
+            throw new BusinessRuleViolationException("Pen pig assignment code already exists: " + null);
         }
 
         PenPig entity = PenPig.builder()
-                .assignmentCode(request.getAssignmentCode())
                 .penId(request.getPenId())
                 .pigId(request.getPigId())
                 .entryDate(request.getEntryDate())

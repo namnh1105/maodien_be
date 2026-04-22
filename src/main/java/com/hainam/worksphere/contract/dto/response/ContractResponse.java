@@ -16,15 +16,9 @@ import java.util.UUID;
 public class ContractResponse {
 
     private UUID id;
-
-    private String contractCode;
-
     private UUID employeeId;
 
     private String employeeName;
-
-    private String employeeCode;
-
     private String contractType;
 
     private LocalDate startDate;

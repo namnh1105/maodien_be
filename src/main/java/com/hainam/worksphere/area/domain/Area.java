@@ -32,10 +32,6 @@ public class Area {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "area_code", nullable = false, unique = true, length = 50)
-    private String areaCode;
-
     @Column(name = "name", nullable = false, length = 150)
     private String name;
 

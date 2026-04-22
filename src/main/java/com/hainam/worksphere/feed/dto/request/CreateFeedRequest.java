@@ -14,9 +14,6 @@ import lombok.NoArgsConstructor;
 public class CreateFeedRequest {
 
     @NotBlank(message = "Feed code is required")
-    @Size(max = 30)
-    private String feedCode;
-
     @NotBlank(message = "Feed name is required")
     @Size(max = 150)
     private String name;

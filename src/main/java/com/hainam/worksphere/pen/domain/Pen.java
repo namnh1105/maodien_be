@@ -27,10 +27,6 @@ public class Pen {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "pen_code", nullable = false, unique = true, length = 30)
-    private String penCode;
-
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 

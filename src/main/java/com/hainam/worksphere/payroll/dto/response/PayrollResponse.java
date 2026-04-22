@@ -21,9 +21,6 @@ public class PayrollResponse {
     private UUID employeeId;
 
     private String employeeName;
-
-    private String employeeCode;
-
     private Integer month;
 
     private Integer year;

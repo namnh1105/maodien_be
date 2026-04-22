@@ -16,7 +16,6 @@ import java.util.UUID;
 public class ReproductionCycleResponse {
 
     private UUID id;
-    private String cycleCode;
     private UUID matingId;
     private LocalDate conceptionDate;
     private LocalDate expectedFarrowDate;

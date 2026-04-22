@@ -29,13 +29,6 @@ public class PigletHerd {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "herd_code", nullable = false, unique = true, length = 30)
-    private String herdCode;
-
-    @Column(name = "reproduction_code", length = 30)
-    private String reproductionCode;
-
     @Column(name = "herd_name", length = 100)
     private String herdName;
 

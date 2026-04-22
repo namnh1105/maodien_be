@@ -15,7 +15,6 @@ import java.util.UUID;
 public class WarehouseResponse {
 
     private UUID id;
-    private String warehouseCode;
     private String name;
     private String warehouseType;
     private Instant createdAt;
