@@ -5,6 +5,7 @@ import com.hainam.worksphere.diseasehistory.dto.request.*;
 import com.hainam.worksphere.diseasehistory.dto.response.DiseaseHistoryResponse;
 import com.hainam.worksphere.diseasehistory.mapper.DiseaseHistoryMapper;
 import com.hainam.worksphere.diseasehistory.repository.DiseaseHistoryRepository;
+import com.hainam.worksphere.pig.repository.PigRepository;
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
@@ -20,6 +21,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class DiseaseHistoryService {
     private final DiseaseHistoryRepository repo;
+    private final PigRepository pigRepository;
     private final DiseaseHistoryMapper mapper;
 
     @Transactional
@@ -31,10 +33,10 @@ public class DiseaseHistoryService {
     }
 
     @Transactional(readOnly = true)
-    public List<DiseaseHistoryResponse> getAll() { return repo.findAllActive().stream().map(mapper::toResponse).toList(); }
+    public List<DiseaseHistoryResponse> getAll() { return repo.findAllActive().stream().map(this::toResponseWithEarTag).toList(); }
 
     @Transactional(readOnly = true)
-    public DiseaseHistoryResponse getById(UUID id) { return mapper.toResponse(repo.findActiveById(id).orElseThrow(() -> new ResourceNotFoundException("DiseaseHistory", id.toString()))); }
+    public DiseaseHistoryResponse getById(UUID id) { return toResponseWithEarTag(repo.findActiveById(id).orElseThrow(() -> new ResourceNotFoundException("DiseaseHistory", id.toString()))); }
 
     @Transactional
     @AuditAction(type = ActionType.UPDATE, entity = "DISEASE_HISTORY")
@@ -51,7 +53,7 @@ public class DiseaseHistoryService {
         if (r.getStatus() != null) e.setStatus(r.getStatus());
         if (r.getNote() != null) e.setNote(r.getNote());
         e.setUpdatedBy(updatedBy);
-        e = repo.save(e); AuditContext.registerUpdated(e); return mapper.toResponse(e);
+        e = repo.save(e); AuditContext.registerUpdated(e); return toResponseWithEarTag(e);
     }
 
     @Transactional
@@ -60,5 +62,13 @@ public class DiseaseHistoryService {
         DiseaseHistory e = repo.findActiveById(id).orElseThrow(() -> new ResourceNotFoundException("DiseaseHistory", id.toString()));
         AuditContext.registerDeleted(e);
         e.setIsDeleted(true); e.setDeletedAt(Instant.now()); e.setDeletedBy(deletedBy); repo.save(e);
+    }
+
+    private DiseaseHistoryResponse toResponseWithEarTag(DiseaseHistory diseaseHistory) {
+        DiseaseHistoryResponse response = mapper.toResponse(diseaseHistory);
+        if (diseaseHistory.getPigId() != null) {
+            response.setPigEarTag(pigRepository.findActiveById(diseaseHistory.getPigId()).map(p -> p.getEarTag()).orElse(null));
+        }
+        return response;
     }
 }

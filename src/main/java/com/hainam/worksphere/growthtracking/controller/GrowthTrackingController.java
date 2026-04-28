@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,14 +30,14 @@ public class GrowthTrackingController {
     private final GrowthTrackingService growthTrackingService;
 
     @PostMapping
-    @Operation(summary = "Create growth tracking")
-    public ResponseEntity<ApiResponse<GrowthTrackingResponse>> create(
-            @Valid @RequestBody CreateGrowthTrackingRequest request,
+        @Operation(summary = "Create growth tracking (batch)")
+        public ResponseEntity<ApiResponse<List<GrowthTrackingResponse>>> create(
+            @Valid @NotEmpty @RequestBody List<@Valid CreateGrowthTrackingRequest> requests,
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
-        GrowthTrackingResponse response = growthTrackingService.create(request, userPrincipal.getId());
+        List<GrowthTrackingResponse> response = growthTrackingService.createBatch(requests, userPrincipal.getId());
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Growth tracking created successfully", response));
+            .body(ApiResponse.success("Growth tracking created successfully", response));
     }
 
     @GetMapping

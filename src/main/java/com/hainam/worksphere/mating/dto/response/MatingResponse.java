@@ -17,7 +17,11 @@ public class MatingResponse {
 
     private UUID id;
     private UUID sowPigId;
-    private UUID boarBreedId;
+    private String sowPigEarTag;
+    private String sowBreed;
+    private UUID semenId;
+    private String semenCode;
+    private String boarBreed;
     private Double litterLength;
     private Integer matingRound;
     private UUID employeeId;

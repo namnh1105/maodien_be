@@ -6,6 +6,7 @@ import com.hainam.worksphere.pigloss.dto.request.UpdatePigLossRequest;
 import com.hainam.worksphere.pigloss.dto.response.PigLossResponse;
 import com.hainam.worksphere.pigloss.mapper.PigLossMapper;
 import com.hainam.worksphere.pigloss.repository.PigLossRepository;
+import com.hainam.worksphere.pig.repository.PigRepository;
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
@@ -23,6 +24,7 @@ import java.util.UUID;
 public class PigLossService {
 
     private final PigLossRepository pigLossRepository;
+    private final PigRepository pigRepository;
     private final PigLossMapper pigLossMapper;
 
     @Transactional
@@ -45,14 +47,14 @@ public class PigLossService {
 
     @Transactional(readOnly = true)
     public List<PigLossResponse> getAll() {
-        return pigLossRepository.findAllActive().stream().map(pigLossMapper::toResponse).toList();
+        return pigLossRepository.findAllActive().stream().map(this::toResponseWithEarTag).toList();
     }
 
     @Transactional(readOnly = true)
     public PigLossResponse getById(UUID id) {
         PigLoss entity = pigLossRepository.findActiveById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("PigLoss", id.toString()));
-        return pigLossMapper.toResponse(entity);
+        return toResponseWithEarTag(entity);
     }
 
     @Transactional
@@ -73,7 +75,7 @@ public class PigLossService {
 
         PigLoss saved = pigLossRepository.save(entity);
         AuditContext.registerUpdated(saved);
-        return pigLossMapper.toResponse(saved);
+        return toResponseWithEarTag(saved);
     }
 
     @Transactional
@@ -88,5 +90,13 @@ public class PigLossService {
         entity.setDeletedAt(Instant.now());
         entity.setDeletedBy(deletedBy);
         pigLossRepository.save(entity);
+    }
+
+    private PigLossResponse toResponseWithEarTag(PigLoss pigLoss) {
+        PigLossResponse response = pigLossMapper.toResponse(pigLoss);
+        if (pigLoss.getPigId() != null) {
+            response.setPigEarTag(pigRepository.findActiveById(pigLoss.getPigId()).map(p -> p.getEarTag()).orElse(null));
+        }
+        return response;
     }
 }

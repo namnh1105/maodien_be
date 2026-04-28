@@ -17,6 +17,7 @@ public class OrderDetailResponse {
     private UUID id;
     private UUID orderId;
     private UUID pigId;
+    private String pigEarTag;
     private UUID herdId;
     private Integer quantity;
     private Double unitPrice;

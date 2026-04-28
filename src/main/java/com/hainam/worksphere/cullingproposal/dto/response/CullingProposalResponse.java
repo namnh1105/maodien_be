@@ -16,6 +16,7 @@ public class CullingProposalResponse {
 
     private UUID id;
     private UUID pigId;
+    private String pigEarTag;
     private String proposalType;
     private String reason;
     private UUID employeeId;

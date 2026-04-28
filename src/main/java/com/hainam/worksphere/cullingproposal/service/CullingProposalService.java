@@ -6,6 +6,7 @@ import com.hainam.worksphere.cullingproposal.dto.request.UpdateCullingProposalRe
 import com.hainam.worksphere.cullingproposal.dto.response.CullingProposalResponse;
 import com.hainam.worksphere.cullingproposal.mapper.CullingProposalMapper;
 import com.hainam.worksphere.cullingproposal.repository.CullingProposalRepository;
+import com.hainam.worksphere.pig.repository.PigRepository;
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
@@ -24,6 +25,7 @@ public class CullingProposalService {
 
     private final CullingProposalRepository cullingProposalRepository;
     private final CullingProposalMapper cullingProposalMapper;
+    private final PigRepository pigRepository;
 
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "CULLING_PROPOSAL")
@@ -33,19 +35,21 @@ public class CullingProposalService {
 
         CullingProposal saved = cullingProposalRepository.save(cullingProposal);
         AuditContext.registerCreated(saved);
-        return cullingProposalMapper.toResponse(saved);
+        return toResponseWithEarTag(saved);
     }
 
     @Transactional(readOnly = true)
     public List<CullingProposalResponse> getAll() {
-        return cullingProposalRepository.findAllActive().stream().map(cullingProposalMapper::toResponse).toList();
+        return cullingProposalRepository.findAllActive().stream()
+                .map(this::toResponseWithEarTag)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public CullingProposalResponse getById(UUID id) {
         CullingProposal cullingProposal = cullingProposalRepository.findActiveById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("CullingProposal", id));
-        return cullingProposalMapper.toResponse(cullingProposal);
+        return toResponseWithEarTag(cullingProposal);
     }
 
     @Transactional
@@ -60,7 +64,7 @@ public class CullingProposalService {
 
         CullingProposal saved = cullingProposalRepository.save(cullingProposal);
         AuditContext.registerUpdated(saved);
-        return cullingProposalMapper.toResponse(saved);
+        return toResponseWithEarTag(saved);
     }
 
     @Transactional
@@ -75,4 +79,14 @@ public class CullingProposalService {
         cullingProposal.setDeletedBy(deletedBy);
         cullingProposalRepository.save(cullingProposal);
     }
+
+    private CullingProposalResponse toResponseWithEarTag(CullingProposal cullingProposal) {
+        CullingProposalResponse response = cullingProposalMapper.toResponse(cullingProposal);
+        if (cullingProposal.getPigId() != null) {
+            pigRepository.findActiveById(cullingProposal.getPigId())
+                    .ifPresent(pig -> response.setPigEarTag(pig.getEarTag()));
+        }
+        return response;
+    }
 }
+

@@ -12,5 +12,6 @@ public interface SaleMapper {
     @Mapping(target = "customerId", source = "customer.id")
     @Mapping(target = "customerName", source = "customer.name")
     @Mapping(target = "pigId", source = "pig.id")
+    @Mapping(target = "pigEarTag", source = "pig.earTag")
     SaleResponse toResponse(Sale sale);
 }

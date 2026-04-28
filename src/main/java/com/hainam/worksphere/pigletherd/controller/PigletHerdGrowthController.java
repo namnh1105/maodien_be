@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,13 +32,13 @@ public class PigletHerdGrowthController {
     private final PigletHerdGrowthService pigletHerdGrowthService;
 
     @PostMapping
-    @Operation(summary = "Create piglet herd growth")
+    @Operation(summary = "Create piglet herd growth (batch)")
     @RequirePermission(PermissionType.UPDATE_PIGLET_HERD)
-    public ResponseEntity<ApiResponse<PigletHerdGrowthResponse>> create(
-            @Valid @RequestBody CreatePigletHerdGrowthRequest request,
+    public ResponseEntity<ApiResponse<List<PigletHerdGrowthResponse>>> create(
+            @Valid @NotEmpty @RequestBody List<@Valid CreatePigletHerdGrowthRequest> requests,
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
-        PigletHerdGrowthResponse response = pigletHerdGrowthService.create(request, userPrincipal.getId());
+        List<PigletHerdGrowthResponse> response = pigletHerdGrowthService.createBatch(requests, userPrincipal.getId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Piglet herd growth created successfully", response));
     }

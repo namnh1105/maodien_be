@@ -6,6 +6,7 @@ import com.hainam.worksphere.growthtracking.dto.request.UpdateGrowthTrackingRequ
 import com.hainam.worksphere.growthtracking.dto.response.GrowthTrackingResponse;
 import com.hainam.worksphere.growthtracking.mapper.GrowthTrackingMapper;
 import com.hainam.worksphere.growthtracking.repository.GrowthTrackingRepository;
+import com.hainam.worksphere.pig.repository.PigRepository;
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
@@ -24,11 +25,12 @@ public class GrowthTrackingService {
 
     private final GrowthTrackingRepository growthTrackingRepository;
     private final GrowthTrackingMapper growthTrackingMapper;
+    private final PigRepository pigRepository;
 
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "GROWTH_TRACKING")
-    public GrowthTrackingResponse create(CreateGrowthTrackingRequest request, UUID createdBy) {
-        GrowthTracking tracking = GrowthTracking.builder()
+    public List<GrowthTrackingResponse> createBatch(List<CreateGrowthTrackingRequest> requests, UUID createdBy) {
+        List<GrowthTracking> entities = requests.stream().map(request -> GrowthTracking.builder()
                 .pigId(request.getPigId())
                 .trackingDate(request.getTrackingDate())
                 .litterLength(request.getLitterLength())
@@ -39,23 +41,23 @@ public class GrowthTrackingService {
                 .fcr(request.getFcr())
                 .note(request.getNote())
                 .createdBy(createdBy)
-                .build();
+                .build()).toList();
 
-        GrowthTracking saved = growthTrackingRepository.save(tracking);
-        AuditContext.registerCreated(saved);
-        return growthTrackingMapper.toResponse(saved);
+        List<GrowthTracking> saved = growthTrackingRepository.saveAll(entities);
+        saved.forEach(AuditContext::registerCreated);
+        return saved.stream().map(this::toResponseWithEarTag).toList();
     }
 
     @Transactional(readOnly = true)
     public List<GrowthTrackingResponse> getAll() {
-        return growthTrackingRepository.findAllActive().stream().map(growthTrackingMapper::toResponse).toList();
+        return growthTrackingRepository.findAllActive().stream().map(this::toResponseWithEarTag).toList();
     }
 
     @Transactional(readOnly = true)
     public GrowthTrackingResponse getById(UUID id) {
         GrowthTracking tracking = growthTrackingRepository.findActiveById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("GrowthTracking", id.toString()));
-        return growthTrackingMapper.toResponse(tracking);
+        return toResponseWithEarTag(tracking);
     }
 
     @Transactional
@@ -79,7 +81,7 @@ public class GrowthTrackingService {
 
         GrowthTracking saved = growthTrackingRepository.save(tracking);
         AuditContext.registerUpdated(saved);
-        return growthTrackingMapper.toResponse(saved);
+        return toResponseWithEarTag(saved);
     }
 
     @Transactional
@@ -94,5 +96,13 @@ public class GrowthTrackingService {
         tracking.setDeletedAt(Instant.now());
         tracking.setDeletedBy(deletedBy);
         growthTrackingRepository.save(tracking);
+    }
+
+    private GrowthTrackingResponse toResponseWithEarTag(GrowthTracking growthTracking) {
+        GrowthTrackingResponse response = growthTrackingMapper.toResponse(growthTracking);
+        if (growthTracking.getPigId() != null) {
+            response.setPigEarTag(pigRepository.findActiveById(growthTracking.getPigId()).map(p -> p.getEarTag()).orElse(null));
+        }
+        return response;
     }
 }

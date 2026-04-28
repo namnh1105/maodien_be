@@ -1,4 +1,4 @@
-package com.hainam.worksphere.penpig.dto.response;
+package com.hainam.worksphere.pigsemen.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,15 +13,19 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PenPigResponse {
+public class PigSemenResponse {
 
     private UUID id;
-    private UUID penId;
-    private UUID pigId;
-    private String pigEarTag;
-    private LocalDate entryDate;
-    private LocalDate exitDate;
+    private String code;
+    private UUID boarPigId;
+    private String boarPigEarTag;
+    private String boarBreed;
+    private LocalDate collectionDate;
+    private Double volume;
+    private Double motility;
+    private String quality;
     private String status;
+    private String note;
     private Instant createdAt;
     private Instant updatedAt;
 }

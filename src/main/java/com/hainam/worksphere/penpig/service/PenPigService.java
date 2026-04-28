@@ -6,6 +6,7 @@ import com.hainam.worksphere.penpig.dto.request.UpdatePenPigRequest;
 import com.hainam.worksphere.penpig.dto.response.PenPigResponse;
 import com.hainam.worksphere.penpig.mapper.PenPigMapper;
 import com.hainam.worksphere.penpig.repository.PenPigRepository;
+import com.hainam.worksphere.pig.repository.PigRepository;
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
@@ -24,6 +25,7 @@ public class PenPigService {
 
     private final PenPigRepository penPigRepository;
     private final PenPigMapper penPigMapper;
+    private final PigRepository pigRepository;
 
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "PEN_PIG")
@@ -39,19 +41,21 @@ public class PenPigService {
 
         PenPig saved = penPigRepository.save(entity);
         AuditContext.registerCreated(saved);
-        return penPigMapper.toResponse(saved);
+        return toResponseWithEarTag(saved);
     }
 
     @Transactional(readOnly = true)
     public List<PenPigResponse> getAll() {
-        return penPigRepository.findAllActive().stream().map(penPigMapper::toResponse).toList();
+        return penPigRepository.findAllActive().stream()
+                .map(this::toResponseWithEarTag)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public PenPigResponse getById(UUID id) {
         PenPig entity = penPigRepository.findActiveById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("PenPig", id.toString()));
-        return penPigMapper.toResponse(entity);
+        return toResponseWithEarTag(entity);
     }
 
     @Transactional
@@ -71,7 +75,7 @@ public class PenPigService {
 
         PenPig saved = penPigRepository.save(entity);
         AuditContext.registerUpdated(saved);
-        return penPigMapper.toResponse(saved);
+        return toResponseWithEarTag(saved);
     }
 
     @Transactional
@@ -87,4 +91,14 @@ public class PenPigService {
         entity.setDeletedBy(deletedBy);
         penPigRepository.save(entity);
     }
+
+    private PenPigResponse toResponseWithEarTag(PenPig penPig) {
+        PenPigResponse response = penPigMapper.toResponse(penPig);
+        if (penPig.getPigId() != null) {
+            pigRepository.findActiveById(penPig.getPigId())
+                    .ifPresent(pig -> response.setPigEarTag(pig.getEarTag()));
+        }
+        return response;
+    }
 }
+

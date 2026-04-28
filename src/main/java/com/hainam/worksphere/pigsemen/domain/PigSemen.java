@@ -1,4 +1,4 @@
-package com.hainam.worksphere.mating.domain;
+package com.hainam.worksphere.pigsemen.domain;
 
 import com.hainam.worksphere.shared.audit.annotation.AuditableEntity;
 import jakarta.persistence.*;
@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "mating_records")
+@Table(name = "pig_semen")
 @AuditableEntity(ignoreFields = {
     "id", "updatedAt", "updatedBy", "createdAt", "createdBy",
     "isDeleted", "deletedAt", "deletedBy"
@@ -23,31 +23,38 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Mating {
+public class PigSemen {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    @Column(name = "sow_pig_id")
-    private UUID sowPigId;
 
-    @Column(name = "semen_id")
-    private UUID semenId;
+    @Column(name = "code", nullable = false, length = 100, unique = true)
+    private String code;
 
-    @Column(name = "litter_length")
-    private Double litterLength;
+    @Column(name = "boar_pig_id")
+    private UUID boarPigId;
 
-    @Column(name = "mating_round")
-    private Integer matingRound;
+    @Column(name = "boar_breed", length = 100)
+    private String boarBreed;
 
-    @Column(name = "employee_id")
-    private UUID employeeId;
+    @Column(name = "collection_date")
+    private LocalDate collectionDate;
 
-    @Column(name = "mating_date")
-    private LocalDate matingDate;
+    @Column(name = "volume")
+    private Double volume;
+
+    @Column(name = "motility")
+    private Double motility;
+
+    @Column(name = "quality", length = 50)
+    private String quality;
 
     @Column(name = "status", length = 50)
     private String status;
+
+    @Column(name = "note", columnDefinition = "TEXT")
+    private String note;
 
     @CreationTimestamp
     @Column(name = "created_at")

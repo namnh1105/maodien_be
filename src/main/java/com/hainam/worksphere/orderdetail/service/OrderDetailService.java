@@ -6,6 +6,7 @@ import com.hainam.worksphere.orderdetail.dto.request.UpdateOrderDetailRequest;
 import com.hainam.worksphere.orderdetail.dto.response.OrderDetailResponse;
 import com.hainam.worksphere.orderdetail.mapper.OrderDetailMapper;
 import com.hainam.worksphere.orderdetail.repository.OrderDetailRepository;
+import com.hainam.worksphere.pig.repository.PigRepository;
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
@@ -24,6 +25,7 @@ public class OrderDetailService {
 
     private final OrderDetailRepository orderDetailRepository;
     private final OrderDetailMapper orderDetailMapper;
+    private final PigRepository pigRepository;
 
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "ORDER_DETAIL")
@@ -33,19 +35,21 @@ public class OrderDetailService {
 
         OrderDetail saved = orderDetailRepository.save(orderDetail);
         AuditContext.registerCreated(saved);
-        return orderDetailMapper.toResponse(saved);
+        return toResponseWithEarTag(saved);
     }
 
     @Transactional(readOnly = true)
     public List<OrderDetailResponse> getAll() {
-        return orderDetailRepository.findAllActive().stream().map(orderDetailMapper::toResponse).toList();
+        return orderDetailRepository.findAllActive().stream()
+                .map(this::toResponseWithEarTag)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public OrderDetailResponse getById(UUID id) {
         OrderDetail orderDetail = orderDetailRepository.findActiveById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("OrderDetail", id));
-        return orderDetailMapper.toResponse(orderDetail);
+        return toResponseWithEarTag(orderDetail);
     }
 
     @Transactional
@@ -60,7 +64,7 @@ public class OrderDetailService {
 
         OrderDetail saved = orderDetailRepository.save(orderDetail);
         AuditContext.registerUpdated(saved);
-        return orderDetailMapper.toResponse(saved);
+        return toResponseWithEarTag(saved);
     }
 
     @Transactional
@@ -74,5 +78,14 @@ public class OrderDetailService {
         orderDetail.setDeletedAt(Instant.now());
         orderDetail.setDeletedBy(deletedBy);
         orderDetailRepository.save(orderDetail);
+    }
+
+    private OrderDetailResponse toResponseWithEarTag(OrderDetail orderDetail) {
+        OrderDetailResponse response = orderDetailMapper.toResponse(orderDetail);
+        if (orderDetail.getPigId() != null) {
+            pigRepository.findActiveById(orderDetail.getPigId())
+                    .ifPresent(pig -> response.setPigEarTag(pig.getEarTag()));
+        }
+        return response;
     }
 }

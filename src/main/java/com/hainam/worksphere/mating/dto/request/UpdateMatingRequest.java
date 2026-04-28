@@ -17,7 +17,7 @@ public class UpdateMatingRequest {
 
     private UUID sowPigId;
 
-    private UUID boarBreedId;
+    private UUID semenId;
 
     private Double litterLength;
 

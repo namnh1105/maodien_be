@@ -46,6 +46,25 @@ public class PigletHerdGrowthService {
         return pigletHerdGrowthMapper.toResponse(saved);
     }
 
+    @Transactional
+    @AuditAction(type = ActionType.CREATE, entity = "PIGLET_HERD_GROWTH")
+    public List<PigletHerdGrowthResponse> createBatch(List<CreatePigletHerdGrowthRequest> requests, UUID createdBy) {
+        List<PigletHerdGrowth> entities = requests.stream().map(request -> {
+            ensureHerdExists(request.getHerdId());
+            return PigletHerdGrowth.builder()
+                    .herdId(request.getHerdId())
+                    .trackingDate(request.getTrackingDate())
+                    .averageWeight(request.getAverageWeight())
+                    .note(request.getNote())
+                    .createdBy(createdBy)
+                    .build();
+        }).toList();
+
+        List<PigletHerdGrowth> saved = pigletHerdGrowthRepository.saveAll(entities);
+        saved.forEach(AuditContext::registerCreated);
+        return saved.stream().map(pigletHerdGrowthMapper::toResponse).toList();
+    }
+
     @Transactional(readOnly = true)
     public List<PigletHerdGrowthResponse> getAll() {
         return pigletHerdGrowthRepository.findAllActive().stream().map(pigletHerdGrowthMapper::toResponse).toList();

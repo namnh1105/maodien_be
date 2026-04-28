@@ -17,6 +17,7 @@ public class GrowthTrackingResponse {
 
     private UUID id;
     private UUID pigId;
+    private String pigEarTag;
     private LocalDate trackingDate;
     private Double litterLength;
     private Double chestGirth;

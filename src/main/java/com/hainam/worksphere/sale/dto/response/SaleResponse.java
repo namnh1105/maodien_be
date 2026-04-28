@@ -19,6 +19,7 @@ public class SaleResponse {
     private UUID customerId;
     private String customerName;
     private UUID pigId;
+    private String pigEarTag;
     private LocalDate saleDate;
     private Double price;
     private String note;

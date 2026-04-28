@@ -12,6 +12,7 @@ import java.util.UUID;
 public class DiseaseHistoryResponse {
     private UUID id;
     private UUID pigId;
+    private String pigEarTag;
     private String diseaseName;
     private LocalDate sickDate;
     private LocalDate recoveryDate;

@@ -8,6 +8,7 @@ import com.hainam.worksphere.mating.mapper.MatingMapper;
 import com.hainam.worksphere.mating.repository.MatingRepository;
 import com.hainam.worksphere.pig.domain.Pig;
 import com.hainam.worksphere.pig.repository.PigRepository;
+import com.hainam.worksphere.pigsemen.repository.PigSemenRepository;
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
@@ -26,6 +27,7 @@ public class MatingService {
 
     private final MatingRepository matingRepository;
     private final PigRepository pigRepository;
+    private final PigSemenRepository pigSemenRepository;
     private final MatingMapper matingMapper;
 
     @Transactional
@@ -33,7 +35,7 @@ public class MatingService {
     public MatingResponse create(CreateMatingRequest request, UUID createdBy) {
         Mating mating = Mating.builder()
                 .sowPigId(request.getSowPigId())
-                .boarBreedId(request.getBoarBreedId())
+                .semenId(request.getSemenId())
                 .litterLength(request.getLitterLength())
                 .matingRound(request.getMatingRound())
                 .employeeId(request.getEmployeeId())
@@ -44,19 +46,19 @@ public class MatingService {
 
         Mating saved = matingRepository.save(mating);
         AuditContext.registerCreated(saved);
-        return matingMapper.toResponse(saved);
+        return toResponseWithEnrichment(saved);
     }
 
     @Transactional(readOnly = true)
     public List<MatingResponse> getAll() {
-        return matingRepository.findAllActive().stream().map(matingMapper::toResponse).toList();
+        return matingRepository.findAllActive().stream().map(this::toResponseWithEnrichment).toList();
     }
 
     @Transactional(readOnly = true)
     public MatingResponse getById(UUID id) {
         Mating mating = matingRepository.findActiveById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Mating", id.toString()));
-        return matingMapper.toResponse(mating);
+        return toResponseWithEnrichment(mating);
     }
 
     @Transactional(readOnly = true)
@@ -65,7 +67,7 @@ public class MatingService {
             .orElseThrow(() -> new ResourceNotFoundException("Pig", maLon));
 
         return matingRepository.findActiveBySowPigId(pig.getId()).stream()
-            .map(matingMapper::toResponse)
+            .map(this::toResponseWithEnrichment)
             .toList();
     }
 
@@ -78,7 +80,7 @@ public class MatingService {
         AuditContext.snapshot(mating);
 
         if (request.getSowPigId() != null) mating.setSowPigId(request.getSowPigId());
-        if (request.getBoarBreedId() != null) mating.setBoarBreedId(request.getBoarBreedId());
+        if (request.getSemenId() != null) mating.setSemenId(request.getSemenId());
         if (request.getLitterLength() != null) mating.setLitterLength(request.getLitterLength());
         if (request.getMatingRound() != null) mating.setMatingRound(request.getMatingRound());
         if (request.getEmployeeId() != null) mating.setEmployeeId(request.getEmployeeId());
@@ -88,7 +90,7 @@ public class MatingService {
 
         Mating saved = matingRepository.save(mating);
         AuditContext.registerUpdated(saved);
-        return matingMapper.toResponse(saved);
+        return toResponseWithEnrichment(saved);
     }
 
     @Transactional
@@ -103,5 +105,26 @@ public class MatingService {
         mating.setDeletedAt(Instant.now());
         mating.setDeletedBy(deletedBy);
         matingRepository.save(mating);
+    }
+
+    private MatingResponse toResponseWithEnrichment(Mating mating) {
+        MatingResponse response = matingMapper.toResponse(mating);
+        
+        if (mating.getSowPigId() != null) {
+            pigRepository.findActiveById(mating.getSowPigId()).ifPresent(pig -> {
+                response.setSowPigEarTag(pig.getEarTag());
+                response.setSowBreed(pig.getSpecies());
+            });
+        }
+        
+        if (mating.getSemenId() != null) {
+            pigSemenRepository.findActiveById(mating.getSemenId()).ifPresent(semen -> {
+                response.setSemenId(semen.getId());
+                response.setSemenCode(semen.getCode());
+                response.setBoarBreed(semen.getBoarBreed());
+            });
+        }
+        
+        return response;
     }
 }

@@ -1,6 +1,6 @@
 package com.hainam.worksphere.growthtracking.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CreateGrowthTrackingRequest {
 
-    @NotBlank(message = "Mã tăng trưởng không được để trống")
+    @NotNull(message = "Pig id không được để trống")
     private UUID pigId;
     private LocalDate trackingDate;
     private Double litterLength;

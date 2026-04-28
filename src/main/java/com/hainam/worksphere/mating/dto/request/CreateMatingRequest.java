@@ -19,7 +19,7 @@ public class CreateMatingRequest {
     @NotBlank(message = "Mã phối không được để trống")
     private UUID sowPigId;
 
-    private UUID boarBreedId;
+    private UUID semenId;
 
     private Double litterLength;
 

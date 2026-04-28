@@ -17,6 +17,7 @@ public class PigLossResponse {
 
     private UUID id;
     private UUID pigId;
+    private String pigEarTag;
     private LocalDate lossDate;
     private String reason;
     private String note;

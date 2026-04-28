@@ -10,6 +10,7 @@ import org.mapstruct.MappingConstants;
 public interface VaccinationMapper {
 
     @Mapping(target = "pigId", source = "pig.id")
+    @Mapping(target = "pigEarTag", source = "pig.earTag")
     @Mapping(target = "vaccineId", source = "vaccine.id")
     @Mapping(target = "vaccineName", source = "vaccine.name")
     @Mapping(target = "employeeId", source = "employee.id")
