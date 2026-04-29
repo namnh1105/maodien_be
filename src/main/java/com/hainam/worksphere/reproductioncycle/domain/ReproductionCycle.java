@@ -52,6 +52,12 @@ public class ReproductionCycle {
     @Column(name = "dead_count")
     private Integer deadCount;
 
+    @Column(name = "crushed_count")
+    private Integer crushedCount;
+
+    @Column(name = "deformed_count")
+    private Integer deformedCount;
+
     @Column(name = "average_weight")
     private Double averageWeight;
 

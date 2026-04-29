@@ -55,6 +55,12 @@ public class PigletHerd {
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
+    @Column(name = "semen_id")
+    private UUID semenId;
+
+    @Column(name = "status", length = 50)
+    private String status;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private Instant createdAt;

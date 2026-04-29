@@ -71,6 +71,15 @@ public class MatingService {
             .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<MatingResponse> getByPigId(UUID pigId) {
+        pigRepository.findActiveById(pigId)
+                .orElseThrow(() -> new ResourceNotFoundException("Pig", pigId.toString()));
+        return matingRepository.findActiveBySowPigId(pigId).stream()
+                .map(this::toResponseWithEnrichment)
+                .toList();
+    }
+
     @Transactional
     @AuditAction(type = ActionType.UPDATE, entity = "MATING")
     public MatingResponse update(UUID id, UpdateMatingRequest request, UUID updatedBy) {

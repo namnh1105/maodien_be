@@ -34,4 +34,8 @@ public class CreatePigletHerdRequest {
     private Double averageBirthWeight;
 
     private LocalDate birthDate;
+
+    private UUID semenId;
+
+    private String status;
 }

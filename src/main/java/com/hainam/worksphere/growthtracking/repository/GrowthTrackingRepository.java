@@ -22,4 +22,8 @@ public interface GrowthTrackingRepository extends JpaRepository<GrowthTracking, 
 
     @Query("SELECT gt FROM GrowthTracking gt WHERE gt.pigId = :pigId AND gt.isDeleted = false ORDER BY gt.trackingDate DESC, gt.createdAt DESC")
     List<GrowthTracking> findActiveByPigId(@Param("pigId") UUID pigId);
+
+    /** Batch query: lấy growth records của nhiều lợn cùng lúc (tránh N+1). */
+    @Query("SELECT gt FROM GrowthTracking gt WHERE gt.pigId IN :pigIds AND gt.isDeleted = false ORDER BY gt.trackingDate DESC, gt.createdAt DESC")
+    List<GrowthTracking> findActiveByPigIds(@Param("pigIds") List<UUID> pigIds);
 }

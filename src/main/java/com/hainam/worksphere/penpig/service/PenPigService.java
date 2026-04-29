@@ -1,5 +1,6 @@
 package com.hainam.worksphere.penpig.service;
 
+import com.hainam.worksphere.pen.repository.PenRepository;
 import com.hainam.worksphere.penpig.domain.PenPig;
 import com.hainam.worksphere.penpig.dto.request.CreatePenPigRequest;
 import com.hainam.worksphere.penpig.dto.request.UpdatePenPigRequest;
@@ -10,6 +11,7 @@ import com.hainam.worksphere.pig.repository.PigRepository;
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
+import com.hainam.worksphere.shared.exception.BusinessRuleViolationException;
 import com.hainam.worksphere.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,10 +28,27 @@ public class PenPigService {
     private final PenPigRepository penPigRepository;
     private final PenPigMapper penPigMapper;
     private final PigRepository pigRepository;
+    private final PenRepository penRepository;
 
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "PEN_PIG")
     public PenPigResponse create(CreatePenPigRequest request, UUID createdBy) {
+        // Validate pen exists
+        penRepository.findActiveById(request.getPenId())
+                .orElseThrow(() -> new ResourceNotFoundException("Pen", request.getPenId().toString()));
+
+        // Validate pig exists (if provided)
+        if (request.getPigId() != null) {
+            pigRepository.findActiveById(request.getPigId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Pig", request.getPigId().toString()));
+
+            // Prevent duplicate active assignment (pig already in this pen with no exit date)
+            if (penPigRepository.existsActivByPenIdAndPigId(request.getPenId(), request.getPigId())) {
+                throw new BusinessRuleViolationException(
+                        "Lợn này đã được phân chuồng vào chuồng đã chọn và chưa xuất chuồng");
+            }
+        }
+
         PenPig entity = PenPig.builder()
                 .penId(request.getPenId())
                 .pigId(request.getPigId())

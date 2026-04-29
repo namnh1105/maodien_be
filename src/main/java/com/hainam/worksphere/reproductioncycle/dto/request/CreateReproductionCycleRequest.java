@@ -28,5 +28,7 @@ public class CreateReproductionCycleRequest {
     private Integer bornCount;
     private Integer aliveCount;
     private Integer deadCount;
+    private Integer crushedCount;
+    private Integer deformedCount;
     private Double averageWeight;
 }

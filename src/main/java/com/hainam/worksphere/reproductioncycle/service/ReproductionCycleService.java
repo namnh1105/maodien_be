@@ -37,6 +37,8 @@ public class ReproductionCycleService {
                 .bornCount(request.getBornCount())
                 .aliveCount(request.getAliveCount())
                 .deadCount(request.getDeadCount())
+                .crushedCount(request.getCrushedCount())
+                .deformedCount(request.getDeformedCount())
                 .averageWeight(request.getAverageWeight())
                 .createdBy(createdBy)
                 .build();
@@ -74,6 +76,8 @@ public class ReproductionCycleService {
         if (request.getBornCount() != null) cycle.setBornCount(request.getBornCount());
         if (request.getAliveCount() != null) cycle.setAliveCount(request.getAliveCount());
         if (request.getDeadCount() != null) cycle.setDeadCount(request.getDeadCount());
+        if (request.getCrushedCount() != null) cycle.setCrushedCount(request.getCrushedCount());
+        if (request.getDeformedCount() != null) cycle.setDeformedCount(request.getDeformedCount());
         if (request.getAverageWeight() != null) cycle.setAverageWeight(request.getAverageWeight());
         cycle.setUpdatedBy(updatedBy);
 

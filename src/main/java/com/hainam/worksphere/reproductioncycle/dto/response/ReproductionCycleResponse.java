@@ -24,6 +24,8 @@ public class ReproductionCycleResponse {
     private Integer bornCount;
     private Integer aliveCount;
     private Integer deadCount;
+    private Integer crushedCount;
+    private Integer deformedCount;
     private Double averageWeight;
     private Instant createdAt;
     private Instant updatedAt;

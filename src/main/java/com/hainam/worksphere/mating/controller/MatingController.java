@@ -46,9 +46,15 @@ public class MatingController {
     }
 
     @GetMapping("/by-ma-lon/{maLon}")
-    @Operation(summary = "Get mating records by pig code/ear tag")
+    @Operation(summary = "Get mating records by pig ear tag")
     public ResponseEntity<ApiResponse<List<MatingResponse>>> getByMaLon(@PathVariable String maLon) {
         return ResponseEntity.ok(ApiResponse.success(matingService.getByMaLon(maLon)));
+    }
+
+    @GetMapping("/by-pig/{pigId}")
+    @Operation(summary = "Get mating history by pig id (Lịch sử phối theo id lợn)")
+    public ResponseEntity<ApiResponse<List<MatingResponse>>> getByPigId(@PathVariable UUID pigId) {
+        return ResponseEntity.ok(ApiResponse.success(matingService.getByPigId(pigId)));
     }
 
     @GetMapping("/{id}")

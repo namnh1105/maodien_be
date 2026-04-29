@@ -28,4 +28,8 @@ public class UpdatePigletHerdRequest {
     private Double averageBirthWeight;
 
     private LocalDate birthDate;
+
+    private UUID semenId;
+
+    private String status;
 }

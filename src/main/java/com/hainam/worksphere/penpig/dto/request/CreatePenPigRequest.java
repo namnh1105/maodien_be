@@ -1,7 +1,6 @@
 package com.hainam.worksphere.penpig.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CreatePenPigRequest {
 
-    @NotBlank(message = "Mã phân chuồng không được để trống")
+    @NotNull(message = "Mã phân chuồng không được để trống")
     private UUID penId;
     private UUID pigId;
     private LocalDate entryDate;

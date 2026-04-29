@@ -19,5 +19,33 @@ public interface ReproductionCycleRepository extends JpaRepository<ReproductionC
     @Query("SELECT rc FROM ReproductionCycle rc WHERE rc.id = :id AND rc.isDeleted = false")
     Optional<ReproductionCycle> findActiveById(@Param("id") UUID id);
 
+    /**
+     * Lấy lịch sử lứa đẻ của lợn nái theo pigId (join qua mating_records).
+     * Sắp xếp mới nhất lên đầu.
+     */
+    @Query("SELECT rc FROM ReproductionCycle rc " +
+           "JOIN com.hainam.worksphere.mating.domain.Mating m ON m.id = rc.matingId " +
+           "WHERE m.sowPigId = :sowPigId AND rc.isDeleted = false AND m.isDeleted = false " +
+           "ORDER BY rc.actualFarrowDate DESC NULLS LAST, rc.expectedFarrowDate DESC NULLS LAST")
+    List<ReproductionCycle> findActiveBySowPigId(@Param("sowPigId") UUID sowPigId);
 
+    /**
+     * Lấy các bản ghi đang mang thai (chưa có actualFarrowDate) theo sowPigId.
+     */
+    @Query("SELECT rc FROM ReproductionCycle rc " +
+           "JOIN com.hainam.worksphere.mating.domain.Mating m ON m.id = rc.matingId " +
+           "WHERE m.sowPigId = :sowPigId AND rc.isDeleted = false AND m.isDeleted = false " +
+           "AND rc.actualFarrowDate IS NULL " +
+           "ORDER BY rc.conceptionDate DESC NULLS LAST")
+    List<ReproductionCycle> findActivePregnantBySowPigId(@Param("sowPigId") UUID sowPigId);
+
+    /**
+     * Lấy tất cả lợn đang mang thai (chưa đẻ).
+     */
+    @Query("SELECT rc FROM ReproductionCycle rc " +
+           "JOIN com.hainam.worksphere.mating.domain.Mating m ON m.id = rc.matingId " +
+           "WHERE rc.isDeleted = false AND m.isDeleted = false " +
+           "AND rc.actualFarrowDate IS NULL")
+    List<ReproductionCycle> findAllActivePregnant();
 }
+
