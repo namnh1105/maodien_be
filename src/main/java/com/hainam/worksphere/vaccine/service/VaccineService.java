@@ -12,14 +12,13 @@ import com.hainam.worksphere.vaccine.dto.response.VaccineResponse;
 import com.hainam.worksphere.vaccine.mapper.VaccineMapper;
 import com.hainam.worksphere.vaccine.repository.VaccineRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-@Service
+@Deprecated
 @RequiredArgsConstructor
 public class VaccineService {
 

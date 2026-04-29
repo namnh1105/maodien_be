@@ -17,6 +17,8 @@ public class LivestockMaterialResponse {
     private UUID id;
     private String name;
     private String unit;
+    private String materialType;
+    private String description;
     private Instant createdAt;
     private Instant updatedAt;
 }

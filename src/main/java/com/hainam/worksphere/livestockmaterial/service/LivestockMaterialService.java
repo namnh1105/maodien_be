@@ -1,6 +1,7 @@
 package com.hainam.worksphere.livestockmaterial.service;
 
 import com.hainam.worksphere.livestockmaterial.domain.LivestockMaterial;
+import com.hainam.worksphere.livestockmaterial.domain.MaterialType;
 import com.hainam.worksphere.livestockmaterial.dto.request.CreateLivestockMaterialRequest;
 import com.hainam.worksphere.livestockmaterial.dto.request.UpdateLivestockMaterialRequest;
 import com.hainam.worksphere.livestockmaterial.dto.response.LivestockMaterialResponse;
@@ -36,6 +37,8 @@ public class LivestockMaterialService {
         LivestockMaterial material = LivestockMaterial.builder()
                 .name(request.getName())
                 .unit(request.getUnit())
+                .materialType(parseMaterialType(request.getMaterialType()))
+                .description(request.getDescription())
                 .createdBy(createdBy)
                 .build();
 
@@ -66,6 +69,8 @@ public class LivestockMaterialService {
 
         if (request.getName() != null) material.setName(request.getName());
         if (request.getUnit() != null) material.setUnit(request.getUnit());
+        if (request.getMaterialType() != null) material.setMaterialType(parseMaterialType(request.getMaterialType()));
+        if (request.getDescription() != null) material.setDescription(request.getDescription());
         material.setUpdatedBy(updatedBy);
 
         LivestockMaterial saved = livestockMaterialRepository.save(material);
@@ -85,5 +90,16 @@ public class LivestockMaterialService {
         material.setDeletedAt(Instant.now());
         material.setDeletedBy(deletedBy);
         livestockMaterialRepository.save(material);
+    }
+
+    private MaterialType parseMaterialType(String rawType) {
+        if (rawType == null || rawType.isBlank()) {
+            throw new BusinessRuleViolationException("Material type is required");
+        }
+        try {
+            return MaterialType.valueOf(rawType.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new BusinessRuleViolationException("Invalid material type: " + rawType);
+        }
     }
 }

@@ -4,13 +4,13 @@ import com.hainam.worksphere.vaccine.domain.Vaccine;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.NoRepositoryBean;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Repository
+@NoRepositoryBean
 public interface VaccineRepository extends JpaRepository<Vaccine, UUID> {
 
     @Query("SELECT v FROM Vaccine v WHERE v.isDeleted = false")

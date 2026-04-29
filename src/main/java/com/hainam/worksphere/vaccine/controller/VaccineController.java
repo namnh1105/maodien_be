@@ -9,8 +9,6 @@ import com.hainam.worksphere.vaccine.dto.request.UpdateVaccineRequest;
 import com.hainam.worksphere.vaccine.dto.response.VaccineResponse;
 import com.hainam.worksphere.vaccine.service.VaccineService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,11 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@RestController
-@RequestMapping("/api/v1/vaccines")
+@Deprecated
 @RequiredArgsConstructor
-@Tag(name = "Vaccine Management")
-@SecurityRequirement(name = "Bearer Authentication")
 public class VaccineController {
 
     private final VaccineService vaccineService;

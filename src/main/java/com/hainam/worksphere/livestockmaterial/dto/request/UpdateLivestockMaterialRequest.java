@@ -17,4 +17,10 @@ public class UpdateLivestockMaterialRequest {
 
     @Size(max = 50)
     private String unit;
+
+    @Size(max = 50)
+    private String materialType;
+
+    @Size(max = 1000)
+    private String description;
 }

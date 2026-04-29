@@ -9,8 +9,6 @@ import com.hainam.worksphere.feed.service.FeedService;
 import com.hainam.worksphere.shared.constant.PermissionType;
 import com.hainam.worksphere.shared.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,11 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@RestController
-@RequestMapping("/api/v1/feeds")
+@Deprecated
 @RequiredArgsConstructor
-@Tag(name = "Feed Management")
-@SecurityRequirement(name = "Bearer Authentication")
 public class FeedController {
 
     private final FeedService feedService;

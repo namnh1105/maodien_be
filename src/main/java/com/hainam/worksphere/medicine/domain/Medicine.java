@@ -1,6 +1,5 @@
 package com.hainam.worksphere.medicine.domain;
 
-import com.hainam.worksphere.shared.audit.annotation.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,12 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.Instant;
 import java.util.UUID;
 
-@Entity
-@Table(name = "medicines")
-@AuditableEntity(ignoreFields = {
-    "id", "updatedAt", "updatedBy", "createdAt", "createdBy",
-    "isDeleted", "deletedAt", "deletedBy"
-})
+@Deprecated
 @Data
 @Builder
 @NoArgsConstructor

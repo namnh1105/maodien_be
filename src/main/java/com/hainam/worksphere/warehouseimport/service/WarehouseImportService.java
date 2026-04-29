@@ -1,18 +1,16 @@
 package com.hainam.worksphere.warehouseimport.service;
 
-import com.hainam.worksphere.feed.repository.FeedRepository;
 import com.hainam.worksphere.livestockmaterial.repository.LivestockMaterialRepository;
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
 import com.hainam.worksphere.shared.exception.BusinessRuleViolationException;
 import com.hainam.worksphere.shared.exception.SupplierNotFoundException;
-import com.hainam.worksphere.shared.exception.VaccineNotFoundException;
+import com.hainam.worksphere.shared.exception.LivestockMaterialNotFoundException;
 import com.hainam.worksphere.shared.exception.WarehouseImportNotFoundException;
 import com.hainam.worksphere.shared.exception.WarehouseNotFoundException;
 import com.hainam.worksphere.supplier.domain.Supplier;
 import com.hainam.worksphere.supplier.repository.SupplierRepository;
-import com.hainam.worksphere.vaccine.repository.VaccineRepository;
 import com.hainam.worksphere.warehouse.domain.Warehouse;
 import com.hainam.worksphere.warehouse.repository.WarehouseRepository;
 import com.hainam.worksphere.warehouseimport.domain.ItemType;
@@ -37,8 +35,6 @@ public class WarehouseImportService {
     private final WarehouseImportRepository warehouseImportRepository;
     private final WarehouseRepository warehouseRepository;
     private final SupplierRepository supplierRepository;
-    private final VaccineRepository vaccineRepository;
-    private final FeedRepository feedRepository;
     private final LivestockMaterialRepository livestockMaterialRepository;
     private final WarehouseImportMapper warehouseImportMapper;
 
@@ -162,17 +158,10 @@ public class WarehouseImportService {
     }
 
     private void validateItem(ItemType itemType, UUID itemId) {
-        boolean exists = switch (itemType) {
-            case VACCINE -> vaccineRepository.findActiveById(itemId).isPresent();
-            case MATERIAL -> livestockMaterialRepository.findActiveById(itemId).isPresent();
-            case FEED -> feedRepository.findActiveById(itemId).isPresent();
-        };
+        boolean exists = livestockMaterialRepository.findActiveById(itemId).isPresent();
 
         if (!exists) {
-            if (itemType == ItemType.VACCINE) {
-                throw VaccineNotFoundException.byId(itemId.toString());
-            }
-            throw new BusinessRuleViolationException("Item not found for type " + itemType + " with id: " + itemId);
+            throw LivestockMaterialNotFoundException.byId(itemId.toString());
         }
     }
 }

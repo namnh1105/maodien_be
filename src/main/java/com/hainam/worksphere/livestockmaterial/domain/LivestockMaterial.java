@@ -33,6 +33,13 @@ public class LivestockMaterial {
     @Column(name = "unit", length = 50)
     private String unit;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "material_type", nullable = false, length = 50)
+    private MaterialType materialType;
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private Instant createdAt;

@@ -12,14 +12,13 @@ import com.hainam.worksphere.shared.audit.util.AuditContext;
 import com.hainam.worksphere.shared.exception.BusinessRuleViolationException;
 import com.hainam.worksphere.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-@Service
+@Deprecated
 @RequiredArgsConstructor
 public class MedicineService {
 

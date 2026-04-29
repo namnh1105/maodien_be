@@ -20,4 +20,11 @@ public class CreateLivestockMaterialRequest {
 
     @Size(max = 50)
     private String unit;
+
+    @NotBlank(message = "Material type is required")
+    @Size(max = 50)
+    private String materialType;
+
+    @Size(max = 1000)
+    private String description;
 }
