@@ -15,6 +15,5 @@ public interface PigletHerdMapper {
     @Mapping(target = "fatherId", source = "father.id")
     @Mapping(target = "fatherEarTag", source = "father.earTag")
     @Mapping(target = "fatherBreed", source = "father.species")
-    @Mapping(target = "semenCode", ignore = true)
     PigletHerdResponse toResponse(PigletHerd pigletHerd);
 }

@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -27,7 +28,6 @@ public class PigSemenService {
     @AuditAction(type = ActionType.CREATE, entity = "PIG_SEMEN")
     public PigSemenResponse create(CreatePigSemenRequest request, UUID createdBy) {
         PigSemen entity = PigSemen.builder()
-                .code(request.getCode())
                 .boarPigId(request.getBoarPigId())
                 .boarBreed(request.getBoarBreed())
                 .collectionDate(request.getCollectionDate())
@@ -43,6 +43,58 @@ public class PigSemenService {
         AuditContext.registerCreated(saved);
         
         return toResponseWithEarTag(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PigSemenResponse> getAll() {
+        return pigSemenRepository.findAllActive().stream()
+                .map(this::toResponseWithEarTag)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public PigSemenResponse getById(UUID id) {
+        PigSemen entity = pigSemenRepository.findActiveById(id)
+                .orElseThrow(() -> new com.hainam.worksphere.shared.exception.ResourceNotFoundException("PigSemen", id.toString()));
+        return toResponseWithEarTag(entity);
+    }
+
+    @Transactional
+    @AuditAction(type = ActionType.UPDATE, entity = "PIG_SEMEN")
+    public PigSemenResponse update(UUID id, com.hainam.worksphere.pigsemen.dto.request.UpdatePigSemenRequest request, UUID updatedBy) {
+        PigSemen entity = pigSemenRepository.findActiveById(id)
+                .orElseThrow(() -> new com.hainam.worksphere.shared.exception.ResourceNotFoundException("PigSemen", id.toString()));
+
+        AuditContext.snapshot(entity);
+
+        if (request.getBoarPigId() != null) entity.setBoarPigId(request.getBoarPigId());
+        if (request.getBoarBreed() != null) entity.setBoarBreed(request.getBoarBreed());
+        if (request.getCollectionDate() != null) entity.setCollectionDate(request.getCollectionDate());
+        if (request.getVolume() != null) entity.setVolume(request.getVolume());
+        if (request.getMotility() != null) entity.setMotility(request.getMotility());
+        if (request.getQuality() != null) entity.setQuality(request.getQuality());
+        if (request.getStatus() != null) entity.setStatus(request.getStatus());
+        if (request.getNote() != null) entity.setNote(request.getNote());
+        entity.setUpdatedBy(updatedBy);
+
+        PigSemen saved = pigSemenRepository.save(entity);
+        AuditContext.registerUpdated(saved);
+
+        return toResponseWithEarTag(saved);
+    }
+
+    @Transactional
+    @AuditAction(type = ActionType.DELETE, entity = "PIG_SEMEN")
+    public void delete(UUID id, UUID deletedBy) {
+        PigSemen entity = pigSemenRepository.findActiveById(id)
+                .orElseThrow(() -> new com.hainam.worksphere.shared.exception.ResourceNotFoundException("PigSemen", id.toString()));
+
+        AuditContext.registerDeleted(entity);
+
+        entity.setIsDeleted(true);
+        entity.setDeletedAt(java.time.Instant.now());
+        entity.setDeletedBy(deletedBy);
+        pigSemenRepository.save(entity);
     }
 
     private PigSemenResponse toResponseWithEarTag(PigSemen pigSemen) {

@@ -29,9 +29,6 @@ public class PigSemen {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "code", nullable = false, length = 100, unique = true)
-    private String code;
-
     @Column(name = "boar_pig_id")
     private UUID boarPigId;
 

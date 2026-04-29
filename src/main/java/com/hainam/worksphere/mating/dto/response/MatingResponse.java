@@ -20,7 +20,6 @@ public class MatingResponse {
     private String sowPigEarTag;
     private String sowBreed;
     private UUID semenId;
-    private String semenCode;
     private String boarBreed;
     private Double litterLength;
     private Integer matingRound;

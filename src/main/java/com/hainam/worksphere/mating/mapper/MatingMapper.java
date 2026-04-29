@@ -11,7 +11,6 @@ public interface MatingMapper {
 
     @Mapping(target = "sowPigEarTag", ignore = true)
     @Mapping(target = "sowBreed", ignore = true)
-    @Mapping(target = "semenCode", ignore = true)
     @Mapping(target = "boarBreed", ignore = true)
     MatingResponse toResponse(Mating mating);
 }

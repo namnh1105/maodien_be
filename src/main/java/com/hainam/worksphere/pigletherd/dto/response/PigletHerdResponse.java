@@ -29,7 +29,6 @@ public class PigletHerdResponse {
     private Double averageBirthWeight;
     private LocalDate birthDate;
     private UUID semenId;
-    private String semenCode;
     private String status;
     private Instant createdAt;
     private Instant updatedAt;

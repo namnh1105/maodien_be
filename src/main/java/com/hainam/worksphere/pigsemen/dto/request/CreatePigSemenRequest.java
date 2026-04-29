@@ -15,8 +15,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CreatePigSemenRequest {
 
-    @NotBlank(message = "Mã tinh không được để trống")
-    private String code;
     private UUID boarPigId;
     private String boarBreed;
     private LocalDate collectionDate;

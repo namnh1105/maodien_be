@@ -45,7 +45,6 @@ public class PigletHerdService {
     private final PigletHerdMovementRepository pigletHerdMovementRepository;
     private final PigletHerdGrowthMapper pigletHerdGrowthMapper;
     private final PigletHerdMovementMapper pigletHerdMovementMapper;
-    private final com.hainam.worksphere.pigsemen.repository.PigSemenRepository pigSemenRepository;
 
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "PIGLET_HERD")
@@ -71,19 +70,19 @@ public class PigletHerdService {
 
         PigletHerd saved = pigletHerdRepository.save(herd);
         AuditContext.registerCreated(saved);
-        return toResponseWithEnrichment(saved);
+        return pigletHerdMapper.toResponse(saved);
     }
 
     @Transactional(readOnly = true)
     public List<PigletHerdResponse> getAll() {
-        return pigletHerdRepository.findAllActive().stream().map(this::toResponseWithEnrichment).toList();
+        return pigletHerdRepository.findAllActive().stream().map(pigletHerdMapper::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
     public PigletHerdResponse getById(UUID id) {
         PigletHerd herd = pigletHerdRepository.findActiveById(id)
                 .orElseThrow(() -> PigletHerdNotFoundException.byId(id.toString()));
-        return toResponseWithEnrichment(herd);
+        return pigletHerdMapper.toResponse(herd);
     }
 
         @Transactional(readOnly = true)
@@ -110,7 +109,7 @@ public class PigletHerdService {
 
     @Transactional(readOnly = true)
     public List<PigletHerdResponse> getByMotherId(UUID motherId) {
-        return pigletHerdRepository.findActiveByMotherId(motherId).stream().map(this::toResponseWithEnrichment).toList();
+        return pigletHerdRepository.findActiveByMotherId(motherId).stream().map(pigletHerdMapper::toResponse).toList();
     }
 
     @Transactional
@@ -136,7 +135,7 @@ public class PigletHerdService {
 
         PigletHerd saved = pigletHerdRepository.save(herd);
         AuditContext.registerUpdated(saved);
-        return toResponseWithEnrichment(saved);
+        return pigletHerdMapper.toResponse(saved);
     }
 
     @Transactional
@@ -251,16 +250,7 @@ public class PigletHerdService {
         PigletHerd savedTarget = pigletHerdRepository.save(target);
         AuditContext.registerUpdated(savedTarget);
 
-        return toResponseWithEnrichment(savedTarget);
-    }
-
-    private PigletHerdResponse toResponseWithEnrichment(PigletHerd herd) {
-        PigletHerdResponse response = pigletHerdMapper.toResponse(herd);
-        if (herd.getSemenId() != null) {
-            pigSemenRepository.findActiveById(herd.getSemenId())
-                    .ifPresent(semen -> response.setSemenCode(semen.getCode()));
-        }
-        return response;
+        return pigletHerdMapper.toResponse(savedTarget);
     }
 
     private Pig findPigOrNull(UUID pigId) {

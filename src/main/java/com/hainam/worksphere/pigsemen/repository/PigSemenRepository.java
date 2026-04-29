@@ -19,9 +19,6 @@ public interface PigSemenRepository extends JpaRepository<PigSemen, UUID> {
     @Query("SELECT ps FROM PigSemen ps WHERE ps.id = :id AND ps.isDeleted = false")
     Optional<PigSemen> findActiveById(@Param("id") UUID id);
 
-    @Query("SELECT ps FROM PigSemen ps WHERE ps.code = :code AND ps.isDeleted = false")
-    Optional<PigSemen> findActiveByCode(@Param("code") String code);
-
     @Query("SELECT ps FROM PigSemen ps WHERE ps.boarPigId = :boarPigId AND ps.isDeleted = false")
     List<PigSemen> findActiveByBoarPigId(@Param("boarPigId") UUID boarPigId);
 }
