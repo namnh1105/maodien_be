@@ -10,6 +10,10 @@ import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
 import com.hainam.worksphere.shared.exception.ResourceNotFoundException;
+import com.hainam.worksphere.livestockmaterial.domain.LivestockMaterial;
+import com.hainam.worksphere.livestockmaterial.repository.LivestockMaterialRepository;
+import com.hainam.worksphere.livestockmaterial.domain.MaterialType;
+import com.hainam.worksphere.shared.exception.LivestockMaterialNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,11 +28,20 @@ public class FeedingRationDetailService {
 
     private final FeedingRationDetailRepository feedingRationDetailRepository;
     private final FeedingRationDetailMapper feedingRationDetailMapper;
+    private final LivestockMaterialRepository livestockMaterialRepository;
 
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "FEEDING_RATION_DETAIL")
     public FeedingRationDetailResponse create(CreateFeedingRationDetailRequest request, UUID createdBy) {
+        LivestockMaterial feed = livestockMaterialRepository.findActiveById(request.getFeedId())
+                .orElseThrow(() -> LivestockMaterialNotFoundException.byId(request.getFeedId().toString()));
+
+        if (feed.getMaterialType() != MaterialType.FEED) {
+            throw new IllegalArgumentException("Material is not a feed");
+        }
+
         FeedingRationDetail feedingRationDetail = feedingRationDetailMapper.toEntity(request);
+        feedingRationDetail.setFeed(feed);
         feedingRationDetail.setCreatedBy(createdBy);
 
         FeedingRationDetail saved = feedingRationDetailRepository.save(feedingRationDetail);
@@ -56,6 +69,16 @@ public class FeedingRationDetailService {
 
         AuditContext.snapshot(feedingRationDetail);
         feedingRationDetailMapper.updateEntityFromRequest(request, feedingRationDetail);
+        
+        if (request.getFeedId() != null) {
+            LivestockMaterial feed = livestockMaterialRepository.findActiveById(request.getFeedId())
+                    .orElseThrow(() -> LivestockMaterialNotFoundException.byId(request.getFeedId().toString()));
+            if (feed.getMaterialType() != MaterialType.FEED) {
+                throw new IllegalArgumentException("Material is not a feed");
+            }
+            feedingRationDetail.setFeed(feed);
+        }
+
         feedingRationDetail.setUpdatedBy(updatedBy);
 
         FeedingRationDetail saved = feedingRationDetailRepository.save(feedingRationDetail);

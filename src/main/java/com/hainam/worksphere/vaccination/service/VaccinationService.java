@@ -10,15 +10,16 @@ import com.hainam.worksphere.shared.audit.util.AuditContext;
 import com.hainam.worksphere.shared.exception.EmployeeNotFoundException;
 import com.hainam.worksphere.shared.exception.PigNotFoundException;
 import com.hainam.worksphere.shared.exception.VaccinationNotFoundException;
-import com.hainam.worksphere.shared.exception.VaccineNotFoundException;
+import com.hainam.worksphere.livestockmaterial.domain.LivestockMaterial;
+import com.hainam.worksphere.livestockmaterial.repository.LivestockMaterialRepository;
+import com.hainam.worksphere.shared.exception.LivestockMaterialNotFoundException;
+import com.hainam.worksphere.livestockmaterial.domain.MaterialType;
 import com.hainam.worksphere.vaccination.domain.Vaccination;
 import com.hainam.worksphere.vaccination.dto.request.CreateVaccinationRequest;
 import com.hainam.worksphere.vaccination.dto.request.UpdateVaccinationRequest;
 import com.hainam.worksphere.vaccination.dto.response.VaccinationResponse;
 import com.hainam.worksphere.vaccination.mapper.VaccinationMapper;
 import com.hainam.worksphere.vaccination.repository.VaccinationRepository;
-import com.hainam.worksphere.vaccine.domain.Vaccine;
-import com.hainam.worksphere.vaccine.repository.VaccineRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +34,7 @@ public class VaccinationService {
 
     private final VaccinationRepository vaccinationRepository;
     private final PigRepository pigRepository;
-    private final VaccineRepository vaccineRepository;
+    private final LivestockMaterialRepository livestockMaterialRepository;
     private final EmployeeRepository employeeRepository;
     private final VaccinationMapper vaccinationMapper;
 
@@ -43,8 +44,12 @@ public class VaccinationService {
         Pig pig = pigRepository.findActiveById(request.getPigId())
                 .orElseThrow(() -> PigNotFoundException.byId(request.getPigId().toString()));
 
-        Vaccine vaccine = vaccineRepository.findActiveById(request.getVaccineId())
-                .orElseThrow(() -> VaccineNotFoundException.byId(request.getVaccineId().toString()));
+        LivestockMaterial vaccine = livestockMaterialRepository.findActiveById(request.getVaccineId())
+                .orElseThrow(() -> LivestockMaterialNotFoundException.byId(request.getVaccineId().toString()));
+
+        if (vaccine.getMaterialType() != MaterialType.VACCINE) {
+            throw new IllegalArgumentException("Material is not a vaccine");
+        }
 
         Vaccination vaccination = Vaccination.builder()
                 .pig(pig)
@@ -98,8 +103,11 @@ public class VaccinationService {
         }
 
         if (request.getVaccineId() != null) {
-            Vaccine vaccine = vaccineRepository.findActiveById(request.getVaccineId())
-                    .orElseThrow(() -> VaccineNotFoundException.byId(request.getVaccineId().toString()));
+            LivestockMaterial vaccine = livestockMaterialRepository.findActiveById(request.getVaccineId())
+                    .orElseThrow(() -> LivestockMaterialNotFoundException.byId(request.getVaccineId().toString()));
+            if (vaccine.getMaterialType() != MaterialType.VACCINE) {
+                throw new IllegalArgumentException("Material is not a vaccine");
+            }
             vaccination.setVaccine(vaccine);
         }
 

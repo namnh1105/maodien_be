@@ -18,8 +18,8 @@ public class CreateFeedingRationDetailRequest {
     @NotNull(message = "Ration id is required")
     private UUID rationId;
 
-    @NotBlank(message = "Feed name is required")
-    private String feedName;
+    @NotNull(message = "Feed id is required")
+    private UUID feedId;
 
     private Double totalFeedAmount;
 }

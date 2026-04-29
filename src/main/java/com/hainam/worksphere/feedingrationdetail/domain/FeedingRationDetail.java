@@ -1,11 +1,15 @@
 package com.hainam.worksphere.feedingrationdetail.domain;
 
 import com.hainam.worksphere.shared.audit.annotation.AuditableEntity;
+import com.hainam.worksphere.livestockmaterial.domain.LivestockMaterial;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,8 +40,9 @@ public class FeedingRationDetail {
     @Column(name = "ration_id", nullable = false)
     private UUID rationId;
 
-    @Column(name = "feed_name", nullable = false, length = 150)
-    private String feedName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "material_id", nullable = false)
+    private LivestockMaterial feed;
 
     @Column(name = "total_feed_amount")
     private Double totalFeedAmount;

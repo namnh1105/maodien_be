@@ -16,6 +16,7 @@ public class FeedingRationDetailResponse {
 
     private UUID id;
     private UUID rationId;
+    private UUID feedId;
     private String feedName;
     private Double totalFeedAmount;
     private Instant createdAt;

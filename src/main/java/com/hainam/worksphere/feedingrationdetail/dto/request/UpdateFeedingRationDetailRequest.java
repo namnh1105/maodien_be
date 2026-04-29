@@ -14,6 +14,6 @@ import java.util.UUID;
 public class UpdateFeedingRationDetailRequest {
 
     private UUID rationId;
-    private String feedName;
+    private UUID feedId;
     private Double totalFeedAmount;
 }

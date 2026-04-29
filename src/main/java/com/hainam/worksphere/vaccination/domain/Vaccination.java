@@ -3,7 +3,7 @@ package com.hainam.worksphere.vaccination.domain;
 import com.hainam.worksphere.employee.domain.Employee;
 import com.hainam.worksphere.pig.domain.Pig;
 import com.hainam.worksphere.shared.audit.annotation.AuditableEntity;
-import com.hainam.worksphere.vaccine.domain.Vaccine;
+import com.hainam.worksphere.livestockmaterial.domain.LivestockMaterial;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,7 +38,7 @@ public class Vaccination {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vaccine_id", nullable = false)
-    private Vaccine vaccine;
+    private LivestockMaterial vaccine;
 
     @Column(name = "vaccination_date", nullable = false)
     private LocalDate vaccinationDate;
