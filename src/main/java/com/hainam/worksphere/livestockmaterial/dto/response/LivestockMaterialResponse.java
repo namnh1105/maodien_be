@@ -18,6 +18,7 @@ public class LivestockMaterialResponse {
     private String name;
     private String unit;
     private String materialType;
+    private Double quantity;
     private String description;
     private Instant createdAt;
     private Instant updatedAt;

@@ -29,6 +29,8 @@ public class Breed {
     private UUID id;
     @Column(name = "name", nullable = false, length = 150)
     private String name;
+    @Column(name = "code", length = 50)
+    private String code;
 
     @Column(name = "characteristics", columnDefinition = "TEXT")
     private String characteristics;

@@ -129,7 +129,10 @@ public class MatingService {
         if (mating.getSemenId() != null) {
             pigSemenRepository.findActiveById(mating.getSemenId()).ifPresent(semen -> {
                 response.setSemenId(semen.getId());
-                response.setBoarBreed(semen.getBoarBreed());
+                if (semen.getBoarPigId() != null) {
+                    pigRepository.findActiveById(semen.getBoarPigId())
+                            .ifPresent(boar -> response.setBoarBreed(boar.getSpecies()));
+                }
             });
         }
         

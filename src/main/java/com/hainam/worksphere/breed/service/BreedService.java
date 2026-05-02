@@ -35,6 +35,7 @@ public class BreedService {
 
         Breed breed = Breed.builder()
                 .name(request.getName())
+                .code(request.getCode())
                 .characteristics(request.getCharacteristics())
                 .createdBy(createdBy)
                 .build();
@@ -65,6 +66,7 @@ public class BreedService {
         AuditContext.snapshot(breed);
 
         if (request.getName() != null) breed.setName(request.getName());
+        if (request.getCode() != null) breed.setCode(request.getCode());
         if (request.getCharacteristics() != null) breed.setCharacteristics(request.getCharacteristics());
         breed.setUpdatedBy(updatedBy);
 

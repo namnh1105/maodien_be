@@ -19,6 +19,12 @@ public interface BreedRepository extends JpaRepository<Breed, UUID> {
     @Query("SELECT b FROM Breed b WHERE b.id = :id AND b.isDeleted = false")
     Optional<Breed> findActiveById(@Param("id") UUID id);
 
+    @Query("SELECT b FROM Breed b WHERE b.name = :name AND b.isDeleted = false")
+    Optional<Breed> findActiveByName(@Param("name") String name);
+
+    @Query("SELECT b FROM Breed b WHERE b.code = :code AND b.isDeleted = false")
+    Optional<Breed> findActiveByCode(@Param("code") String code);
+
     @Query("SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END FROM Breed b WHERE b.name = :name AND b.isDeleted = false")
     boolean existsActiveByName(@Param("name") String name);
 }

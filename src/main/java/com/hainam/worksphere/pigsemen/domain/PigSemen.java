@@ -32,9 +32,6 @@ public class PigSemen {
     @Column(name = "boar_pig_id")
     private UUID boarPigId;
 
-    @Column(name = "boar_breed", length = 100)
-    private String boarBreed;
-
     @Column(name = "collection_date")
     private LocalDate collectionDate;
 

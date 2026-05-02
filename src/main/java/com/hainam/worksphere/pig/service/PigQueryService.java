@@ -31,6 +31,7 @@ public class PigQueryService {
     private final GrowthTrackingRepository growthTrackingRepository;
     private final MatingRepository matingRepository;
     private final ReproductionCycleRepository reproductionCycleRepository;
+    private final com.hainam.worksphere.breed.repository.BreedRepository breedRepository;
 
     // ─────────────────────────────────────────────────────────────────
     // API: Danh sách lợn kèm bản ghi tăng trưởng gần nhất
@@ -83,11 +84,20 @@ public class PigQueryService {
 
         return pigs.stream().map(pig -> {
             GrowthTracking latest = latestGrowthByPigId.get(pig.getId());
+            
+            String breedName = null;
+            if (pig.getSpecies() != null) {
+                breedName = breedRepository.findActiveByCode(pig.getSpecies())
+                        .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                        .orElse(null);
+            }
+
             return PigWithLatestGrowthResponse.builder()
                     .id(pig.getId())
                     .earTag(pig.getEarTag())
                     .type(pig.getType() != null ? pig.getType().name() : null)
                     .species(pig.getSpecies())
+                    .breedName(breedName)
                     .status(pig.getStatus() != null ? pig.getStatus().name() : null)
                     .latestTrackingDate(latest != null ? latest.getTrackingDate() : null)
                     .weight(latest != null ? latest.getWeight() : pig.getBirthWeight())
@@ -138,11 +148,19 @@ public class PigQueryService {
                              c.getStatus().toUpperCase().contains("MISCARRIAGE")))
                     .count();
 
+            String breedName = null;
+            if (sow.getSpecies() != null) {
+                breedName = breedRepository.findActiveByCode(sow.getSpecies())
+                        .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                        .orElse(null);
+            }
+
             return SowResponse.builder()
                     .id(sow.getId())
                     .earTag(sow.getEarTag())
                     .type(sow.getType() != null ? sow.getType().name() : null)
                     .species(sow.getSpecies())
+                    .breedName(breedName)
                     .lastFarrowDate(lastFarrowDate)
                     .totalPregnancies(totalPregnancies)
                     .miscarriageCount((int) miscarriageCount)

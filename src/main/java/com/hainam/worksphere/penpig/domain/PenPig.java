@@ -33,6 +33,8 @@ public class PenPig {
 
     @Column(name = "pig_id")
     private UUID pigId;
+    @Column(name = "herd_id")
+    private UUID herdId;
 
     @Column(name = "entry_date")
     private LocalDate entryDate;

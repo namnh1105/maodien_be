@@ -16,6 +16,7 @@ public class BreedResponse {
 
     private UUID id;
     private String name;
+    private String code;
     private String characteristics;
     private Instant createdAt;
     private Instant updatedAt;

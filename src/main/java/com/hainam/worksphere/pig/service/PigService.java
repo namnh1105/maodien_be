@@ -27,6 +27,7 @@ public class PigService {
 
     private final PigRepository pigRepository;
     private final PigMapper pigMapper;
+    private final com.hainam.worksphere.breed.repository.BreedRepository breedRepository;
 
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "PIG")
@@ -45,27 +46,26 @@ public class PigService {
                 .build();
 
         Pig saved = pigRepository.save(pig);
-        saved = pigRepository.save(saved);
         AuditContext.registerCreated(saved);
-        return pigMapper.toResponse(saved);
+        return toResponseWithBreedName(saved);
     }
 
     @Transactional(readOnly = true)
     public List<PigResponse> getAll() {
-        return pigRepository.findAllActive().stream().map(pigMapper::toResponse).toList();
+        return pigRepository.findAllActive().stream().map(this::toResponseWithBreedName).toList();
     }
 
     @Transactional(readOnly = true)
     public PigResponse getById(UUID id) {
         Pig pig = pigRepository.findActiveById(id)
                 .orElseThrow(() -> PigNotFoundException.byId(id.toString()));
-        return pigMapper.toResponse(pig);
+        return toResponseWithBreedName(pig);
     }
 
     @Transactional(readOnly = true)
     public List<PigResponse> getByStatus(String status) {
         PigStatus parsedStatus = parsePigStatus(status);
-        return pigRepository.findActiveByStatus(parsedStatus).stream().map(pigMapper::toResponse).toList();
+        return pigRepository.findActiveByStatus(parsedStatus).stream().map(this::toResponseWithBreedName).toList();
     }
 
     @Transactional
@@ -89,7 +89,7 @@ public class PigService {
 
         Pig saved = pigRepository.save(pig);
         AuditContext.registerUpdated(saved);
-        return pigMapper.toResponse(saved);
+        return toResponseWithBreedName(saved);
     }
 
     @Transactional
@@ -131,5 +131,14 @@ public class PigService {
         } catch (IllegalArgumentException ex) {
             throw new BusinessRuleViolationException("Invalid pig status: " + rawStatus);
         }
+    }
+
+    private PigResponse toResponseWithBreedName(Pig pig) {
+        PigResponse response = pigMapper.toResponse(pig);
+        if (pig.getSpecies() != null) {
+            breedRepository.findActiveByCode(pig.getSpecies())
+                    .ifPresent(breed -> response.setBreedName(breed.getName()));
+        }
+        return response;
     }
 }

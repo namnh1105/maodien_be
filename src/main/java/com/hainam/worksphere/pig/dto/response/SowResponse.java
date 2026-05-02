@@ -22,6 +22,7 @@ public class SowResponse {
     private String earTag;
     private String type;
     private String species;
+    private String breedName;
 
     /** Ngày đẻ gần nhất (actualFarrowDate từ reproduction_cycles) */
     private LocalDate lastFarrowDate;

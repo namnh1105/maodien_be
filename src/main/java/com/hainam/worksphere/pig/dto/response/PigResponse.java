@@ -22,6 +22,7 @@ public class PigResponse {
     private String type;
     private String origin;
     private String species;
+    private String breedName;
     private Integer nippleCount;
     private LocalDate herdEntryDate;
     private String status;

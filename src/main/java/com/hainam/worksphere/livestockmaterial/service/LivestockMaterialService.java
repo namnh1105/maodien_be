@@ -38,6 +38,7 @@ public class LivestockMaterialService {
                 .name(request.getName())
                 .unit(request.getUnit())
                 .materialType(parseMaterialType(request.getMaterialType()))
+                .quantity(request.getQuantity())
                 .description(request.getDescription())
                 .createdBy(createdBy)
                 .build();
@@ -70,6 +71,7 @@ public class LivestockMaterialService {
         if (request.getName() != null) material.setName(request.getName());
         if (request.getUnit() != null) material.setUnit(request.getUnit());
         if (request.getMaterialType() != null) material.setMaterialType(parseMaterialType(request.getMaterialType()));
+        if (request.getQuantity() != null) material.setQuantity(request.getQuantity());
         if (request.getDescription() != null) material.setDescription(request.getDescription());
         material.setUpdatedBy(updatedBy);
 

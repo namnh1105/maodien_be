@@ -29,6 +29,7 @@ public class PenPigService {
     private final PenPigMapper penPigMapper;
     private final PigRepository pigRepository;
     private final PenRepository penRepository;
+    private final com.hainam.worksphere.pigletherd.repository.PigletHerdRepository pigletHerdRepository;
 
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "PEN_PIG")
@@ -52,6 +53,7 @@ public class PenPigService {
         PenPig entity = PenPig.builder()
                 .penId(request.getPenId())
                 .pigId(request.getPigId())
+                .herdId(request.getHerdId())
                 .entryDate(request.getEntryDate())
                 .exitDate(request.getExitDate())
                 .status(request.getStatus())
@@ -60,13 +62,13 @@ public class PenPigService {
 
         PenPig saved = penPigRepository.save(entity);
         AuditContext.registerCreated(saved);
-        return toResponseWithEarTag(saved);
+        return toResponseWithEarTagAndHerdName(saved);
     }
 
     @Transactional(readOnly = true)
     public List<PenPigResponse> getAll() {
         return penPigRepository.findAllActive().stream()
-                .map(this::toResponseWithEarTag)
+                .map(this::toResponseWithEarTagAndHerdName)
                 .toList();
     }
 
@@ -74,7 +76,7 @@ public class PenPigService {
     public PenPigResponse getById(UUID id) {
         PenPig entity = penPigRepository.findActiveById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("PenPig", id.toString()));
-        return toResponseWithEarTag(entity);
+        return toResponseWithEarTagAndHerdName(entity);
     }
 
     @Transactional
@@ -87,6 +89,7 @@ public class PenPigService {
 
         if (request.getPenId() != null) entity.setPenId(request.getPenId());
         if (request.getPigId() != null) entity.setPigId(request.getPigId());
+        if (request.getHerdId() != null) entity.setHerdId(request.getHerdId());
         if (request.getEntryDate() != null) entity.setEntryDate(request.getEntryDate());
         if (request.getExitDate() != null) entity.setExitDate(request.getExitDate());
         if (request.getStatus() != null) entity.setStatus(request.getStatus());
@@ -94,7 +97,7 @@ public class PenPigService {
 
         PenPig saved = penPigRepository.save(entity);
         AuditContext.registerUpdated(saved);
-        return toResponseWithEarTag(saved);
+        return toResponseWithEarTagAndHerdName(saved);
     }
 
     @Transactional
@@ -111,11 +114,57 @@ public class PenPigService {
         penPigRepository.save(entity);
     }
 
-    private PenPigResponse toResponseWithEarTag(PenPig penPig) {
+    @Transactional
+    @AuditAction(type = ActionType.UPDATE, entity = "PEN_PIG")
+    public void transfer(com.hainam.worksphere.penpig.dto.request.TransferPenPigRequest request, UUID updatedBy) {
+        // Find target pen
+        com.hainam.worksphere.pen.domain.Pen targetPen = penRepository.findActiveByName(request.getTargetPenCode())
+                .orElseThrow(() -> new ResourceNotFoundException("Pen", request.getTargetPenCode()));
+
+        java.time.LocalDate today = java.time.LocalDate.now();
+        List<PenPig> currentAssignments;
+
+        if (request.getPigId() != null) {
+            currentAssignments = penPigRepository.findCurrentByPigId(request.getPigId());
+        } else if (request.getHerdId() != null) {
+            currentAssignments = penPigRepository.findCurrentByHerdId(request.getHerdId());
+        } else {
+            throw new BusinessRuleViolationException("Phải cung cấp id Lợn hoặc id Đàn");
+        }
+
+        // 1. Close current assignments
+        for (PenPig assignment : currentAssignments) {
+            AuditContext.snapshot(assignment);
+            assignment.setExitDate(today);
+            assignment.setStatus("TRANSFERRED");
+            assignment.setUpdatedBy(updatedBy);
+            penPigRepository.save(assignment);
+            AuditContext.registerUpdated(assignment);
+        }
+
+        // 2. Create new assignment
+        PenPig newAssignment = PenPig.builder()
+                .penId(targetPen.getId())
+                .pigId(request.getPigId())
+                .herdId(request.getHerdId())
+                .entryDate(today)
+                .status("ACTIVE")
+                .createdBy(updatedBy)
+                .build();
+
+        PenPig saved = penPigRepository.save(newAssignment);
+        AuditContext.registerCreated(saved);
+    }
+
+    private PenPigResponse toResponseWithEarTagAndHerdName(PenPig penPig) {
         PenPigResponse response = penPigMapper.toResponse(penPig);
         if (penPig.getPigId() != null) {
             pigRepository.findActiveById(penPig.getPigId())
                     .ifPresent(pig -> response.setPigEarTag(pig.getEarTag()));
+        }
+        if (penPig.getHerdId() != null) {
+            pigletHerdRepository.findActiveById(penPig.getHerdId())
+                    .ifPresent(herd -> response.setHerdName(herd.getHerdName()));
         }
         return response;
     }

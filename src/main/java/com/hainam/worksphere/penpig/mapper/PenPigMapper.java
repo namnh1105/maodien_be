@@ -10,5 +10,6 @@ import org.mapstruct.MappingConstants;
 public interface PenPigMapper {
 
     @Mapping(target = "pigEarTag", ignore = true)
+    @Mapping(target = "herdName", ignore = true)
     PenPigResponse toResponse(PenPig penPig);
 }

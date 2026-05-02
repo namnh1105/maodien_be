@@ -25,6 +25,8 @@ public class CreateLivestockMaterialRequest {
     @Size(max = 50)
     private String materialType;
 
+    private Double quantity;
+
     @Size(max = 1000)
     private String description;
 }

@@ -5,19 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdatePenPigRequest {
-
-    private UUID penId;
+public class TransferPenPigRequest {
     private UUID pigId;
     private UUID herdId;
-    private LocalDate entryDate;
-    private LocalDate exitDate;
-    private String status;
+    private String targetPenCode;
 }

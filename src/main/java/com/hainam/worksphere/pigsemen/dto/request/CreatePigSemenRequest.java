@@ -16,7 +16,6 @@ import java.util.UUID;
 public class CreatePigSemenRequest {
 
     private UUID boarPigId;
-    private String boarBreed;
     private LocalDate collectionDate;
     private Double volume;
     private Double motility;

@@ -71,4 +71,14 @@ public class PenPigController {
         penPigService.delete(id, userPrincipal.getId());
         return ResponseEntity.ok(ApiResponse.success("Pen pig assignment deleted successfully", null));
     }
+
+    @PostMapping("/transfer")
+    @Operation(summary = "Transfer pig/herd to another pen")
+    public ResponseEntity<ApiResponse<Void>> transfer(
+            @Valid @RequestBody com.hainam.worksphere.penpig.dto.request.TransferPenPigRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        penPigService.transfer(request, userPrincipal.getId());
+        return ResponseEntity.ok(ApiResponse.success("Transfer completed successfully", null));
+    }
 }

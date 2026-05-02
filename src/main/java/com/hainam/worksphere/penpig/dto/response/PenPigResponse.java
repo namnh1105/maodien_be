@@ -19,6 +19,8 @@ public class PenPigResponse {
     private UUID penId;
     private UUID pigId;
     private String pigEarTag;
+    private UUID herdId;
+    private String herdName;
     private LocalDate entryDate;
     private LocalDate exitDate;
     private String status;

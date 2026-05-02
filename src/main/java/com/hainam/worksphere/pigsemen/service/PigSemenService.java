@@ -29,7 +29,6 @@ public class PigSemenService {
     public PigSemenResponse create(CreatePigSemenRequest request, UUID createdBy) {
         PigSemen entity = PigSemen.builder()
                 .boarPigId(request.getBoarPigId())
-                .boarBreed(request.getBoarBreed())
                 .collectionDate(request.getCollectionDate())
                 .volume(request.getVolume())
                 .motility(request.getMotility())
@@ -68,7 +67,6 @@ public class PigSemenService {
         AuditContext.snapshot(entity);
 
         if (request.getBoarPigId() != null) entity.setBoarPigId(request.getBoarPigId());
-        if (request.getBoarBreed() != null) entity.setBoarBreed(request.getBoarBreed());
         if (request.getCollectionDate() != null) entity.setCollectionDate(request.getCollectionDate());
         if (request.getVolume() != null) entity.setVolume(request.getVolume());
         if (request.getMotility() != null) entity.setMotility(request.getMotility());

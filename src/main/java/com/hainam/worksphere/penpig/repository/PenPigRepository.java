@@ -22,9 +22,15 @@ public interface PenPigRepository extends JpaRepository<PenPig, UUID> {
     @Query("SELECT CASE WHEN COUNT(pp) > 0 THEN true ELSE false END FROM PenPig pp WHERE pp.penId = :penId AND pp.pigId = :pigId AND pp.isDeleted = false AND pp.exitDate IS NULL")
     boolean existsActivByPenIdAndPigId(@Param("penId") UUID penId, @Param("pigId") UUID pigId);
 
+    @Query("SELECT CASE WHEN COUNT(pp) > 0 THEN true ELSE false END FROM PenPig pp WHERE pp.penId = :penId AND pp.herdId = :herdId AND pp.isDeleted = false AND pp.exitDate IS NULL")
+    boolean existsActivByPenIdAndHerdId(@Param("penId") UUID penId, @Param("herdId") UUID herdId);
+
     @Query("SELECT pp FROM PenPig pp WHERE pp.penId = :penId AND pp.isDeleted = false AND pp.exitDate IS NULL")
     List<PenPig> findCurrentByPenId(@Param("penId") UUID penId);
 
     @Query("SELECT pp FROM PenPig pp WHERE pp.pigId = :pigId AND pp.isDeleted = false AND pp.exitDate IS NULL")
     List<PenPig> findCurrentByPigId(@Param("pigId") UUID pigId);
+
+    @Query("SELECT pp FROM PenPig pp WHERE pp.herdId = :herdId AND pp.isDeleted = false AND pp.exitDate IS NULL")
+    List<PenPig> findCurrentByHerdId(@Param("herdId") UUID herdId);
 }

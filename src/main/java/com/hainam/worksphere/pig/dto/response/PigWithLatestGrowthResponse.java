@@ -22,6 +22,7 @@ public class PigWithLatestGrowthResponse {
     private String earTag;
     private String type;
     private String species;
+    private String breedName;
     private String status;
 
     // Bản ghi tăng trưởng gần nhất

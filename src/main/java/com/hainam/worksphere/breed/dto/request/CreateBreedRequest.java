@@ -13,10 +13,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateBreedRequest {
 
-    @NotBlank(message = "Mã giống không được để trống")
     @NotBlank(message = "Tên giống không được để trống")
     @Size(max = 150)
     private String name;
+
+    @NotBlank(message = "Mã giống không được để trống")
+    @Size(max = 50)
+    private String code;
 
     private String characteristics;
 }

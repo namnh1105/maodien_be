@@ -37,6 +37,9 @@ public class LivestockMaterial {
     @Column(name = "material_type", nullable = false, length = 50)
     private MaterialType materialType;
 
+    @Column(name = "quantity")
+    private Double quantity;
+
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 

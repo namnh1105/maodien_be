@@ -19,5 +19,8 @@ public interface PenRepository extends JpaRepository<Pen, UUID> {
     @Query("SELECT p FROM Pen p WHERE p.id = :id AND p.isDeleted = false")
     Optional<Pen> findActiveById(@Param("id") UUID id);
 
+    @Query("SELECT p FROM Pen p WHERE p.name = :name AND p.isDeleted = false")
+    Optional<Pen> findActiveByName(@Param("name") String name);
+
 
 }

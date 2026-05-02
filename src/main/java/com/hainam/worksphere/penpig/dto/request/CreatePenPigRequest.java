@@ -18,6 +18,7 @@ public class CreatePenPigRequest {
     @NotNull(message = "Mã phân chuồng không được để trống")
     private UUID penId;
     private UUID pigId;
+    private UUID herdId;
     private LocalDate entryDate;
     private LocalDate exitDate;
     private String status;
