@@ -56,11 +56,11 @@ public class AesGcmStringEncryptor {
             try {
                 allBytes = Base64.getDecoder().decode(encryptedText);
             } catch (IllegalArgumentException ex) {
-                // Legacy/plaintext data (not encrypted) => return as-is
+                // Not valid base64 => definitely not encrypted by us
                 return encryptedText;
             }
 
-            // Must contain IV + GCM ciphertext/tag at minimum
+            // Must contain IV (12) + GCM ciphertext/tag at minimum
             if (allBytes.length <= IV_LENGTH) {
                 return encryptedText;
             }
@@ -73,7 +73,6 @@ public class AesGcmStringEncryptor {
             byte[] cipherBytes = new byte[buffer.remaining()];
             buffer.get(cipherBytes);
 
-            // GCM includes authentication tag in ciphertext payload.
             if (cipherBytes.length == 0) {
                 return encryptedText;
             }
@@ -84,7 +83,9 @@ public class AesGcmStringEncryptor {
 
             return new String(plainBytes, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            throw new IllegalStateException("Decrypt failed (data may be encrypted with a different key or corrupted)", e);
+            log.warn("Decryption failed (possibly plain text or encrypted with different key): {}. Error: {}", 
+                    encryptedText, e.getMessage());
+            return encryptedText; // Fallback to original text
         }
     }
 
@@ -97,7 +98,8 @@ public class AesGcmStringEncryptor {
                 }
                 return new SecretKeySpec(key, "AES");
             }
-
+            log.warn("No encryption key found in configuration (app.security.encryption.key-base64). " +
+                    "Generating a random key for this session. Encrypted data will NOT be readable after restart!");
             KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
             keyGenerator.init(256);
             return keyGenerator.generateKey();

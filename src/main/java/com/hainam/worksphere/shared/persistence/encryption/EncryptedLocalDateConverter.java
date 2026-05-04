@@ -9,6 +9,7 @@ import java.time.LocalDate;
 
 @Component
 @Converter
+@Slf4j
 public class EncryptedLocalDateConverter implements AttributeConverter<LocalDate, String> {
 
     private static AesGcmStringEncryptor encryptor;
@@ -16,6 +17,7 @@ public class EncryptedLocalDateConverter implements AttributeConverter<LocalDate
     @Autowired
     public void setEncryptor(AesGcmStringEncryptor encryptor) {
         EncryptedLocalDateConverter.encryptor = encryptor;
+        log.debug("EncryptedLocalDateConverter initialized with encryptor");
     }
 
     @Override
@@ -24,9 +26,15 @@ public class EncryptedLocalDateConverter implements AttributeConverter<LocalDate
             return null;
         }
         if (encryptor == null) {
-            throw new IllegalStateException("EncryptedLocalDateConverter is not initialized");
+            log.warn("EncryptedLocalDateConverter: Encryptor not initialized, returning plain text");
+            return attribute.toString();
         }
-        return encryptor.encrypt(attribute.toString());
+        try {
+            return encryptor.encrypt(attribute.toString());
+        } catch (Exception e) {
+            log.error("Encryption failed for date: {}", e.getMessage());
+            return attribute.toString();
+        }
     }
 
     @Override
@@ -35,9 +43,24 @@ public class EncryptedLocalDateConverter implements AttributeConverter<LocalDate
             return null;
         }
         if (encryptor == null) {
-            throw new IllegalStateException("EncryptedLocalDateConverter is not initialized");
+            log.warn("EncryptedLocalDateConverter: Encryptor not initialized, trying to parse raw data");
+            return parseLocalDate(dbData);
         }
-        String plainDate = encryptor.decrypt(dbData);
-        return LocalDate.parse(plainDate);
+        try {
+            String plainDate = encryptor.decrypt(dbData);
+            return parseLocalDate(plainDate);
+        } catch (Exception e) {
+            log.error("Decryption failed for date data: {}", e.getMessage());
+            return parseLocalDate(dbData); // Try to parse as raw text
+        }
+    }
+
+    private LocalDate parseLocalDate(String dateStr) {
+        try {
+            return LocalDate.parse(dateStr);
+        } catch (Exception e) {
+            log.error("Failed to parse date: {}", dateStr);
+            return null;
+        }
     }
 }
