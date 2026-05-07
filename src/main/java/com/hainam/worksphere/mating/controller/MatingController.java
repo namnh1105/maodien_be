@@ -3,6 +3,7 @@ package com.hainam.worksphere.mating.controller;
 import com.hainam.worksphere.auth.security.UserPrincipal;
 import com.hainam.worksphere.mating.dto.request.CreateMatingRequest;
 import com.hainam.worksphere.mating.dto.request.UpdateMatingRequest;
+import com.hainam.worksphere.mating.dto.request.UpdateMatingStatusRequest;
 import com.hainam.worksphere.mating.dto.response.MatingResponse;
 import com.hainam.worksphere.mating.service.MatingService;
 import com.hainam.worksphere.shared.dto.ApiResponse;
@@ -72,6 +73,16 @@ public class MatingController {
     ) {
         MatingResponse response = matingService.update(id, request, userPrincipal.getId());
         return ResponseEntity.ok(ApiResponse.success("Mating record updated successfully", response));
+    }
+
+    @PostMapping("/pregnancy-status")
+    @Operation(summary = "Record pregnancy status for mating records")
+    public ResponseEntity<ApiResponse<List<MatingResponse>>> updatePregnancyStatus(
+            @Valid @RequestBody List<UpdateMatingStatusRequest> requests,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        List<MatingResponse> response = matingService.updatePregnancyStatuses(requests, userPrincipal.getId());
+        return ResponseEntity.ok(ApiResponse.success("Pregnancy status updated successfully", response));
     }
 
     @DeleteMapping("/{id}")

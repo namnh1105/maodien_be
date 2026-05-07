@@ -3,6 +3,7 @@ package com.hainam.worksphere.mating.service;
 import com.hainam.worksphere.mating.domain.Mating;
 import com.hainam.worksphere.mating.dto.request.CreateMatingRequest;
 import com.hainam.worksphere.mating.dto.request.UpdateMatingRequest;
+import com.hainam.worksphere.mating.dto.request.UpdateMatingStatusRequest;
 import com.hainam.worksphere.mating.dto.response.MatingResponse;
 import com.hainam.worksphere.mating.mapper.MatingMapper;
 import com.hainam.worksphere.mating.repository.MatingRepository;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.text.Normalizer;
 import java.util.List;
 import java.util.UUID;
 
@@ -103,6 +105,23 @@ public class MatingService {
     }
 
     @Transactional
+    @AuditAction(type = ActionType.UPDATE, entity = "MATING", actionCode = "UPDATE_PREGNANCY_STATUS")
+    public List<MatingResponse> updatePregnancyStatuses(List<UpdateMatingStatusRequest> requests, UUID updatedBy) {
+        return requests.stream().map(request -> {
+            Mating mating = matingRepository.findActiveById(request.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Mating", request.getId().toString()));
+
+            AuditContext.snapshot(mating);
+            mating.setStatus(normalizePregnancyStatus(request.getStatus()));
+            mating.setUpdatedBy(updatedBy);
+
+            Mating saved = matingRepository.save(mating);
+            AuditContext.registerUpdated(saved);
+            return toResponseWithEnrichment(saved);
+        }).toList();
+    }
+
+    @Transactional
     @AuditAction(type = ActionType.DELETE, entity = "MATING")
     public void delete(UUID id, UUID deletedBy) {
         Mating mating = matingRepository.findActiveById(id)
@@ -137,5 +156,33 @@ public class MatingService {
         }
         
         return response;
+    }
+
+    private String normalizePregnancyStatus(String status) {
+        if (status == null || status.isBlank()) {
+            return status;
+        }
+
+        String normalized = normalizeText(status);
+
+        if (normalized.contains("khong") || normalized.contains("chua") || normalized.contains("not pregnant")) {
+            return "Chờ phối";
+        }
+
+        if (normalized.contains("da phoi")) {
+            return "Đã phối";
+        }
+
+        if (normalized.contains("cho phoi")) {
+            return "Chờ phối";
+        }
+
+        return status.trim();
+    }
+
+    private String normalizeText(String input) {
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+        normalized = normalized.replaceAll("\\p{M}", "");
+        return normalized.trim().toLowerCase();
     }
 }

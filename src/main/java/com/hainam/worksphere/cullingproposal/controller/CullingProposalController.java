@@ -2,6 +2,7 @@ package com.hainam.worksphere.cullingproposal.controller;
 
 import com.hainam.worksphere.auth.security.UserPrincipal;
 import com.hainam.worksphere.cullingproposal.dto.request.CreateCullingProposalRequest;
+import com.hainam.worksphere.cullingproposal.dto.request.UpdateCullingProposalStatusRequest;
 import com.hainam.worksphere.cullingproposal.dto.request.UpdateCullingProposalRequest;
 import com.hainam.worksphere.cullingproposal.dto.response.CullingProposalResponse;
 import com.hainam.worksphere.cullingproposal.service.CullingProposalService;
@@ -52,6 +53,20 @@ public class CullingProposalController {
         return ResponseEntity.ok(ApiResponse.success(cullingProposalService.getAll()));
     }
 
+    @GetMapping("/by-type/{proposalType}")
+    @Operation(summary = "Get culling proposals by proposal type")
+    public ResponseEntity<ApiResponse<List<CullingProposalResponse>>> getByType(
+            @PathVariable String proposalType
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(cullingProposalService.getByProposalType(proposalType)));
+    }
+
+    @GetMapping("/processed")
+    @Operation(summary = "Get processed culling proposals (not pending)")
+    public ResponseEntity<ApiResponse<List<CullingProposalResponse>>> getProcessed() {
+        return ResponseEntity.ok(ApiResponse.success(cullingProposalService.getProcessed()));
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get culling proposal by id")
     public ResponseEntity<ApiResponse<CullingProposalResponse>> getById(@PathVariable UUID id) {
@@ -67,6 +82,16 @@ public class CullingProposalController {
     ) {
         CullingProposalResponse response = cullingProposalService.update(id, request, userPrincipal.getId());
         return ResponseEntity.ok(ApiResponse.success("Culling proposal updated successfully", response));
+    }
+
+    @PostMapping("/review")
+    @Operation(summary = "Approve or reject culling proposals")
+    public ResponseEntity<ApiResponse<List<CullingProposalResponse>>> review(
+            @Valid @RequestBody List<UpdateCullingProposalStatusRequest> requests,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        List<CullingProposalResponse> response = cullingProposalService.review(requests, userPrincipal.getId());
+        return ResponseEntity.ok(ApiResponse.success("Culling proposals reviewed successfully", response));
     }
 
     @DeleteMapping("/{id}")

@@ -20,6 +20,7 @@ public class CullingProposalResponse {
     private String proposalType;
     private String reason;
     private UUID employeeId;
+    private String employeeName;
     private String status;
     private Instant createdAt;
     private Instant updatedAt;

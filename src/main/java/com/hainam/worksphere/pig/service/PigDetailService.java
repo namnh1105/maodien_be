@@ -30,6 +30,7 @@ public class PigDetailService {
 
     private final PigRepository pigRepository;
     private final PigMapper pigMapper;
+        private final com.hainam.worksphere.breed.repository.BreedRepository breedRepository;
     private final PenPigRepository penPigRepository;
     private final PenRepository penRepository;
     private final GrowthTrackingRepository growthTrackingRepository;
@@ -94,7 +95,7 @@ public class PigDetailService {
         Double adg = calculateAdg(growths);
 
         return PigDetailResponse.builder()
-                .pig(pigMapper.toResponse(pig))
+                .pig(toPigResponseWithBreedName(pig))
                 .currentPenId(currentPen != null ? currentPen.getId() : null)
                 .currentPenName(currentPen != null ? currentPen.getName() : null)
                 .penEntryDate(currentAssignment != null ? currentAssignment.getEntryDate() : null)
@@ -106,6 +107,15 @@ public class PigDetailService {
                 .vaccinations(vaccinationItems)
                 .build();
     }
+
+        private PigResponse toPigResponseWithBreedName(Pig pig) {
+                PigResponse response = pigMapper.toResponse(pig);
+                if (pig.getSpecies() != null) {
+                        breedRepository.findActiveByCode(pig.getSpecies())
+                                        .ifPresent(breed -> response.setBreedName(breed.getName()));
+                }
+                return response;
+        }
 
     private Double calculateAdg(List<GrowthTracking> growths) {
         if (growths.size() < 2) {

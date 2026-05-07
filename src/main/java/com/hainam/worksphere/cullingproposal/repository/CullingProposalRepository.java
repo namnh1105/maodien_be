@@ -18,4 +18,7 @@ public interface CullingProposalRepository extends JpaRepository<CullingProposal
 
     @Query("SELECT c FROM CullingProposal c WHERE c.id = :id AND c.isDeleted = false")
     Optional<CullingProposal> findActiveById(@Param("id") UUID id);
+
+    @Query("SELECT c FROM CullingProposal c WHERE c.isDeleted = false AND LOWER(c.proposalType) = LOWER(:proposalType)")
+    List<CullingProposal> findActiveByProposalType(@Param("proposalType") String proposalType);
 }
