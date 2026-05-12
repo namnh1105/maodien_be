@@ -19,6 +19,9 @@ public interface ReproductionCycleRepository extends JpaRepository<ReproductionC
     @Query("SELECT rc FROM ReproductionCycle rc WHERE rc.id = :id AND rc.isDeleted = false")
     Optional<ReproductionCycle> findActiveById(@Param("id") UUID id);
 
+       @Query("SELECT rc FROM ReproductionCycle rc WHERE rc.matingId = :matingId AND rc.isDeleted = false")
+       Optional<ReproductionCycle> findActiveByMatingId(@Param("matingId") UUID matingId);
+
     /**
      * Lấy lịch sử lứa đẻ của lợn nái theo pigId (join qua mating_records).
      * Sắp xếp mới nhất lên đầu.

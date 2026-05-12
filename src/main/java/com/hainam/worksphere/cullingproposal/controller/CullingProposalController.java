@@ -1,6 +1,7 @@
 package com.hainam.worksphere.cullingproposal.controller;
 
 import com.hainam.worksphere.auth.security.UserPrincipal;
+import com.hainam.worksphere.cullingproposal.dto.request.CreateCullingProposalBulkRequest;
 import com.hainam.worksphere.cullingproposal.dto.request.CreateCullingProposalRequest;
 import com.hainam.worksphere.cullingproposal.dto.request.UpdateCullingProposalStatusRequest;
 import com.hainam.worksphere.cullingproposal.dto.request.UpdateCullingProposalRequest;
@@ -46,6 +47,17 @@ public class CullingProposalController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Culling proposal created successfully", response));
     }
+
+            @PostMapping("/bulk")
+            @Operation(summary = "Create culling proposals in bulk")
+            public ResponseEntity<ApiResponse<List<CullingProposalResponse>>> createBulk(
+                @Valid @RequestBody List<CreateCullingProposalBulkRequest> requests,
+                @AuthenticationPrincipal UserPrincipal userPrincipal
+            ) {
+            List<CullingProposalResponse> response = cullingProposalService.createBulkByEarTag(requests, userPrincipal.getId());
+            return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Culling proposals created successfully", response));
+            }
 
     @GetMapping
     @Operation(summary = "Get all culling proposals")

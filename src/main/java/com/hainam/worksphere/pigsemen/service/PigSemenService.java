@@ -44,6 +44,30 @@ public class PigSemenService {
         return toResponseWithEarTag(saved);
     }
 
+        @Transactional
+        @AuditAction(type = ActionType.CREATE, entity = "PIG_SEMEN", actionCode = "BULK_CREATE")
+        public List<PigSemenResponse> createBulk(List<CreatePigSemenRequest> requests, UUID createdBy) {
+        List<PigSemen> entities = requests.stream()
+            .map(request -> PigSemen.builder()
+                .boarPigId(request.getBoarPigId())
+                .collectionDate(request.getCollectionDate())
+                .volume(request.getVolume())
+                .motility(request.getMotility())
+                .quality(request.getQuality())
+                .status(request.getStatus())
+                .note(request.getNote())
+                .createdBy(createdBy)
+                .build())
+            .toList();
+
+        List<PigSemen> savedList = pigSemenRepository.saveAll(entities);
+        savedList.forEach(AuditContext::registerCreated);
+
+        return savedList.stream()
+            .map(this::toResponseWithEarTag)
+            .toList();
+        }
+
     @Transactional(readOnly = true)
     public List<PigSemenResponse> getAll() {
         return pigSemenRepository.findAllActive().stream()

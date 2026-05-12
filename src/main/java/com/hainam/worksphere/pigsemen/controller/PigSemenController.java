@@ -39,6 +39,17 @@ public class PigSemenController {
                 .body(ApiResponse.success("Pig semen created successfully", response));
     }
 
+        @PostMapping("/bulk")
+        @Operation(summary = "Create pig semen in bulk")
+        public ResponseEntity<ApiResponse<List<PigSemenResponse>>> createBulk(
+            @Valid @RequestBody List<CreatePigSemenRequest> requests,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+        ) {
+        List<PigSemenResponse> response = pigSemenService.createBulk(requests, userPrincipal.getId());
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ApiResponse.success("Pig semen created successfully", response));
+        }
+
     @GetMapping
     @Operation(summary = "Get all pig semen")
     public ResponseEntity<ApiResponse<List<PigSemenResponse>>> getAll() {

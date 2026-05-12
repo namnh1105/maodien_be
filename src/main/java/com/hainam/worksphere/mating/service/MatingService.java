@@ -10,6 +10,8 @@ import com.hainam.worksphere.mating.repository.MatingRepository;
 import com.hainam.worksphere.pig.domain.Pig;
 import com.hainam.worksphere.pig.repository.PigRepository;
 import com.hainam.worksphere.pigsemen.repository.PigSemenRepository;
+import com.hainam.worksphere.reproductioncycle.domain.ReproductionCycle;
+import com.hainam.worksphere.reproductioncycle.repository.ReproductionCycleRepository;
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
@@ -18,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.Instant;
 import java.text.Normalizer;
 import java.util.List;
@@ -31,6 +34,7 @@ public class MatingService {
     private final PigRepository pigRepository;
     private final PigSemenRepository pigSemenRepository;
     private final MatingMapper matingMapper;
+    private final ReproductionCycleRepository reproductionCycleRepository;
 
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "MATING")
@@ -112,11 +116,33 @@ public class MatingService {
                     .orElseThrow(() -> new ResourceNotFoundException("Mating", request.getId().toString()));
 
             AuditContext.snapshot(mating);
-            mating.setStatus(normalizePregnancyStatus(request.getStatus()));
+            String normalizedStatus = normalizePregnancyStatus(request.getStatus());
+            mating.setStatus(normalizedStatus);
             mating.setUpdatedBy(updatedBy);
 
             Mating saved = matingRepository.save(mating);
             AuditContext.registerUpdated(saved);
+
+            if (isPregnantStatus(normalizedStatus)) {
+                reproductionCycleRepository.findActiveByMatingId(saved.getId()).orElseGet(() -> {
+                    LocalDate conceptionDate = saved.getMatingDate() != null
+                            ? saved.getMatingDate()
+                            : LocalDate.now();
+                    LocalDate expectedFarrowDate = conceptionDate.plusDays(114);
+
+                    ReproductionCycle cycle = ReproductionCycle.builder()
+                            .matingId(saved.getId())
+                            .conceptionDate(conceptionDate)
+                            .expectedFarrowDate(expectedFarrowDate)
+                            .status("Mang thai")
+                            .createdBy(updatedBy)
+                            .build();
+
+                    ReproductionCycle created = reproductionCycleRepository.save(cycle);
+                    AuditContext.registerCreated(created);
+                    return created;
+                });
+            }
             return toResponseWithEnrichment(saved);
         }).toList();
     }
@@ -163,9 +189,16 @@ public class MatingService {
             return status;
         }
 
+        String rawLower = status.trim().toLowerCase();
         String normalized = normalizeText(status);
 
-        if (normalized.contains("khong") || normalized.contains("chua") || normalized.contains("not pregnant")) {
+        if (rawLower.contains("chửa") || rawLower.contains("mang thai") || rawLower.contains("có thai")
+                || normalized.contains("pregnant")) {
+            return "Chửa";
+        }
+
+        if (normalized.contains("khong") || (normalized.contains("chua") && !rawLower.contains("chửa"))
+                || normalized.contains("not pregnant")) {
             return "Chờ phối";
         }
 
@@ -178,6 +211,15 @@ public class MatingService {
         }
 
         return status.trim();
+    }
+
+    private boolean isPregnantStatus(String status) {
+        if (status == null || status.isBlank()) {
+            return false;
+        }
+        String normalized = normalizeText(status);
+        return normalized.contains("chua") || normalized.contains("mang thai")
+                || normalized.contains("co thai") || normalized.contains("pregnant");
     }
 
     private String normalizeText(String input) {
