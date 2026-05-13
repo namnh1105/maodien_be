@@ -5,6 +5,7 @@ import com.hainam.worksphere.growthtracking.repository.GrowthTrackingRepository;
 import com.hainam.worksphere.mating.domain.Mating;
 import com.hainam.worksphere.mating.repository.MatingRepository;
 import com.hainam.worksphere.pig.domain.Pig;
+import com.hainam.worksphere.pig.domain.PigStatus;
 import com.hainam.worksphere.pig.domain.PigType;
 import com.hainam.worksphere.pig.dto.response.PregnantPigResponse;
 import com.hainam.worksphere.pig.dto.response.PigWithLatestGrowthResponse;
@@ -39,7 +40,9 @@ public class PigQueryService {
 
     @Transactional(readOnly = true)
     public List<PigWithLatestGrowthResponse> getAllWithLatestGrowth() {
-        List<Pig> pigs = pigRepository.findAllActive();
+        List<Pig> pigs = pigRepository.findAllActive().stream()
+                .filter(p -> p.getStatus() == PigStatus.ACTIVE)
+                .toList();
         return buildPigWithGrowthList(pigs);
     }
 
@@ -55,9 +58,12 @@ public class PigQueryService {
         final PigType filterType = tempType;
         List<Pig> pigs = (filterType != null)
                 ? pigRepository.findAllActive().stream()
+                    .filter(p -> p.getStatus() == PigStatus.ACTIVE)
                     .filter(p -> p.getType() == filterType)
                     .toList()
-                : pigRepository.findAllActive();
+                : pigRepository.findAllActive().stream()
+                    .filter(p -> p.getStatus() == PigStatus.ACTIVE)
+                    .toList();
         return buildPigWithGrowthList(pigs);
     }
 
@@ -117,6 +123,7 @@ public class PigQueryService {
     public List<SowResponse> getAllSows() {
         // Lọc lợn nái: type = NAI
         List<Pig> sows = pigRepository.findAllActive().stream()
+                .filter(p -> p.getStatus() == PigStatus.ACTIVE)
                 .filter(p -> p.getType() == PigType.NAI)
                 .toList();
 
@@ -194,6 +201,7 @@ public class PigQueryService {
 
             Pig sow = pigRepository.findActiveById(mating.getSowPigId()).orElse(null);
             if (sow == null) return null;
+            if (sow.getStatus() != PigStatus.ACTIVE) return null;
 
             // Tính số lần mang thai (pregnancyNumber = tổng số records tính đến bây giờ)
             long pregnancyNumber = reproductionCycleRepository.findActiveBySowPigId(sow.getId()).size();
