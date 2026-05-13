@@ -32,8 +32,16 @@ public class PigService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "PIG")
     public PigResponse create(CreatePigRequest request, UUID createdBy) {
+        String earTag = request.getEarTag();
+        if (earTag != null && !earTag.isBlank()) {
+            String normalizedEarTag = earTag.trim();
+            if (pigRepository.findActiveByEarTag(normalizedEarTag).isPresent()) {
+                throw new BusinessRuleViolationException("Mã tai đã tồn tại");
+            }
+            earTag = normalizedEarTag;
+        }
         Pig pig = Pig.builder()
-                .earTag(request.getEarTag())
+                .earTag(earTag)
                 .birthWeight(request.getBirthWeight())
                 .birthDate(request.getBirthDate())
                 .type(parsePigType(request.getType()))
