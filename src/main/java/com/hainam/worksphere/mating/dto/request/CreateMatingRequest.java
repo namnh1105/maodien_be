@@ -1,6 +1,6 @@
 package com.hainam.worksphere.mating.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CreateMatingRequest {
 
-    @NotBlank(message = "Mã phối không được để trống")
+    @NotNull(message = "Mã phối không được để trống")
     private UUID sowPigId;
 
     private UUID semenId;
