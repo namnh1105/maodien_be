@@ -1,6 +1,6 @@
 package com.hainam.worksphere.reproductioncycle.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CreateReproductionCycleRequest {
 
-    @NotBlank(message = "Mã thai kỳ không được để trống")
+    @NotNull(message = "Mã thai kỳ không được để trống")
     private UUID matingId;
     private LocalDate conceptionDate;
     private LocalDate expectedFarrowDate;

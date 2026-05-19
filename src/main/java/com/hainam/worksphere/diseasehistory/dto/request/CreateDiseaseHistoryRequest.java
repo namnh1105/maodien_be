@@ -11,7 +11,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateDiseaseHistoryRequest {
-    @NotBlank
+    @NotNull(message = "Pig id is required")
     private UUID pigId;
     private String diseaseName;
     private LocalDate sickDate;

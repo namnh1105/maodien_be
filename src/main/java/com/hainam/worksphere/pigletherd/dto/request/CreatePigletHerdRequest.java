@@ -1,6 +1,5 @@
 package com.hainam.worksphere.pigletherd.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -17,8 +16,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CreatePigletHerdRequest {
 
-    @NotBlank(message = "Herd code is required")
-    @NotBlank(message = "Reproduction code is required")
     @NotNull(message = "Litter number is required")
     private Integer litterNumber;
 
