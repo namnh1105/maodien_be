@@ -9,6 +9,7 @@ import com.hainam.worksphere.pigletherd.dto.request.CreatePigletHerdRequest;
 import com.hainam.worksphere.pigletherd.dto.request.MergePigletHerdRequest;
 import com.hainam.worksphere.pigletherd.dto.request.SplitPigletHerdRequest;
 import com.hainam.worksphere.pigletherd.dto.request.UpdatePigletHerdRequest;
+import com.hainam.worksphere.pigletherd.dto.request.UpdatePigletHerdStatusRequest;
 import com.hainam.worksphere.pigletherd.dto.response.PigletHerdDetailResponse;
 import com.hainam.worksphere.pigletherd.dto.response.PigletHerdGrowthResponse;
 import com.hainam.worksphere.pigletherd.dto.response.PigletHerdMovementResponse;
@@ -55,6 +56,7 @@ public class PigletHerdService {
                 
             
             .litterNumber(request.getLitterNumber())
+                .penId(request.getPenId())
                 .mother(findPigOrNull(request.getMotherId()))
                 .father(findPigOrNull(request.getFatherId()))
                 .quantity(request.getQuantity())
@@ -122,6 +124,7 @@ public class PigletHerdService {
 
         
         if (request.getLitterNumber() != null) herd.setLitterNumber(request.getLitterNumber());
+        if (request.getPenId() != null) herd.setPenId(request.getPenId());
         if (request.getMotherId() != null) herd.setMother(findPigOrNull(request.getMotherId()));
         if (request.getFatherId() != null) herd.setFather(findPigOrNull(request.getFatherId()));
         if (request.getQuantity() != null) herd.setQuantity(request.getQuantity());
@@ -136,6 +139,24 @@ public class PigletHerdService {
         PigletHerd saved = pigletHerdRepository.save(herd);
         AuditContext.registerUpdated(saved);
         return pigletHerdMapper.toResponse(saved);
+    }
+
+    @Transactional
+    @AuditAction(type = ActionType.UPDATE, entity = "PIGLET_HERD", actionCode = "UPDATE_HERD_STATUS")
+    public List<PigletHerdResponse> updateStatuses(List<UpdatePigletHerdStatusRequest> requests, UUID updatedBy) {
+        return requests.stream().map(request -> {
+            PigletHerd herd = pigletHerdRepository.findActiveById(request.getId())
+                    .orElseThrow(() -> PigletHerdNotFoundException.byId(request.getId().toString()));
+
+            AuditContext.snapshot(herd);
+
+            herd.setStatus(request.getStatus());
+            herd.setUpdatedBy(updatedBy);
+
+            PigletHerd saved = pigletHerdRepository.save(herd);
+            AuditContext.registerUpdated(saved);
+            return pigletHerdMapper.toResponse(saved);
+        }).toList();
     }
 
     @Transactional
@@ -176,6 +197,7 @@ public class PigletHerdService {
                 
                 
                 .litterNumber(request.getLitterNumber())
+            .penId(source.getPenId())
                 .mother(source.getMother())
                 .father(source.getFather())
                 .quantity(request.getQuantity())

@@ -1,8 +1,20 @@
 package com.hainam.worksphere.reproductioncycle.service;
 
+import com.hainam.worksphere.mating.domain.Mating;
+import com.hainam.worksphere.mating.repository.MatingRepository;
+import com.hainam.worksphere.penpig.domain.PenPig;
+import com.hainam.worksphere.penpig.repository.PenPigRepository;
+import com.hainam.worksphere.pig.domain.Pig;
+import com.hainam.worksphere.pig.repository.PigRepository;
+import com.hainam.worksphere.pigletherd.domain.PigletHerd;
+import com.hainam.worksphere.pigletherd.repository.PigletHerdRepository;
+import com.hainam.worksphere.pigsemen.domain.PigSemen;
+import com.hainam.worksphere.pigsemen.repository.PigSemenRepository;
 import com.hainam.worksphere.reproductioncycle.domain.ReproductionCycle;
 import com.hainam.worksphere.reproductioncycle.dto.request.CreateReproductionCycleRequest;
+import com.hainam.worksphere.reproductioncycle.dto.request.RecordFarrowingRequest;
 import com.hainam.worksphere.reproductioncycle.dto.request.UpdateReproductionCycleRequest;
+import com.hainam.worksphere.reproductioncycle.dto.request.UpdateReproductionCycleStatusRequest;
 import com.hainam.worksphere.reproductioncycle.dto.response.ReproductionCycleResponse;
 import com.hainam.worksphere.reproductioncycle.mapper.ReproductionCycleMapper;
 import com.hainam.worksphere.reproductioncycle.repository.ReproductionCycleRepository;
@@ -14,7 +26,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,6 +38,11 @@ public class ReproductionCycleService {
 
     private final ReproductionCycleRepository reproductionCycleRepository;
     private final ReproductionCycleMapper reproductionCycleMapper;
+    private final MatingRepository matingRepository;
+    private final PigRepository pigRepository;
+    private final PigSemenRepository pigSemenRepository;
+    private final PigletHerdRepository pigletHerdRepository;
+    private final PenPigRepository penPigRepository;
 
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "REPRODUCTION_CYCLE")
@@ -50,7 +69,15 @@ public class ReproductionCycleService {
 
     @Transactional(readOnly = true)
     public List<ReproductionCycleResponse> getAll() {
-        return reproductionCycleRepository.findAllActive().stream().map(reproductionCycleMapper::toResponse).toList();
+        return getAll(null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReproductionCycleResponse> getAll(String status) {
+        List<ReproductionCycle> cycles = (status == null || status.isBlank())
+                ? reproductionCycleRepository.findAllActive()
+                : reproductionCycleRepository.findActiveByStatus(status);
+        return cycles.stream().map(reproductionCycleMapper::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
@@ -87,6 +114,71 @@ public class ReproductionCycleService {
     }
 
     @Transactional
+    @AuditAction(type = ActionType.UPDATE, entity = "REPRODUCTION_CYCLE", actionCode = "RECORD_MISCARRIAGE")
+    public List<ReproductionCycleResponse> recordMiscarriages(
+            List<UpdateReproductionCycleStatusRequest> requests,
+            UUID updatedBy
+    ) {
+        return requests.stream().map(request -> {
+            ReproductionCycle cycle = reproductionCycleRepository.findActiveById(request.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("ReproductionCycle", request.getId().toString()));
+
+            AuditContext.snapshot(cycle);
+
+            String normalizedStatus = normalizeCycleStatus(request.getStatus());
+            cycle.setStatus(normalizedStatus);
+            cycle.setUpdatedBy(updatedBy);
+
+            ReproductionCycle saved = reproductionCycleRepository.save(cycle);
+            AuditContext.registerUpdated(saved);
+
+            updateMatingStatusFromCycle(saved, normalizedStatus, updatedBy);
+            return reproductionCycleMapper.toResponse(saved);
+        }).toList();
+    }
+
+    @Transactional
+    @AuditAction(type = ActionType.UPDATE, entity = "REPRODUCTION_CYCLE", actionCode = "RECORD_FARROWING")
+    public List<ReproductionCycleResponse> recordFarrowings(
+            List<RecordFarrowingRequest> requests,
+            UUID updatedBy
+    ) {
+        return requests.stream().map(request -> {
+            ReproductionCycle cycle = reproductionCycleRepository.findActiveById(request.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("ReproductionCycle", request.getId().toString()));
+
+            AuditContext.snapshot(cycle);
+
+            if (request.getActualFarrowDate() != null) cycle.setActualFarrowDate(request.getActualFarrowDate());
+            if (request.getBornCount() != null) cycle.setBornCount(request.getBornCount());
+            if (request.getAliveCount() != null) cycle.setAliveCount(request.getAliveCount());
+            if (request.getDeadCount() != null) cycle.setDeadCount(request.getDeadCount());
+            if (request.getCrushedCount() != null) cycle.setCrushedCount(request.getCrushedCount());
+            if (request.getDeformedCount() != null) cycle.setDeformedCount(request.getDeformedCount());
+            if (request.getAverageWeight() != null) cycle.setAverageWeight(request.getAverageWeight());
+
+            String normalizedStatus = request.getStatus() != null
+                    ? normalizeCycleStatus(request.getStatus())
+                    : cycle.getStatus();
+            if (normalizedStatus != null) {
+                cycle.setStatus(normalizedStatus);
+            }
+            cycle.setUpdatedBy(updatedBy);
+
+            ReproductionCycle saved = reproductionCycleRepository.save(cycle);
+            AuditContext.registerUpdated(saved);
+
+            updateMatingStatusFromCycle(saved, normalizedStatus, updatedBy);
+
+            if (isFarrowingSuccessStatus(normalizedStatus)) {
+                createPigletHerdIfAbsent(saved, request, updatedBy);
+            }
+
+            return reproductionCycleMapper.toResponse(saved);
+        }).toList();
+    }
+
+    @Transactional
     @AuditAction(type = ActionType.DELETE, entity = "REPRODUCTION_CYCLE")
     public void delete(UUID id, UUID deletedBy) {
         ReproductionCycle cycle = reproductionCycleRepository.findActiveById(id)
@@ -98,5 +190,120 @@ public class ReproductionCycleService {
         cycle.setDeletedAt(Instant.now());
         cycle.setDeletedBy(deletedBy);
         reproductionCycleRepository.save(cycle);
+    }
+
+    private void updateMatingStatusFromCycle(ReproductionCycle cycle, String cycleStatus, UUID updatedBy) {
+        if (cycle.getMatingId() == null || cycleStatus == null) {
+            return;
+        }
+
+        matingRepository.findActiveById(cycle.getMatingId()).ifPresent(mating -> {
+            AuditContext.snapshot(mating);
+
+            String normalized = normalizeText(cycleStatus);
+            if (normalized.contains("say") || normalized.contains("miscarriage")
+                    || normalized.contains("fail") || normalized.contains("aborted")) {
+                mating.setStatus("Sảy");
+            } else if (normalized.contains("da de") || normalized.equals("de")
+                    || normalized.contains("farrow") || normalized.contains("success")) {
+                mating.setStatus("Đã đẻ");
+            } else if (normalized.contains("mang thai") || normalized.contains("chua")
+                    || normalized.contains("dau thai") || normalized.contains("pregnant")) {
+                mating.setStatus("Chửa");
+            } else {
+                mating.setStatus(cycleStatus);
+            }
+
+            mating.setUpdatedBy(updatedBy);
+            matingRepository.save(mating);
+        });
+    }
+
+    private void createPigletHerdIfAbsent(ReproductionCycle cycle, RecordFarrowingRequest request, UUID createdBy) {
+        Mating mating = matingRepository.findActiveById(cycle.getMatingId())
+                .orElseThrow(() -> new ResourceNotFoundException("Mating", cycle.getMatingId().toString()));
+
+        Pig mother = pigRepository.findActiveById(mating.getSowPigId())
+                .orElseThrow(() -> new ResourceNotFoundException("Pig", mating.getSowPigId().toString()));
+
+        Pig father = null;
+        if (mating.getSemenId() != null) {
+            PigSemen semen = pigSemenRepository.findActiveById(mating.getSemenId()).orElse(null);
+            if (semen != null && semen.getBoarPigId() != null) {
+                father = pigRepository.findActiveById(semen.getBoarPigId()).orElse(null);
+            }
+        }
+
+        LocalDate birthDate = request.getActualFarrowDate() != null
+                ? request.getActualFarrowDate()
+                : LocalDate.now();
+
+        int litterNumber = reproductionCycleRepository.findActiveBySowPigId(mother.getId()).size();
+
+        if (pigletHerdRepository.existsActiveByMotherIdAndLitterNumberAndBirthDate(
+                mother.getId(), litterNumber, birthDate)) {
+            return;
+        }
+
+        UUID penId = null;
+        List<PenPig> currentAssignments = penPigRepository.findCurrentByPigId(mother.getId());
+        if (!currentAssignments.isEmpty()) {
+            penId = currentAssignments.get(0).getPenId();
+        }
+
+        String motherTag = mother.getEarTag() != null ? mother.getEarTag() : "";
+        String herdName = motherTag.isBlank() ? null : motherTag + "-" + litterNumber;
+
+        PigletHerd herd = PigletHerd.builder()
+                .herdName(herdName)
+                .litterNumber(litterNumber)
+                .penId(penId)
+                .mother(mother)
+                .father(father)
+                .quantity(request.getAliveCount())
+                .averageBirthWeight(request.getAverageWeight())
+                .birthDate(birthDate)
+                .semenId(mating.getSemenId())
+                .createdBy(createdBy)
+                .build();
+
+        PigletHerd saved = pigletHerdRepository.save(herd);
+        AuditContext.registerCreated(saved);
+    }
+
+    private boolean isFarrowingSuccessStatus(String status) {
+        if (status == null || status.isBlank()) return false;
+        String normalized = normalizeText(status);
+        return normalized.contains("success") || normalized.contains("da de")
+                || normalized.equals("de") || normalized.contains("farrow");
+    }
+
+    private String normalizeCycleStatus(String status) {
+        if (status == null || status.isBlank()) return status;
+
+        String normalized = normalizeText(status);
+        if (normalized.contains("success") || normalized.contains("da de")
+                || normalized.equals("de") || normalized.contains("farrow")) {
+            return "Đã đẻ";
+        }
+
+        if (normalized.contains("say") || normalized.contains("miscarriage")
+                || normalized.contains("fail") || normalized.contains("aborted")) {
+            return "Sảy";
+        }
+
+        if (normalized.contains("dang mang thai") || normalized.contains("mang thai")
+                || normalized.contains("chua") || normalized.contains("dau thai")
+                || normalized.contains("pregnant")) {
+            return "Đang mang thai";
+        }
+
+        return status.trim();
+    }
+
+    private String normalizeText(String input) {
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+        normalized = normalized.replaceAll("\\p{M}", "");
+        return normalized.trim().toLowerCase();
     }
 }

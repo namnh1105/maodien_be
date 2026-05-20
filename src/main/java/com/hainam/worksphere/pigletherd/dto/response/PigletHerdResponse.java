@@ -18,6 +18,7 @@ public class PigletHerdResponse {
     private UUID id;
     private String herdName;
     private Integer litterNumber;
+    private UUID penId;
     private UUID motherId;
     private String motherEarTag;
     private String motherBreed;

@@ -7,6 +7,8 @@ import com.hainam.worksphere.mating.repository.MatingRepository;
 import com.hainam.worksphere.pig.domain.Pig;
 import com.hainam.worksphere.pig.domain.PigStatus;
 import com.hainam.worksphere.pig.domain.PigType;
+import com.hainam.worksphere.pig.dto.response.PregnantPigCountResponse;
+import com.hainam.worksphere.pig.dto.response.PregnantPigListResponse;
 import com.hainam.worksphere.pig.dto.response.PregnantPigResponse;
 import com.hainam.worksphere.pig.dto.response.PigWithLatestGrowthResponse;
 import com.hainam.worksphere.pig.dto.response.SowResponse;
@@ -17,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -191,30 +194,93 @@ public class PigQueryService {
 
     @Transactional(readOnly = true)
     public List<PregnantPigResponse> getAllPregnant() {
-        // Lấy tất cả reproduction cycles chưa đẻ
-        List<ReproductionCycle> pregnantCycles = reproductionCycleRepository.findAllActivePregnant();
+        return getPregnantResponses();
+    }
 
-        return pregnantCycles.stream().map(rc -> {
-            // Lấy mating để tìm sowPigId và matingDate
-            Mating mating = matingRepository.findActiveById(rc.getMatingId()).orElse(null);
-            if (mating == null) return null;
+    @Transactional(readOnly = true)
+    public PregnantPigCountResponse countPregnant() {
+        List<PregnantPigResponse> items = getPregnantResponses();
+        return PregnantPigCountResponse.builder()
+                .count(items.size())
+                .build();
+    }
 
-            Pig sow = pigRepository.findActiveById(mating.getSowPigId()).orElse(null);
-            if (sow == null) return null;
-            if (sow.getStatus() != PigStatus.ACTIVE) return null;
+    @Transactional(readOnly = true)
+    public PregnantPigListResponse getDueSoon(int days) {
+        LocalDate today = LocalDate.now();
+        LocalDate endDate = today.plusDays(days);
 
-            // Tính số lần mang thai (pregnancyNumber = tổng số records tính đến bây giờ)
-            long pregnancyNumber = reproductionCycleRepository.findActiveBySowPigId(sow.getId()).size();
+        List<PregnantPigResponse> items = getPregnantResponses().stream()
+                .filter(item -> item.getExpectedFarrowDate() != null)
+                .filter(item -> !item.getExpectedFarrowDate().isBefore(today))
+                .filter(item -> !item.getExpectedFarrowDate().isAfter(endDate))
+                .toList();
 
-            return PregnantPigResponse.builder()
-                    .id(sow.getId())
-                    .earTag(sow.getEarTag())
-                    .matingDate(mating.getMatingDate())
-                    .conceptionDate(rc.getConceptionDate())
-                    .expectedFarrowDate(rc.getExpectedFarrowDate())
-                    .pregnancyNumber((int) pregnancyNumber)
-                    .status(rc.getStatus())
-                    .build();
-        }).filter(r -> r != null).toList();
+        return PregnantPigListResponse.builder()
+                .count(items.size())
+                .items(items)
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public PregnantPigListResponse getOverdue() {
+        LocalDate today = LocalDate.now();
+
+        List<PregnantPigResponse> items = getPregnantResponses().stream()
+                .filter(item -> item.getExpectedFarrowDate() != null)
+                .filter(item -> item.getExpectedFarrowDate().isBefore(today))
+                .toList();
+
+        return PregnantPigListResponse.builder()
+                .count(items.size())
+                .items(items)
+                .build();
+    }
+
+    private List<PregnantPigResponse> getPregnantResponses() {
+        List<ReproductionCycle> cycles = reproductionCycleRepository.findAllActive();
+
+        return cycles.stream()
+                .filter(rc -> isPregnantCycleStatus(rc.getStatus()))
+                .map(this::buildPregnantResponse)
+                .filter(r -> r != null)
+                .toList();
+    }
+
+    private PregnantPigResponse buildPregnantResponse(ReproductionCycle rc) {
+        Mating mating = matingRepository.findActiveById(rc.getMatingId()).orElse(null);
+        if (mating == null) return null;
+
+        Pig sow = pigRepository.findActiveById(mating.getSowPigId()).orElse(null);
+        if (sow == null) return null;
+        if (sow.getStatus() != PigStatus.ACTIVE) return null;
+
+        long pregnancyNumber = reproductionCycleRepository.findActiveBySowPigId(sow.getId()).size();
+
+        return PregnantPigResponse.builder()
+                .id(sow.getId())
+                .earTag(sow.getEarTag())
+                .matingDate(mating.getMatingDate())
+                .conceptionDate(rc.getConceptionDate())
+                .expectedFarrowDate(rc.getExpectedFarrowDate())
+                .pregnancyNumber((int) pregnancyNumber)
+                .status(rc.getStatus())
+                .build();
+    }
+
+    private boolean isPregnantCycleStatus(String status) {
+        if (status == null || status.isBlank()) return false;
+        String normalized = normalizeText(status);
+        return normalized.contains("dang mang thai")
+                || normalized.contains("mang thai")
+                || normalized.contains("chua")
+                || normalized.contains("dau thai")
+                || normalized.contains("pregnant");
+    }
+
+    private String normalizeText(String input) {
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+        normalized = normalized.replaceAll("\\p{M}", "");
+        return normalized.trim().toLowerCase();
     }
 }

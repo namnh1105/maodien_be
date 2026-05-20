@@ -35,6 +35,9 @@ public class PigletHerd {
     @Column(name = "litter_number")
     private Integer litterNumber;
 
+    @Column(name = "pen_id")
+    private UUID penId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mother_id")
     private Pig mother;

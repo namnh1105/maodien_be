@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,4 +26,13 @@ public interface PigletHerdRepository extends JpaRepository<PigletHerd, UUID> {
 
     @Query("SELECT h FROM PigletHerd h WHERE h.mother.id IN :motherIds AND h.isDeleted = false")
     List<PigletHerd> findActiveByMotherIds(@Param("motherIds") List<UUID> motherIds);
+
+    @Query("SELECT CASE WHEN COUNT(h) > 0 THEN true ELSE false END FROM PigletHerd h " +
+           "WHERE h.mother.id = :motherId AND h.litterNumber = :litterNumber AND h.birthDate = :birthDate " +
+           "AND h.isDeleted = false")
+    boolean existsActiveByMotherIdAndLitterNumberAndBirthDate(
+            @Param("motherId") UUID motherId,
+            @Param("litterNumber") Integer litterNumber,
+            @Param("birthDate") LocalDate birthDate
+    );
 }

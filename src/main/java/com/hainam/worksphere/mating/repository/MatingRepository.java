@@ -22,6 +22,9 @@ public interface MatingRepository extends JpaRepository<Mating, UUID> {
     @Query("SELECT m FROM Mating m WHERE m.sowPigId = :sowPigId AND m.isDeleted = false ORDER BY m.matingDate DESC NULLS LAST")
     List<Mating> findActiveBySowPigId(@Param("sowPigId") UUID sowPigId);
 
+    @Query("SELECT m FROM Mating m WHERE m.isDeleted = false AND LOWER(m.status) = LOWER(:status)")
+    List<Mating> findActiveByStatus(@Param("status") String status);
+
     /** Đếm tổng số lần mang thai của lợn nái (số lần phối). */
     @Query("SELECT COUNT(m) FROM Mating m WHERE m.sowPigId = :sowPigId AND m.isDeleted = false")
     long countActiveBySowPigId(@Param("sowPigId") UUID sowPigId);

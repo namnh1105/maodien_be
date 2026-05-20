@@ -6,6 +6,7 @@ import com.hainam.worksphere.pigletherd.dto.request.CreatePigletHerdRequest;
 import com.hainam.worksphere.pigletherd.dto.request.MergePigletHerdRequest;
 import com.hainam.worksphere.pigletherd.dto.request.SplitPigletHerdRequest;
 import com.hainam.worksphere.pigletherd.dto.request.UpdatePigletHerdRequest;
+import com.hainam.worksphere.pigletherd.dto.request.UpdatePigletHerdStatusRequest;
 import com.hainam.worksphere.pigletherd.dto.response.PigletHerdDetailResponse;
 import com.hainam.worksphere.pigletherd.dto.response.PigletHerdResponse;
 import com.hainam.worksphere.pigletherd.service.PigletHerdService;
@@ -81,6 +82,17 @@ public class PigletHerdController {
     ) {
         PigletHerdResponse response = pigletHerdService.update(id, request, userPrincipal.getId());
         return ResponseEntity.ok(ApiResponse.success("Piglet herd updated successfully", response));
+    }
+
+    @PostMapping("/weaning-status")
+    @Operation(summary = "Update piglet herd status (weaning)")
+    @RequirePermission(PermissionType.UPDATE_PIGLET_HERD)
+    public ResponseEntity<ApiResponse<List<PigletHerdResponse>>> updateWeaningStatus(
+            @Valid @RequestBody List<@Valid UpdatePigletHerdStatusRequest> requests,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        List<PigletHerdResponse> response = pigletHerdService.updateStatuses(requests, userPrincipal.getId());
+        return ResponseEntity.ok(ApiResponse.success("Piglet herd status updated successfully", response));
     }
 
     @DeleteMapping("/{id}")

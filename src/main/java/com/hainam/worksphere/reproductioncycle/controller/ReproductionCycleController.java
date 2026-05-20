@@ -2,7 +2,9 @@ package com.hainam.worksphere.reproductioncycle.controller;
 
 import com.hainam.worksphere.auth.security.UserPrincipal;
 import com.hainam.worksphere.reproductioncycle.dto.request.CreateReproductionCycleRequest;
+import com.hainam.worksphere.reproductioncycle.dto.request.RecordFarrowingRequest;
 import com.hainam.worksphere.reproductioncycle.dto.request.UpdateReproductionCycleRequest;
+import com.hainam.worksphere.reproductioncycle.dto.request.UpdateReproductionCycleStatusRequest;
 import com.hainam.worksphere.reproductioncycle.dto.response.ReproductionCycleResponse;
 import com.hainam.worksphere.reproductioncycle.service.ReproductionCycleService;
 import com.hainam.worksphere.shared.dto.ApiResponse;
@@ -41,8 +43,10 @@ public class ReproductionCycleController {
 
     @GetMapping
     @Operation(summary = "Get all reproduction cycles")
-    public ResponseEntity<ApiResponse<List<ReproductionCycleResponse>>> getAll() {
-        return ResponseEntity.ok(ApiResponse.success(reproductionCycleService.getAll()));
+    public ResponseEntity<ApiResponse<List<ReproductionCycleResponse>>> getAll(
+            @RequestParam(required = false) String status
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(reproductionCycleService.getAll(status)));
     }
 
     @GetMapping("/{id}")
@@ -61,6 +65,28 @@ public class ReproductionCycleController {
         ReproductionCycleResponse response = reproductionCycleService.update(id, request, userPrincipal.getId());
         return ResponseEntity.ok(ApiResponse.success("Reproduction cycle updated successfully", response));
     }
+
+        @PostMapping("/miscarriage")
+        @Operation(summary = "Record miscarriage for reproduction cycles")
+        public ResponseEntity<ApiResponse<List<ReproductionCycleResponse>>> recordMiscarriage(
+            @Valid @RequestBody List<@Valid UpdateReproductionCycleStatusRequest> requests,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+        ) {
+        List<ReproductionCycleResponse> response = reproductionCycleService
+            .recordMiscarriages(requests, userPrincipal.getId());
+        return ResponseEntity.ok(ApiResponse.success("Miscarriage recorded successfully", response));
+        }
+
+        @PostMapping("/farrowing")
+        @Operation(summary = "Record farrowing for reproduction cycles")
+        public ResponseEntity<ApiResponse<List<ReproductionCycleResponse>>> recordFarrowing(
+            @Valid @RequestBody List<@Valid RecordFarrowingRequest> requests,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+        ) {
+        List<ReproductionCycleResponse> response = reproductionCycleService
+            .recordFarrowings(requests, userPrincipal.getId());
+        return ResponseEntity.ok(ApiResponse.success("Farrowing recorded successfully", response));
+        }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete reproduction cycle")

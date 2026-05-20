@@ -57,7 +57,15 @@ public class MatingService {
 
     @Transactional(readOnly = true)
     public List<MatingResponse> getAll() {
-        return matingRepository.findAllActive().stream().map(this::toResponseWithEnrichment).toList();
+        return getAll(null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MatingResponse> getAll(String status) {
+        List<Mating> records = (status == null || status.isBlank())
+                ? matingRepository.findAllActive()
+                : matingRepository.findActiveByStatus(status);
+        return records.stream().map(this::toResponseWithEnrichment).toList();
     }
 
     @Transactional(readOnly = true)
@@ -118,7 +126,7 @@ public class MatingService {
                         .matingId(saved.getId())
                         .conceptionDate(conceptionDate)
                         .expectedFarrowDate(expectedFarrowDate)
-                        .status("Mang thai")
+                    .status("Đang mang thai")
                         .createdBy(updatedBy)
                         .build();
 
@@ -150,11 +158,11 @@ public class MatingService {
                     LocalDate conceptionDate = LocalDate.now();
                     LocalDate expectedFarrowDate = conceptionDate.plusDays(114);
 
-                    ReproductionCycle cycle = ReproductionCycle.builder()
+                        ReproductionCycle cycle = ReproductionCycle.builder()
                             .matingId(saved.getId())
                             .conceptionDate(conceptionDate)
                             .expectedFarrowDate(expectedFarrowDate)
-                            .status("Mang thai")
+                            .status("Đang mang thai")
                             .createdBy(updatedBy)
                             .build();
 

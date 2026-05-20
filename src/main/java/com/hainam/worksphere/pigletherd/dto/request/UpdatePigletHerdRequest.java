@@ -16,6 +16,8 @@ import java.util.UUID;
 public class UpdatePigletHerdRequest {
     private Integer litterNumber;
 
+    private UUID penId;
+
     private UUID motherId;
 
     private UUID fatherId;

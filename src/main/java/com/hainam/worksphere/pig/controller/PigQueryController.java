@@ -1,6 +1,8 @@
 package com.hainam.worksphere.pig.controller;
 
 import com.hainam.worksphere.pig.dto.response.FarrowingHistoryItemResponse;
+import com.hainam.worksphere.pig.dto.response.PregnantPigCountResponse;
+import com.hainam.worksphere.pig.dto.response.PregnantPigListResponse;
 import com.hainam.worksphere.pig.dto.response.PregnantPigResponse;
 import com.hainam.worksphere.pig.dto.response.PigWithLatestGrowthResponse;
 import com.hainam.worksphere.pig.dto.response.SowResponse;
@@ -85,5 +87,23 @@ public class PigQueryController {
     @Operation(summary = "Danh sách lợn đang mang thai")
     public ResponseEntity<ApiResponse<List<PregnantPigResponse>>> getAllPregnant() {
         return ResponseEntity.ok(ApiResponse.success(pigQueryService.getAllPregnant()));
+    }
+
+    @GetMapping("/pregnant/count")
+    @Operation(summary = "Số lượng lợn đang mang thai")
+    public ResponseEntity<ApiResponse<PregnantPigCountResponse>> getPregnantCount() {
+        return ResponseEntity.ok(ApiResponse.success(pigQueryService.countPregnant()));
+    }
+
+    @GetMapping("/due-soon")
+    @Operation(summary = "Số lượng lợn sắp đẻ (7 ngày tới)")
+    public ResponseEntity<ApiResponse<PregnantPigListResponse>> getDueSoon() {
+        return ResponseEntity.ok(ApiResponse.success(pigQueryService.getDueSoon(7)));
+    }
+
+    @GetMapping("/overdue")
+    @Operation(summary = "Số lượng lợn quá ngày dự kiến")
+    public ResponseEntity<ApiResponse<PregnantPigListResponse>> getOverdue() {
+        return ResponseEntity.ok(ApiResponse.success(pigQueryService.getOverdue()));
     }
 }

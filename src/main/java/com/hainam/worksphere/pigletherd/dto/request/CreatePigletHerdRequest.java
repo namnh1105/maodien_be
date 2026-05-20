@@ -19,6 +19,8 @@ public class CreatePigletHerdRequest {
     @NotNull(message = "Litter number is required")
     private Integer litterNumber;
 
+    private UUID penId;
+
     private UUID motherId;
 
     private UUID fatherId;

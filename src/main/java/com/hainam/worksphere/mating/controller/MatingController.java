@@ -42,8 +42,10 @@ public class MatingController {
 
     @GetMapping
     @Operation(summary = "Get all mating records")
-    public ResponseEntity<ApiResponse<List<MatingResponse>>> getAll() {
-        return ResponseEntity.ok(ApiResponse.success(matingService.getAll()));
+    public ResponseEntity<ApiResponse<List<MatingResponse>>> getAll(
+            @RequestParam(required = false) String status
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(matingService.getAll(status)));
     }
 
     @GetMapping("/by-ma-lon/{maLon}")
