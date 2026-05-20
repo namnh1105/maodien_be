@@ -12,6 +12,7 @@ import com.hainam.worksphere.employee.domain.Employee;
 import com.hainam.worksphere.employee.repository.EmployeeRepository;
 import com.hainam.worksphere.pig.domain.Pig;
 import com.hainam.worksphere.pig.domain.PigStatus;
+import com.hainam.worksphere.pig.domain.PigType;
 import com.hainam.worksphere.pig.repository.PigRepository;
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
@@ -209,15 +210,21 @@ public class CullingProposalService {
         }
 
         PigStatus nextStatus = resolvePigStatusForApprovedProposal(proposal.getProposalType());
-        if (nextStatus == null) {
-            return;
-        }
-
         Pig pig = pigRepository.findActiveById(proposal.getPigId())
                 .orElseThrow(() -> new ResourceNotFoundException("Pig", proposal.getPigId().toString()));
 
+        PigType nextType = resolvePigTypeForApprovedProposal(proposal.getProposalType(), pig.getType());
+        if (nextStatus == null && nextType == null) {
+            return;
+        }
+
         if (pig.getStatus() == PigStatus.ACTIVE) {
-            pig.setStatus(nextStatus);
+            if (nextStatus != null) {
+                pig.setStatus(nextStatus);
+            }
+            if (nextType != null) {
+                pig.setType(nextType);
+            }
             pig.setUpdatedBy(updatedBy);
             Pig savedPig = pigRepository.save(pig);
             AuditContext.registerUpdated(savedPig);
@@ -234,6 +241,24 @@ public class CullingProposalService {
         }
         if (normalized.contains("ban loai")) {
             return PigStatus.THIT;
+        }
+        return null;
+    }
+
+    private PigType resolvePigTypeForApprovedProposal(String proposalType, PigType currentType) {
+        if (proposalType == null || proposalType.isBlank()) {
+            return null;
+        }
+        String normalized = normalizeText(proposalType);
+        if (!normalized.contains("ban loai")) {
+            return null;
+        }
+
+        if (currentType == PigType.NAI || currentType == PigType.NAI_THIT) {
+            return PigType.NAI_THIT;
+        }
+        if (currentType == PigType.NOC || currentType == PigType.NOC_THIT) {
+            return PigType.NOC_THIT;
         }
         return null;
     }

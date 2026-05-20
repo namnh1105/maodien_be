@@ -54,7 +54,14 @@ public class PigQueryService {
     public List<PigWithLatestGrowthResponse> getAllWithLatestGrowthByType(String type) {
         PigType tempType;
         try {
-            tempType = PigType.valueOf(type.trim().toUpperCase());
+            String normalized = normalizeText(type)
+                    .replace('-', ' ')
+                    .replace('_', ' ')
+                    .replaceAll("\\s+", " ")
+                    .trim()
+                    .toUpperCase();
+            String enumCandidate = normalized.replace(' ', '_');
+            tempType = PigType.valueOf(enumCandidate);
         } catch (IllegalArgumentException e) {
             tempType = null;
         }

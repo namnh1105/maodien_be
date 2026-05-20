@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -119,10 +120,23 @@ public class PigService {
             throw new BusinessRuleViolationException("Pig type is required");
         }
         try {
-            return PigType.valueOf(rawType.trim().toUpperCase());
+            String normalized = normalizeText(rawType)
+                    .replace('-', ' ')
+                    .replace('_', ' ')
+                    .replaceAll("\\s+", " ")
+                    .trim()
+                    .toUpperCase();
+            String enumCandidate = normalized.replace(' ', '_');
+            return PigType.valueOf(enumCandidate);
         } catch (IllegalArgumentException ex) {
             throw new BusinessRuleViolationException("Invalid pig type: " + rawType);
         }
+    }
+
+    private String normalizeText(String input) {
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+        normalized = normalized.replaceAll("\\p{M}", "");
+        return normalized.trim().toLowerCase();
     }
 
     private String generatePigCode(UUID id) {
