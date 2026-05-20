@@ -100,11 +100,33 @@ public class MatingService {
         if (request.getMatingRound() != null) mating.setMatingRound(request.getMatingRound());
         if (request.getEmployeeId() != null) mating.setEmployeeId(request.getEmployeeId());
         if (request.getMatingDate() != null) mating.setMatingDate(request.getMatingDate());
-        if (request.getStatus() != null) mating.setStatus(request.getStatus());
+        if (request.getStatus() != null) {
+            String normalizedStatus = normalizePregnancyStatus(request.getStatus());
+            mating.setStatus(normalizedStatus);
+        }
         mating.setUpdatedBy(updatedBy);
 
         Mating saved = matingRepository.save(mating);
         AuditContext.registerUpdated(saved);
+
+        if (request.getStatus() != null && isPregnantStatus(saved.getStatus())) {
+            reproductionCycleRepository.findActiveByMatingId(saved.getId()).orElseGet(() -> {
+                    LocalDate conceptionDate = LocalDate.now();
+                LocalDate expectedFarrowDate = conceptionDate.plusDays(114);
+
+                ReproductionCycle cycle = ReproductionCycle.builder()
+                        .matingId(saved.getId())
+                        .conceptionDate(conceptionDate)
+                        .expectedFarrowDate(expectedFarrowDate)
+                        .status("Mang thai")
+                        .createdBy(updatedBy)
+                        .build();
+
+                ReproductionCycle created = reproductionCycleRepository.save(cycle);
+                AuditContext.registerCreated(created);
+                return created;
+            });
+        }
         return toResponseWithEnrichment(saved);
     }
 
@@ -125,9 +147,7 @@ public class MatingService {
 
             if (isPregnantStatus(normalizedStatus)) {
                 reproductionCycleRepository.findActiveByMatingId(saved.getId()).orElseGet(() -> {
-                    LocalDate conceptionDate = saved.getMatingDate() != null
-                            ? saved.getMatingDate()
-                            : LocalDate.now();
+                    LocalDate conceptionDate = LocalDate.now();
                     LocalDate expectedFarrowDate = conceptionDate.plusDays(114);
 
                     ReproductionCycle cycle = ReproductionCycle.builder()
@@ -192,6 +212,10 @@ public class MatingService {
         String rawLower = status.trim().toLowerCase();
         String normalized = normalizeText(status);
 
+        if (normalized.contains("dau thai")) {
+            return "Đậu thai";
+        }
+
         if (rawLower.contains("chửa") || rawLower.contains("mang thai") || rawLower.contains("có thai")
                 || normalized.contains("pregnant")) {
             return "Chửa";
@@ -218,8 +242,8 @@ public class MatingService {
             return false;
         }
         String normalized = normalizeText(status);
-        return normalized.contains("chua") || normalized.contains("mang thai")
-                || normalized.contains("co thai") || normalized.contains("pregnant");
+        return normalized.contains("dau thai") || normalized.contains("chua") || normalized.contains("mang thai")
+            || normalized.contains("co thai") || normalized.contains("pregnant");
     }
 
     private String normalizeText(String input) {
