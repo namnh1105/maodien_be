@@ -14,6 +14,7 @@ import com.hainam.worksphere.pig.dto.response.PigWithLatestGrowthResponse;
 import com.hainam.worksphere.pig.dto.response.SowResponse;
 import com.hainam.worksphere.pig.repository.PigRepository;
 import com.hainam.worksphere.reproductioncycle.domain.ReproductionCycle;
+import com.hainam.worksphere.reproductioncycle.domain.ReproductionCycleStatus;
 import com.hainam.worksphere.reproductioncycle.repository.ReproductionCycleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -155,7 +156,8 @@ public class PigQueryService {
                     .filter(c -> c.getStatus() != null &&
                             (c.getStatus().toUpperCase().contains("FAILED") ||
                              c.getStatus().toUpperCase().contains("ABORTED") ||
-                             c.getStatus().toUpperCase().contains("MISCARRIAGE")))
+                         c.getStatus().toUpperCase().contains("MISCARRIAGE") ||
+                         c.getStatus().toUpperCase().contains(ReproductionCycleStatus.MISCARRIED.name())))
                     .count();
 
             String breedName = null;
@@ -271,6 +273,10 @@ public class PigQueryService {
     private boolean isPregnantCycleStatus(String status) {
         if (status == null || status.isBlank()) return false;
         String normalized = normalizeText(status);
+        String enumCandidate = status.trim().toUpperCase().replace(' ', '_');
+        if (ReproductionCycleStatus.PREGNANT.name().equals(enumCandidate)) {
+            return true;
+        }
         return normalized.contains("dang mang thai")
                 || normalized.contains("mang thai")
                 || normalized.contains("chua")

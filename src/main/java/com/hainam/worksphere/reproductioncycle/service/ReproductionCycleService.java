@@ -10,7 +10,9 @@ import com.hainam.worksphere.pigletherd.domain.PigletHerd;
 import com.hainam.worksphere.pigletherd.repository.PigletHerdRepository;
 import com.hainam.worksphere.pigsemen.domain.PigSemen;
 import com.hainam.worksphere.pigsemen.repository.PigSemenRepository;
+import com.hainam.worksphere.mating.domain.MatingStatus;
 import com.hainam.worksphere.reproductioncycle.domain.ReproductionCycle;
+import com.hainam.worksphere.reproductioncycle.domain.ReproductionCycleStatus;
 import com.hainam.worksphere.reproductioncycle.dto.request.CreateReproductionCycleRequest;
 import com.hainam.worksphere.reproductioncycle.dto.request.RecordFarrowingRequest;
 import com.hainam.worksphere.reproductioncycle.dto.request.UpdateReproductionCycleRequest;
@@ -200,16 +202,13 @@ public class ReproductionCycleService {
         matingRepository.findActiveById(cycle.getMatingId()).ifPresent(mating -> {
             AuditContext.snapshot(mating);
 
-            String normalized = normalizeText(cycleStatus);
-            if (normalized.contains("say") || normalized.contains("miscarriage")
-                    || normalized.contains("fail") || normalized.contains("aborted")) {
-                mating.setStatus("Sảy");
-            } else if (normalized.contains("da de") || normalized.equals("de")
-                    || normalized.contains("farrow") || normalized.contains("success")) {
-                mating.setStatus("Đã đẻ");
-            } else if (normalized.contains("mang thai") || normalized.contains("chua")
-                    || normalized.contains("dau thai") || normalized.contains("pregnant")) {
-                mating.setStatus("Chửa");
+            String normalizedCycleStatus = normalizeCycleStatus(cycleStatus);
+            if (ReproductionCycleStatus.MISCARRIED.name().equals(normalizedCycleStatus)) {
+                mating.setStatus(MatingStatus.MISCARRIED.name());
+            } else if (ReproductionCycleStatus.FARROWED.name().equals(normalizedCycleStatus)) {
+                mating.setStatus(MatingStatus.FARROWED.name());
+            } else if (ReproductionCycleStatus.PREGNANT.name().equals(normalizedCycleStatus)) {
+                mating.setStatus(MatingStatus.PREGNANT.name());
             } else {
                 mating.setStatus(cycleStatus);
             }
@@ -274,8 +273,12 @@ public class ReproductionCycleService {
     private boolean isFarrowingSuccessStatus(String status) {
         if (status == null || status.isBlank()) return false;
         String normalized = normalizeText(status);
-        return normalized.contains("success") || normalized.contains("da de")
-                || normalized.equals("de") || normalized.contains("farrow");
+        if (normalized.contains("success") || normalized.contains("da de")
+            || normalized.equals("de") || normalized.contains("farrow")) {
+            return true;
+        }
+        String enumCandidate = status.trim().toUpperCase().replace(' ', '_');
+        return ReproductionCycleStatus.FARROWED.name().equals(enumCandidate);
     }
 
     private String normalizeCycleStatus(String status) {
@@ -284,21 +287,26 @@ public class ReproductionCycleService {
         String normalized = normalizeText(status);
         if (normalized.contains("success") || normalized.contains("da de")
                 || normalized.equals("de") || normalized.contains("farrow")) {
-            return "Đã đẻ";
+            return ReproductionCycleStatus.FARROWED.name();
         }
 
         if (normalized.contains("say") || normalized.contains("miscarriage")
                 || normalized.contains("fail") || normalized.contains("aborted")) {
-            return "Sảy";
+            return ReproductionCycleStatus.MISCARRIED.name();
         }
 
         if (normalized.contains("dang mang thai") || normalized.contains("mang thai")
                 || normalized.contains("chua") || normalized.contains("dau thai")
                 || normalized.contains("pregnant")) {
-            return "Đang mang thai";
+            return ReproductionCycleStatus.PREGNANT.name();
         }
 
-        return status.trim();
+        String enumCandidate = status.trim().toUpperCase().replace(' ', '_');
+        try {
+            return ReproductionCycleStatus.valueOf(enumCandidate).name();
+        } catch (IllegalArgumentException ignored) {
+            return status.trim();
+        }
     }
 
     private String normalizeText(String input) {

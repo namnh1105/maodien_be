@@ -1,6 +1,7 @@
 package com.hainam.worksphere.mating.service;
 
 import com.hainam.worksphere.mating.domain.Mating;
+import com.hainam.worksphere.mating.domain.MatingStatus;
 import com.hainam.worksphere.mating.dto.request.CreateMatingRequest;
 import com.hainam.worksphere.mating.dto.request.UpdateMatingRequest;
 import com.hainam.worksphere.mating.dto.request.UpdateMatingStatusRequest;
@@ -126,7 +127,7 @@ public class MatingService {
                         .matingId(saved.getId())
                         .conceptionDate(conceptionDate)
                         .expectedFarrowDate(expectedFarrowDate)
-                    .status("Đang mang thai")
+                    .status(com.hainam.worksphere.reproductioncycle.domain.ReproductionCycleStatus.PREGNANT.name())
                         .createdBy(updatedBy)
                         .build();
 
@@ -162,7 +163,7 @@ public class MatingService {
                             .matingId(saved.getId())
                             .conceptionDate(conceptionDate)
                             .expectedFarrowDate(expectedFarrowDate)
-                            .status("Đang mang thai")
+                            .status(com.hainam.worksphere.reproductioncycle.domain.ReproductionCycleStatus.PREGNANT.name())
                             .createdBy(updatedBy)
                             .build();
 
@@ -221,28 +222,43 @@ public class MatingService {
         String normalized = normalizeText(status);
 
         if (normalized.contains("dau thai")) {
-            return "Đậu thai";
+            return MatingStatus.PREGNANT.name();
         }
 
         if (rawLower.contains("chửa") || rawLower.contains("mang thai") || rawLower.contains("có thai")
                 || normalized.contains("pregnant")) {
-            return "Chửa";
+            return MatingStatus.PREGNANT.name();
         }
 
         if (normalized.contains("khong") || (normalized.contains("chua") && !rawLower.contains("chửa"))
                 || normalized.contains("not pregnant")) {
-            return "Chờ phối";
+            return MatingStatus.PENDING.name();
         }
 
         if (normalized.contains("da phoi")) {
-            return "Đã phối";
+            return MatingStatus.BRED.name();
         }
 
         if (normalized.contains("cho phoi")) {
-            return "Chờ phối";
+            return MatingStatus.PENDING.name();
         }
 
-        return status.trim();
+        if (normalized.contains("say") || normalized.contains("miscarriage")
+                || normalized.contains("fail") || normalized.contains("aborted")) {
+            return MatingStatus.MISCARRIED.name();
+        }
+
+        if (normalized.contains("da de") || normalized.equals("de")
+                || normalized.contains("farrow") || normalized.contains("success")) {
+            return MatingStatus.FARROWED.name();
+        }
+
+        String enumCandidate = status.trim().toUpperCase().replace(' ', '_');
+        try {
+            return MatingStatus.valueOf(enumCandidate).name();
+        } catch (IllegalArgumentException ignored) {
+            return status.trim();
+        }
     }
 
     private boolean isPregnantStatus(String status) {
@@ -250,8 +266,12 @@ public class MatingService {
             return false;
         }
         String normalized = normalizeText(status);
-        return normalized.contains("dau thai") || normalized.contains("chua") || normalized.contains("mang thai")
-            || normalized.contains("co thai") || normalized.contains("pregnant");
+        if (normalized.contains("dau thai") || normalized.contains("chua") || normalized.contains("mang thai")
+                || normalized.contains("co thai") || normalized.contains("pregnant")) {
+            return true;
+        }
+        String enumCandidate = status.trim().toUpperCase().replace(' ', '_');
+        return MatingStatus.PREGNANT.name().equals(enumCandidate);
     }
 
     private String normalizeText(String input) {
