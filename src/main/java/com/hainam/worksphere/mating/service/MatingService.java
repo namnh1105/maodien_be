@@ -40,6 +40,9 @@ public class MatingService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "MATING")
     public MatingResponse create(CreateMatingRequest request, UUID createdBy) {
+        String normalizedStatus = request.getStatus() != null
+            ? normalizePregnancyStatus(request.getStatus())
+            : null;
         Mating mating = Mating.builder()
                 .sowPigId(request.getSowPigId())
                 .semenId(request.getSemenId())
@@ -47,7 +50,7 @@ public class MatingService {
                 .matingRound(request.getMatingRound())
                 .employeeId(request.getEmployeeId())
                 .matingDate(request.getMatingDate())
-                .status(request.getStatus())
+            .status(normalizedStatus)
                 .createdBy(createdBy)
                 .build();
 
@@ -124,12 +127,12 @@ public class MatingService {
                 LocalDate expectedFarrowDate = conceptionDate.plusDays(114);
 
                 ReproductionCycle cycle = ReproductionCycle.builder()
-                        .matingId(saved.getId())
-                        .conceptionDate(conceptionDate)
-                        .expectedFarrowDate(expectedFarrowDate)
-                    .status(com.hainam.worksphere.reproductioncycle.domain.ReproductionCycleStatus.PREGNANT.name())
-                        .createdBy(updatedBy)
-                        .build();
+                    .matingId(saved.getId())
+                    .conceptionDate(conceptionDate)
+                    .expectedFarrowDate(expectedFarrowDate)
+                        .status(com.hainam.worksphere.reproductioncycle.domain.ReproductionCycleStatus.TRACKING.name())
+                    .createdBy(updatedBy)
+                    .build();
 
                 ReproductionCycle created = reproductionCycleRepository.save(cycle);
                 AuditContext.registerCreated(created);
@@ -163,7 +166,7 @@ public class MatingService {
                             .matingId(saved.getId())
                             .conceptionDate(conceptionDate)
                             .expectedFarrowDate(expectedFarrowDate)
-                            .status(com.hainam.worksphere.reproductioncycle.domain.ReproductionCycleStatus.PREGNANT.name())
+                            .status(com.hainam.worksphere.reproductioncycle.domain.ReproductionCycleStatus.TRACKING.name())
                             .createdBy(updatedBy)
                             .build();
 
@@ -221,42 +224,50 @@ public class MatingService {
         String rawLower = status.trim().toLowerCase();
         String normalized = normalizeText(status);
 
-        if (normalized.contains("dau thai")) {
-            return MatingStatus.PREGNANT.name();
+        if (normalized.contains("dau thai") || rawLower.contains("chửa") || rawLower.contains("mang thai")
+                || rawLower.contains("có thai") || normalized.contains("pregnant")
+                || normalized.contains("thanh cong") || normalized.contains("success")) {
+            return MatingStatus.SUCCESS.name();
         }
 
-        if (rawLower.contains("chửa") || rawLower.contains("mang thai") || rawLower.contains("có thai")
-                || normalized.contains("pregnant")) {
-            return MatingStatus.PREGNANT.name();
+        if (normalized.contains("khong dau thai") || normalized.contains("khong co thai")
+                || normalized.contains("khong") || normalized.contains("not pregnant")
+                || normalized.contains("that bai") || normalized.contains("fail")) {
+            return MatingStatus.FAILURE.name();
         }
 
-        if (normalized.contains("khong") || (normalized.contains("chua") && !rawLower.contains("chửa"))
-                || normalized.contains("not pregnant")) {
-            return MatingStatus.PENDING.name();
-        }
-
-        if (normalized.contains("da phoi")) {
-            return MatingStatus.BRED.name();
-        }
-
-        if (normalized.contains("cho phoi")) {
-            return MatingStatus.PENDING.name();
+        if (normalized.contains("da phoi") || normalized.contains("phoi")
+                || normalized.contains("can theo doi") || normalized.contains("theo doi")
+                || normalized.contains("tracking") || normalized.contains("follow")) {
+            return MatingStatus.TRACKING.name();
         }
 
         if (normalized.contains("say") || normalized.contains("miscarriage")
-                || normalized.contains("fail") || normalized.contains("aborted")) {
-            return MatingStatus.MISCARRIED.name();
+                || normalized.contains("aborted")) {
+            return MatingStatus.FAILURE.name();
         }
 
         if (normalized.contains("da de") || normalized.equals("de")
-                || normalized.contains("farrow") || normalized.contains("success")) {
-            return MatingStatus.FARROWED.name();
+                || normalized.contains("farrow")) {
+            return MatingStatus.SUCCESS.name();
+        }
+
+        if (normalized.contains("cho phoi")) {
+            return MatingStatus.TRACKING.name();
+        }
+
+        if (normalized.contains("pending")) {
+            return MatingStatus.TRACKING.name();
         }
 
         String enumCandidate = status.trim().toUpperCase().replace(' ', '_');
         try {
             return MatingStatus.valueOf(enumCandidate).name();
         } catch (IllegalArgumentException ignored) {
+            if ("PREGNANT".equals(enumCandidate)) return MatingStatus.SUCCESS.name();
+            if ("BRED".equals(enumCandidate) || "PENDING".equals(enumCandidate)) return MatingStatus.TRACKING.name();
+            if ("FARROWED".equals(enumCandidate)) return MatingStatus.SUCCESS.name();
+            if ("MISCARRIED".equals(enumCandidate)) return MatingStatus.FAILURE.name();
             return status.trim();
         }
     }
@@ -267,11 +278,12 @@ public class MatingService {
         }
         String normalized = normalizeText(status);
         if (normalized.contains("dau thai") || normalized.contains("chua") || normalized.contains("mang thai")
-                || normalized.contains("co thai") || normalized.contains("pregnant")) {
+                || normalized.contains("co thai") || normalized.contains("pregnant")
+                || normalized.contains("thanh cong") || normalized.contains("success")) {
             return true;
         }
         String enumCandidate = status.trim().toUpperCase().replace(' ', '_');
-        return MatingStatus.PREGNANT.name().equals(enumCandidate);
+        return MatingStatus.SUCCESS.name().equals(enumCandidate) || "PREGNANT".equals(enumCandidate);
     }
 
     private String normalizeText(String input) {

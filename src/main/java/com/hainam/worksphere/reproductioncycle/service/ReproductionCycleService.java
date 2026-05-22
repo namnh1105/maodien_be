@@ -49,12 +49,15 @@ public class ReproductionCycleService {
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "REPRODUCTION_CYCLE")
     public ReproductionCycleResponse create(CreateReproductionCycleRequest request, UUID createdBy) {
+        String normalizedStatus = request.getStatus() != null
+            ? normalizeCycleStatus(request.getStatus())
+            : null;
         ReproductionCycle cycle = ReproductionCycle.builder()
                 .matingId(request.getMatingId())
                 .conceptionDate(request.getConceptionDate())
                 .expectedFarrowDate(request.getExpectedFarrowDate())
                 .actualFarrowDate(request.getActualFarrowDate())
-                .status(request.getStatus())
+            .status(normalizedStatus)
                 .bornCount(request.getBornCount())
                 .aliveCount(request.getAliveCount())
                 .deadCount(request.getDeadCount())
@@ -101,7 +104,7 @@ public class ReproductionCycleService {
         if (request.getConceptionDate() != null) cycle.setConceptionDate(request.getConceptionDate());
         if (request.getExpectedFarrowDate() != null) cycle.setExpectedFarrowDate(request.getExpectedFarrowDate());
         if (request.getActualFarrowDate() != null) cycle.setActualFarrowDate(request.getActualFarrowDate());
-        if (request.getStatus() != null) cycle.setStatus(request.getStatus());
+        if (request.getStatus() != null) cycle.setStatus(normalizeCycleStatus(request.getStatus()));
         if (request.getBornCount() != null) cycle.setBornCount(request.getBornCount());
         if (request.getAliveCount() != null) cycle.setAliveCount(request.getAliveCount());
         if (request.getDeadCount() != null) cycle.setDeadCount(request.getDeadCount());
@@ -204,11 +207,11 @@ public class ReproductionCycleService {
 
             String normalizedCycleStatus = normalizeCycleStatus(cycleStatus);
             if (ReproductionCycleStatus.MISCARRIED.name().equals(normalizedCycleStatus)) {
-                mating.setStatus(MatingStatus.MISCARRIED.name());
+                mating.setStatus(MatingStatus.FAILURE.name());
             } else if (ReproductionCycleStatus.FARROWED.name().equals(normalizedCycleStatus)) {
-                mating.setStatus(MatingStatus.FARROWED.name());
-            } else if (ReproductionCycleStatus.PREGNANT.name().equals(normalizedCycleStatus)) {
-                mating.setStatus(MatingStatus.PREGNANT.name());
+                mating.setStatus(MatingStatus.SUCCESS.name());
+            } else if (ReproductionCycleStatus.TRACKING.name().equals(normalizedCycleStatus)) {
+                mating.setStatus(MatingStatus.SUCCESS.name());
             } else {
                 mating.setStatus(cycleStatus);
             }
@@ -278,7 +281,7 @@ public class ReproductionCycleService {
             return true;
         }
         String enumCandidate = status.trim().toUpperCase().replace(' ', '_');
-        return ReproductionCycleStatus.FARROWED.name().equals(enumCandidate);
+        return ReproductionCycleStatus.FARROWED.name().equals(enumCandidate) || "FARROWED".equals(enumCandidate);
     }
 
     private String normalizeCycleStatus(String status) {
@@ -297,14 +300,17 @@ public class ReproductionCycleService {
 
         if (normalized.contains("dang mang thai") || normalized.contains("mang thai")
                 || normalized.contains("chua") || normalized.contains("dau thai")
-                || normalized.contains("pregnant")) {
-            return ReproductionCycleStatus.PREGNANT.name();
+                || normalized.contains("pregnant") || normalized.contains("theo doi")) {
+            return ReproductionCycleStatus.TRACKING.name();
         }
 
         String enumCandidate = status.trim().toUpperCase().replace(' ', '_');
         try {
             return ReproductionCycleStatus.valueOf(enumCandidate).name();
         } catch (IllegalArgumentException ignored) {
+            if ("PREGNANT".equals(enumCandidate)) return ReproductionCycleStatus.TRACKING.name();
+            if ("FARROWED".equals(enumCandidate)) return ReproductionCycleStatus.FARROWED.name();
+            if ("MISCARRIED".equals(enumCandidate)) return ReproductionCycleStatus.MISCARRIED.name();
             return status.trim();
         }
     }

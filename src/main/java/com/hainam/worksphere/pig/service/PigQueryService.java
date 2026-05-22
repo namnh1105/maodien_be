@@ -158,12 +158,13 @@ public class PigQueryService {
             // Tổng số lần mang thai = tổng số records
             int totalPregnancies = cycles.size();
 
-            // Số lần sẩy thai / thất bại (actualFarrowDate IS NULL và status chứa FAILED/ABORTED)
+                    // Số lần sẩy thai / thất bại (actualFarrowDate IS NULL và status chứa FAILED/ABORTED/MISCARRIED)
             long miscarriageCount = cycles.stream()
                     .filter(c -> c.getStatus() != null &&
                             (c.getStatus().toUpperCase().contains("FAILED") ||
                              c.getStatus().toUpperCase().contains("ABORTED") ||
                          c.getStatus().toUpperCase().contains("MISCARRIAGE") ||
+                         c.getStatus().toUpperCase().contains("MISCARRIED") ||
                          c.getStatus().toUpperCase().contains(ReproductionCycleStatus.MISCARRIED.name())))
                     .count();
 
@@ -281,14 +282,15 @@ public class PigQueryService {
         if (status == null || status.isBlank()) return false;
         String normalized = normalizeText(status);
         String enumCandidate = status.trim().toUpperCase().replace(' ', '_');
-        if (ReproductionCycleStatus.PREGNANT.name().equals(enumCandidate)) {
+        if (ReproductionCycleStatus.TRACKING.name().equals(enumCandidate) || "PREGNANT".equals(enumCandidate)) {
             return true;
         }
         return normalized.contains("dang mang thai")
                 || normalized.contains("mang thai")
                 || normalized.contains("chua")
                 || normalized.contains("dau thai")
-                || normalized.contains("pregnant");
+            || normalized.contains("pregnant")
+            || normalized.contains("theo doi");
     }
 
     private String normalizeText(String input) {
