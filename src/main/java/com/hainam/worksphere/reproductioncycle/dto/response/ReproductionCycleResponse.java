@@ -29,4 +29,5 @@ public class ReproductionCycleResponse {
     private Double averageWeight;
     private Instant createdAt;
     private Instant updatedAt;
+    private String sowPigEarTag;
 }

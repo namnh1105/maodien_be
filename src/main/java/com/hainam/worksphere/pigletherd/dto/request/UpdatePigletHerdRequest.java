@@ -33,5 +33,7 @@ public class UpdatePigletHerdRequest {
 
     private UUID semenId;
 
-    private String status;
+    private com.hainam.worksphere.pigletherd.domain.PigletHerdStatus status;
+
+    private Boolean isSold;
 }

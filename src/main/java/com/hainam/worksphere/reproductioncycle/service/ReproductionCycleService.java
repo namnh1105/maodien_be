@@ -7,6 +7,7 @@ import com.hainam.worksphere.penpig.repository.PenPigRepository;
 import com.hainam.worksphere.pig.domain.Pig;
 import com.hainam.worksphere.pig.repository.PigRepository;
 import com.hainam.worksphere.pigletherd.domain.PigletHerd;
+import com.hainam.worksphere.pigletherd.domain.PigletHerdStatus;
 import com.hainam.worksphere.pigletherd.repository.PigletHerdRepository;
 import com.hainam.worksphere.pigsemen.domain.PigSemen;
 import com.hainam.worksphere.pigsemen.repository.PigSemenRepository;
@@ -69,7 +70,7 @@ public class ReproductionCycleService {
 
         ReproductionCycle saved = reproductionCycleRepository.save(cycle);
         AuditContext.registerCreated(saved);
-        return reproductionCycleMapper.toResponse(saved);
+        return toResponseWithEarTag(saved);
     }
 
     @Transactional(readOnly = true)
@@ -80,16 +81,16 @@ public class ReproductionCycleService {
     @Transactional(readOnly = true)
     public List<ReproductionCycleResponse> getAll(String status) {
         List<ReproductionCycle> cycles = (status == null || status.isBlank())
-                ? reproductionCycleRepository.findAllActive()
-                : reproductionCycleRepository.findActiveByStatus(status);
-        return cycles.stream().map(reproductionCycleMapper::toResponse).toList();
+            ? reproductionCycleRepository.findAllActive()
+            : reproductionCycleRepository.findActiveByStatus(status);
+        return cycles.stream().map(this::toResponseWithEarTag).toList();
     }
 
     @Transactional(readOnly = true)
     public ReproductionCycleResponse getById(UUID id) {
         ReproductionCycle cycle = reproductionCycleRepository.findActiveById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ReproductionCycle", id.toString()));
-        return reproductionCycleMapper.toResponse(cycle);
+            .orElseThrow(() -> new ResourceNotFoundException("ReproductionCycle", id.toString()));
+        return toResponseWithEarTag(cycle);
     }
 
     @Transactional
@@ -115,7 +116,7 @@ public class ReproductionCycleService {
 
         ReproductionCycle saved = reproductionCycleRepository.save(cycle);
         AuditContext.registerUpdated(saved);
-        return reproductionCycleMapper.toResponse(saved);
+        return toResponseWithEarTag(saved);
     }
 
     @Transactional
@@ -138,7 +139,7 @@ public class ReproductionCycleService {
             AuditContext.registerUpdated(saved);
 
             updateMatingStatusFromCycle(saved, normalizedStatus, updatedBy);
-            return reproductionCycleMapper.toResponse(saved);
+            return toResponseWithEarTag(saved);
         }).toList();
     }
 
@@ -179,7 +180,7 @@ public class ReproductionCycleService {
                 createPigletHerdIfAbsent(saved, request, updatedBy);
             }
 
-            return reproductionCycleMapper.toResponse(saved);
+            return toResponseWithEarTag(saved);
         }).toList();
     }
 
@@ -266,6 +267,7 @@ public class ReproductionCycleService {
                 .averageBirthWeight(request.getAverageWeight())
                 .birthDate(birthDate)
                 .semenId(mating.getSemenId())
+                .status(PigletHerdStatus.UNWEANED)
                 .createdBy(createdBy)
                 .build();
 
@@ -319,5 +321,20 @@ public class ReproductionCycleService {
         String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
         normalized = normalized.replaceAll("\\p{M}", "");
         return normalized.trim().toLowerCase();
+    }
+
+    private ReproductionCycleResponse toResponseWithEarTag(ReproductionCycle cycle) {
+        ReproductionCycleResponse response = reproductionCycleMapper.toResponse(cycle);
+
+        if (cycle.getMatingId() != null) {
+            matingRepository.findActiveById(cycle.getMatingId()).ifPresent(mating -> {
+                if (mating.getSowPigId() != null) {
+                    pigRepository.findActiveById(mating.getSowPigId())
+                            .ifPresent(pig -> response.setSowPigEarTag(pig.getEarTag()));
+                }
+            });
+        }
+
+        return response;
     }
 }

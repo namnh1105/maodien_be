@@ -30,7 +30,8 @@ public class PigletHerdResponse {
     private Double averageBirthWeight;
     private LocalDate birthDate;
     private UUID semenId;
-    private String status;
+    private com.hainam.worksphere.pigletherd.domain.PigletHerdStatus status;
+    private Boolean isSold;
     private Instant createdAt;
     private Instant updatedAt;
 }

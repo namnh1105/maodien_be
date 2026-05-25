@@ -65,6 +65,7 @@ public class PigletHerdService {
                 .birthDate(request.getBirthDate())
                 .semenId(request.getSemenId())
                 .status(request.getStatus())
+                .isSold(request.getIsSold())
                 .createdBy(createdBy)
                 .build();
 
@@ -133,6 +134,7 @@ public class PigletHerdService {
         if (request.getBirthDate() != null) herd.setBirthDate(request.getBirthDate());
         if (request.getSemenId() != null) herd.setSemenId(request.getSemenId());
         if (request.getStatus() != null) herd.setStatus(request.getStatus());
+        if (request.getIsSold() != null) herd.setIsSold(request.getIsSold());
         herd.setHerdName(buildHerdName(herd.getMother(), herd.getLitterNumber()));
         herd.setUpdatedBy(updatedBy);
 
@@ -204,6 +206,8 @@ public class PigletHerdService {
                 .genderNote(source.getGenderNote())
                 .averageBirthWeight(source.getAverageBirthWeight())
                 .birthDate(source.getBirthDate())
+                .status(source.getStatus())
+                .isSold(source.getIsSold())
                 .createdBy(updatedBy)
                 .build();
         target.setHerdName(buildHerdName(target.getMother(), target.getLitterNumber()));

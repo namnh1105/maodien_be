@@ -62,7 +62,12 @@ public class PigletHerd {
     private UUID semenId;
 
     @Column(name = "status", length = 50)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private PigletHerdStatus status;
+
+    @Column(name = "is_sold")
+    @Builder.Default
+    private Boolean isSold = false;
 
     @CreationTimestamp
     @Column(name = "created_at")

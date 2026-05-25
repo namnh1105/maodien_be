@@ -1,6 +1,5 @@
 package com.hainam.worksphere.pigletherd.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +17,6 @@ public class UpdatePigletHerdStatusRequest {
     @NotNull(message = "Herd id is required")
     private UUID id;
 
-    @NotBlank(message = "Status is required")
-    private String status;
+    @NotNull(message = "Status is required")
+    private com.hainam.worksphere.pigletherd.domain.PigletHerdStatus status;
 }
