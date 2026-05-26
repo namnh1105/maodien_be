@@ -27,6 +27,21 @@ public interface PigletHerdRepository extends JpaRepository<PigletHerd, UUID> {
     @Query("SELECT h FROM PigletHerd h WHERE h.mother.id IN :motherIds AND h.isDeleted = false")
     List<PigletHerd> findActiveByMotherIds(@Param("motherIds") List<UUID> motherIds);
 
+        @Query("SELECT h FROM PigletHerd h WHERE h.isSold = :isSold AND h.isDeleted = false")
+        List<PigletHerd> findActiveByIsSold(@Param("isSold") Boolean isSold);
+
+        @Query("SELECT h FROM PigletHerd h WHERE h.status = :status AND h.isDeleted = false")
+        List<PigletHerd> findActiveByStatus(@Param("status") com.hainam.worksphere.pigletherd.domain.PigletHerdStatus status);
+
+        @Query("SELECT h FROM PigletHerd h WHERE h.status = :status AND h.isSold = :isSold AND h.isDeleted = false")
+        List<PigletHerd> findActiveByIsSoldAndStatus(
+            @Param("isSold") Boolean isSold,
+            @Param("status") com.hainam.worksphere.pigletherd.domain.PigletHerdStatus status
+        );
+
+        @Query("SELECT h FROM PigletHerd h WHERE h.id IN :ids AND h.isDeleted = false")
+        List<PigletHerd> findActiveByIds(@Param("ids") List<UUID> ids);
+
     @Query("SELECT CASE WHEN COUNT(h) > 0 THEN true ELSE false END FROM PigletHerd h " +
            "WHERE h.mother.id = :motherId AND h.litterNumber = :litterNumber AND h.birthDate = :birthDate " +
            "AND h.isDeleted = false")

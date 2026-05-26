@@ -2,9 +2,13 @@ package com.hainam.worksphere.pigletherd.service;
 
 import com.hainam.worksphere.pig.domain.Pig;
 import com.hainam.worksphere.pig.repository.PigRepository;
+import com.hainam.worksphere.pen.domain.Pen;
+import com.hainam.worksphere.pen.repository.PenRepository;
 import com.hainam.worksphere.pigletherd.domain.PigletHerd;
+import com.hainam.worksphere.pigletherd.domain.PigletHerdGrowth;
 import com.hainam.worksphere.pigletherd.domain.PigletHerdMovement;
 import com.hainam.worksphere.pigletherd.domain.PigletHerdMovementType;
+import com.hainam.worksphere.pigletherd.domain.PigletHerdStatus;
 import com.hainam.worksphere.pigletherd.dto.request.CreatePigletHerdRequest;
 import com.hainam.worksphere.pigletherd.dto.request.MergePigletHerdRequest;
 import com.hainam.worksphere.pigletherd.dto.request.SplitPigletHerdRequest;
@@ -33,7 +37,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +48,7 @@ public class PigletHerdService {
 
     private final PigletHerdRepository pigletHerdRepository;
     private final PigRepository pigRepository;
+    private final PenRepository penRepository;
     private final PigletHerdMapper pigletHerdMapper;
     private final PigletHerdGrowthRepository pigletHerdGrowthRepository;
     private final PigletHerdMovementRepository pigletHerdMovementRepository;
@@ -73,19 +81,35 @@ public class PigletHerdService {
 
         PigletHerd saved = pigletHerdRepository.save(herd);
         AuditContext.registerCreated(saved);
-        return pigletHerdMapper.toResponse(saved);
+        return toEnrichedResponse(saved);
     }
 
     @Transactional(readOnly = true)
     public List<PigletHerdResponse> getAll() {
-        return pigletHerdRepository.findAllActive().stream().map(pigletHerdMapper::toResponse).toList();
+        return getAll(null, null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PigletHerdResponse> getAll(Boolean isSold, PigletHerdStatus status) {
+        List<PigletHerd> herds;
+        if (isSold != null && status != null) {
+            herds = pigletHerdRepository.findActiveByIsSoldAndStatus(isSold, status);
+        } else if (isSold != null) {
+            herds = pigletHerdRepository.findActiveByIsSold(isSold);
+        } else if (status != null) {
+            herds = pigletHerdRepository.findActiveByStatus(status);
+        } else {
+            herds = pigletHerdRepository.findAllActive();
+        }
+
+        return herds.stream().map(this::toEnrichedResponse).toList();
     }
 
     @Transactional(readOnly = true)
     public PigletHerdResponse getById(UUID id) {
         PigletHerd herd = pigletHerdRepository.findActiveById(id)
                 .orElseThrow(() -> PigletHerdNotFoundException.byId(id.toString()));
-        return pigletHerdMapper.toResponse(herd);
+        return toEnrichedResponse(herd);
     }
 
         @Transactional(readOnly = true)
@@ -98,13 +122,14 @@ public class PigletHerdService {
             .map(pigletHerdGrowthMapper::toResponse)
             .toList();
 
-        List<PigletHerdMovementResponse> movementHistory = pigletHerdMovementRepository.findActiveByHerdId(id)
-            .stream()
-            .map(pigletHerdMovementMapper::toResponse)
+        List<PigletHerdMovement> movements = pigletHerdMovementRepository.findActiveByHerdId(id);
+        Map<UUID, String> herdNameMap = buildHerdNameMap(movements);
+        List<PigletHerdMovementResponse> movementHistory = movements.stream()
+            .map(movement -> enrichMovementResponse(pigletHerdMovementMapper.toResponse(movement), herdNameMap))
             .toList();
 
         return PigletHerdDetailResponse.builder()
-            .herd(pigletHerdMapper.toResponse(herd))
+            .herd(toEnrichedResponse(herd))
             .growthHistory(growthHistory)
             .movementHistory(movementHistory)
             .build();
@@ -112,7 +137,7 @@ public class PigletHerdService {
 
     @Transactional(readOnly = true)
     public List<PigletHerdResponse> getByMotherId(UUID motherId) {
-        return pigletHerdRepository.findActiveByMotherId(motherId).stream().map(pigletHerdMapper::toResponse).toList();
+        return pigletHerdRepository.findActiveByMotherId(motherId).stream().map(this::toEnrichedResponse).toList();
     }
 
     @Transactional
@@ -140,7 +165,7 @@ public class PigletHerdService {
 
         PigletHerd saved = pigletHerdRepository.save(herd);
         AuditContext.registerUpdated(saved);
-        return pigletHerdMapper.toResponse(saved);
+        return toEnrichedResponse(saved);
     }
 
     @Transactional
@@ -157,7 +182,7 @@ public class PigletHerdService {
 
             PigletHerd saved = pigletHerdRepository.save(herd);
             AuditContext.registerUpdated(saved);
-            return pigletHerdMapper.toResponse(saved);
+            return toEnrichedResponse(saved);
         }).toList();
     }
 
@@ -226,7 +251,7 @@ public class PigletHerdService {
 
         AuditContext.registerUpdated(source);
         AuditContext.registerCreated(savedTarget);
-        return pigletHerdMapper.toResponse(savedTarget);
+        return toEnrichedResponse(savedTarget);
     }
 
     @Transactional
@@ -276,7 +301,7 @@ public class PigletHerdService {
         PigletHerd savedTarget = pigletHerdRepository.save(target);
         AuditContext.registerUpdated(savedTarget);
 
-        return pigletHerdMapper.toResponse(savedTarget);
+        return toEnrichedResponse(savedTarget);
     }
 
     private Pig findPigOrNull(UUID pigId) {
@@ -316,5 +341,53 @@ public class PigletHerdService {
                 .createdBy(createdBy)
                 .build();
         pigletHerdMovementRepository.save(movement);
+    }
+
+    private PigletHerdResponse toEnrichedResponse(PigletHerd herd) {
+        PigletHerdResponse response = pigletHerdMapper.toResponse(herd);
+        if (herd.getPenId() != null) {
+            Optional<Pen> pen = penRepository.findActiveById(herd.getPenId());
+            response.setPenName(pen.map(Pen::getName).orElse(null));
+        }
+        response.setCurrentAverageWeight(getLatestAverageWeight(herd.getId()));
+        return response;
+    }
+
+    private Double getLatestAverageWeight(UUID herdId) {
+        if (herdId == null) return null;
+        List<PigletHerdGrowth> growths = pigletHerdGrowthRepository.findActiveByHerdId(herdId);
+        if (growths.isEmpty()) return null;
+        return growths.get(0).getAverageWeight();
+    }
+
+    private Map<UUID, String> buildHerdNameMap(List<PigletHerdMovement> movements) {
+        if (movements == null || movements.isEmpty()) {
+            return Map.of();
+        }
+        List<UUID> ids = movements.stream()
+            .flatMap(movement -> java.util.stream.Stream.of(movement.getHerdId(), movement.getSourceHerdId(), movement.getTargetHerdId()))
+            .filter(id -> id != null)
+            .distinct()
+            .toList();
+
+        if (ids.isEmpty()) {
+            return Map.of();
+        }
+
+        return pigletHerdRepository.findActiveByIds(ids).stream()
+            .collect(Collectors.toMap(PigletHerd::getId, PigletHerd::getHerdName, (a, b) -> a));
+    }
+
+    private PigletHerdMovementResponse enrichMovementResponse(
+            PigletHerdMovementResponse response,
+            Map<UUID, String> herdNameMap
+    ) {
+        if (response == null || herdNameMap == null || herdNameMap.isEmpty()) {
+            return response;
+        }
+        response.setHerdName(herdNameMap.get(response.getHerdId()));
+        response.setSourceHerdName(herdNameMap.get(response.getSourceHerdId()));
+        response.setTargetHerdName(herdNameMap.get(response.getTargetHerdId()));
+        return response;
     }
 }

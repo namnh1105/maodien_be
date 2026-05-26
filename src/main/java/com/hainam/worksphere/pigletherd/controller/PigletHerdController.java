@@ -9,6 +9,7 @@ import com.hainam.worksphere.pigletherd.dto.request.UpdatePigletHerdRequest;
 import com.hainam.worksphere.pigletherd.dto.request.UpdatePigletHerdStatusRequest;
 import com.hainam.worksphere.pigletherd.dto.response.PigletHerdDetailResponse;
 import com.hainam.worksphere.pigletherd.dto.response.PigletHerdResponse;
+import com.hainam.worksphere.pigletherd.domain.PigletHerdStatus;
 import com.hainam.worksphere.pigletherd.service.PigletHerdService;
 import com.hainam.worksphere.shared.constant.PermissionType;
 import com.hainam.worksphere.shared.dto.ApiResponse;
@@ -50,12 +51,14 @@ public class PigletHerdController {
     @Operation(summary = "Get all piglet herds")
     @RequirePermission(PermissionType.VIEW_PIGLET_HERD)
     public ResponseEntity<ApiResponse<List<PigletHerdResponse>>> getAll(
-            @RequestParam(required = false) UUID motherId
+            @RequestParam(required = false) UUID motherId,
+            @RequestParam(required = false) Boolean isSold,
+            @RequestParam(required = false) PigletHerdStatus status
     ) {
         if (motherId != null) {
             return ResponseEntity.ok(ApiResponse.success(pigletHerdService.getByMotherId(motherId)));
         }
-        return ResponseEntity.ok(ApiResponse.success(pigletHerdService.getAll()));
+        return ResponseEntity.ok(ApiResponse.success(pigletHerdService.getAll(isSold, status)));
     }
 
     @GetMapping("/{id}")

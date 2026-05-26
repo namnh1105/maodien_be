@@ -17,9 +17,12 @@ public class PigletHerdMovementResponse {
 
     private UUID id;
     private UUID herdId;
+    private String herdName;
     private String movementType;
     private UUID sourceHerdId;
+    private String sourceHerdName;
     private UUID targetHerdId;
+    private String targetHerdName;
     private LocalDate movementDate;
     private Integer quantity;
     private String reason;

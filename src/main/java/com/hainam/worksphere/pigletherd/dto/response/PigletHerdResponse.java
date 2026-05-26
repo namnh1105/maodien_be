@@ -19,6 +19,7 @@ public class PigletHerdResponse {
     private String herdName;
     private Integer litterNumber;
     private UUID penId;
+    private String penName;
     private UUID motherId;
     private String motherEarTag;
     private String motherBreed;
@@ -28,6 +29,7 @@ public class PigletHerdResponse {
     private Integer quantity;
     private String genderNote;
     private Double averageBirthWeight;
+    private Double currentAverageWeight;
     private LocalDate birthDate;
     private UUID semenId;
     private com.hainam.worksphere.pigletherd.domain.PigletHerdStatus status;
