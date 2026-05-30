@@ -42,6 +42,15 @@ public class MaterialIssueDetail {
     @Column(name = "quantity", nullable = false)
     private Double quantity;
 
+    @Column(name = "unit_price")
+    private Double unitPrice;
+
+    @Column(name = "reason", columnDefinition = "TEXT")
+    private String reason;
+
+    @Column(name = "line_total")
+    private Double lineTotal;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private Instant createdAt;

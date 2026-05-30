@@ -19,6 +19,7 @@ public class MaterialIssueResponse {
     private LocalDate issueDate;
     private UUID employeeId;
     private String reason;
+    private Double totalLoss;
     private Instant createdAt;
     private Instant updatedAt;
 }

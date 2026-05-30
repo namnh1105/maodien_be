@@ -21,4 +21,8 @@ public class CreateMaterialIssueDetailRequest {
 
     @NotNull(message = "Quantity is required")
     private Double quantity;
+
+    private Double unitPrice;
+    private String reason;
+    private Double lineTotal;
 }

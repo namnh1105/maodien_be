@@ -18,4 +18,7 @@ public interface MaterialIssueDetailRepository extends JpaRepository<MaterialIss
 
     @Query("SELECT mid FROM MaterialIssueDetail mid WHERE mid.id = :id AND mid.isDeleted = false")
     Optional<MaterialIssueDetail> findActiveById(@Param("id") UUID id);
+
+    @Query("SELECT mid FROM MaterialIssueDetail mid WHERE mid.issueId = :issueId AND mid.isDeleted = false")
+    List<MaterialIssueDetail> findActiveByIssueId(@Param("issueId") UUID issueId);
 }

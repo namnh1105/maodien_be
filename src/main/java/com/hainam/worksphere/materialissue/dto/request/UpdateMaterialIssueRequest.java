@@ -16,4 +16,5 @@ public class UpdateMaterialIssueRequest {
     private LocalDate issueDate;
     private UUID employeeId;
     private String reason;
+    private Double totalLoss;
 }

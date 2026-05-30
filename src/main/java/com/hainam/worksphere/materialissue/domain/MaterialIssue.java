@@ -42,6 +42,9 @@ public class MaterialIssue {
     @Column(name = "reason", columnDefinition = "TEXT")
     private String reason;
 
+    @Column(name = "total_loss")
+    private Double totalLoss;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private Instant createdAt;

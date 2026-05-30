@@ -22,4 +22,5 @@ public class CreateMaterialIssueRequest {
     private UUID employeeId;
 
     private String reason;
+    private Double totalLoss;
 }

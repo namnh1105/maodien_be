@@ -18,6 +18,9 @@ public class MaterialIssueDetailResponse {
     private UUID issueId;
     private String unit;
     private Double quantity;
+    private Double unitPrice;
+    private String reason;
+    private Double lineTotal;
     private Instant createdAt;
     private Instant updatedAt;
 }

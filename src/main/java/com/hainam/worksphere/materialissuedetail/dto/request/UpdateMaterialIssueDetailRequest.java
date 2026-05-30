@@ -16,4 +16,7 @@ public class UpdateMaterialIssueDetailRequest {
     private UUID issueId;
     private String unit;
     private Double quantity;
+    private Double unitPrice;
+    private String reason;
+    private Double lineTotal;
 }
