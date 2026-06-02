@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,11 +20,15 @@ public interface GrowthTrackingRepository extends JpaRepository<GrowthTracking, 
     @Query("SELECT gt FROM GrowthTracking gt WHERE gt.id = :id AND gt.isDeleted = false")
     Optional<GrowthTracking> findActiveById(@Param("id") UUID id);
 
-
     @Query("SELECT gt FROM GrowthTracking gt WHERE gt.pigId = :pigId AND gt.isDeleted = false ORDER BY gt.trackingDate DESC, gt.createdAt DESC")
     List<GrowthTracking> findActiveByPigId(@Param("pigId") UUID pigId);
 
-    /** Batch query: lấy growth records của nhiều lợn cùng lúc (tránh N+1). */
+    @Query("SELECT gt FROM GrowthTracking gt WHERE gt.pigId = :pigId AND gt.trackingDate < :trackingDate AND gt.isDeleted = false ORDER BY gt.trackingDate DESC, gt.createdAt DESC")
+    List<GrowthTracking> findPreviousActiveByPigId(
+            @Param("pigId") UUID pigId,
+            @Param("trackingDate") LocalDate trackingDate
+    );
+
     @Query("SELECT gt FROM GrowthTracking gt WHERE gt.pigId IN :pigIds AND gt.isDeleted = false ORDER BY gt.trackingDate DESC, gt.createdAt DESC")
     List<GrowthTracking> findActiveByPigIds(@Param("pigIds") List<UUID> pigIds);
 }

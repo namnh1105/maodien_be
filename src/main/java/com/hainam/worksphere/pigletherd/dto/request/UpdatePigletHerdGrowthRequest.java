@@ -17,5 +17,9 @@ public class UpdatePigletHerdGrowthRequest {
 
     private Double averageWeight;
 
+    private Double averageLitterLength;
+
+    private Double averageChestGirth;
+
     private String note;
 }

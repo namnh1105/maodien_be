@@ -38,6 +38,21 @@ public class PigletHerdGrowth {
     @Column(name = "average_weight")
     private Double averageWeight;
 
+    @Column(name = "average_litter_length")
+    private Double averageLitterLength;
+
+    @Column(name = "average_chest_girth")
+    private Double averageChestGirth;
+
+    @Column(name = "growth_rate")
+    private Double growthRate;
+
+    @Column(name = "adg")
+    private Double adg;
+
+    @Column(name = "fcr")
+    private Double fcr;
+
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;
 

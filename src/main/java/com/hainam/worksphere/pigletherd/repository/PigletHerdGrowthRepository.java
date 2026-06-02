@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.time.LocalDate;
 
 @Repository
 public interface PigletHerdGrowthRepository extends JpaRepository<PigletHerdGrowth, UUID> {
@@ -21,4 +22,10 @@ public interface PigletHerdGrowthRepository extends JpaRepository<PigletHerdGrow
 
     @Query("SELECT g FROM PigletHerdGrowth g WHERE g.herdId = :herdId AND g.isDeleted = false ORDER BY g.trackingDate DESC")
     List<PigletHerdGrowth> findActiveByHerdId(@Param("herdId") UUID herdId);
+
+    @Query("SELECT g FROM PigletHerdGrowth g WHERE g.herdId = :herdId AND g.trackingDate < :trackingDate AND g.isDeleted = false ORDER BY g.trackingDate DESC, g.createdAt DESC")
+    List<PigletHerdGrowth> findPreviousActiveByHerdId(
+            @Param("herdId") UUID herdId,
+            @Param("trackingDate") LocalDate trackingDate
+    );
 }

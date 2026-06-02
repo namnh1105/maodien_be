@@ -19,6 +19,11 @@ public class PigletHerdGrowthResponse {
     private UUID herdId;
     private LocalDate trackingDate;
     private Double averageWeight;
+    private Double averageLitterLength;
+    private Double averageChestGirth;
+    private Double growthRate;
+    private Double adg;
+    private Double fcr;
     private String note;
     private Instant createdAt;
     private Instant updatedAt;

@@ -33,4 +33,7 @@ public interface PenPigRepository extends JpaRepository<PenPig, UUID> {
 
     @Query("SELECT pp FROM PenPig pp WHERE pp.herdId = :herdId AND pp.isDeleted = false AND pp.exitDate IS NULL")
     List<PenPig> findCurrentByHerdId(@Param("herdId") UUID herdId);
+
+    @Query("SELECT COUNT(DISTINCT pp.pigId) FROM PenPig pp WHERE pp.penId = :penId AND pp.pigId IS NOT NULL AND pp.isDeleted = false AND pp.exitDate IS NULL")
+    long countCurrentPigsByPenId(@Param("penId") UUID penId);
 }

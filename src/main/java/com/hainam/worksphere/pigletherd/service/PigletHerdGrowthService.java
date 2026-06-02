@@ -1,6 +1,8 @@
 package com.hainam.worksphere.pigletherd.service;
 
 import com.hainam.worksphere.pigletherd.domain.PigletHerdGrowth;
+import com.hainam.worksphere.feedingrationdetail.repository.FeedingRationDetailRepository;
+import com.hainam.worksphere.pigletherd.domain.PigletHerd;
 import com.hainam.worksphere.pigletherd.dto.request.CreatePigletHerdGrowthRequest;
 import com.hainam.worksphere.pigletherd.dto.request.UpdatePigletHerdGrowthRequest;
 import com.hainam.worksphere.pigletherd.dto.response.PigletHerdGrowthResponse;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,19 +31,23 @@ public class PigletHerdGrowthService {
     private final PigletHerdGrowthRepository pigletHerdGrowthRepository;
     private final PigletHerdRepository pigletHerdRepository;
     private final PigletHerdGrowthMapper pigletHerdGrowthMapper;
+    private final FeedingRationDetailRepository feedingRationDetailRepository;
 
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "PIGLET_HERD_GROWTH")
     public PigletHerdGrowthResponse create(CreatePigletHerdGrowthRequest request, UUID createdBy) {
-        ensureHerdExists(request.getHerdId());
+        PigletHerd herd = ensureHerdExists(request.getHerdId());
 
         PigletHerdGrowth growth = PigletHerdGrowth.builder()
                 .herdId(request.getHerdId())
                 .trackingDate(request.getTrackingDate())
                 .averageWeight(request.getAverageWeight())
+                .averageLitterLength(request.getAverageLitterLength())
+                .averageChestGirth(request.getAverageChestGirth())
                 .note(request.getNote())
                 .createdBy(createdBy)
                 .build();
+        applyCalculatedMetrics(growth, herd);
 
         PigletHerdGrowth saved = pigletHerdGrowthRepository.save(growth);
         AuditContext.registerCreated(saved);
@@ -50,14 +58,18 @@ public class PigletHerdGrowthService {
     @AuditAction(type = ActionType.CREATE, entity = "PIGLET_HERD_GROWTH")
     public List<PigletHerdGrowthResponse> createBatch(List<CreatePigletHerdGrowthRequest> requests, UUID createdBy) {
         List<PigletHerdGrowth> entities = requests.stream().map(request -> {
-            ensureHerdExists(request.getHerdId());
-            return PigletHerdGrowth.builder()
+            PigletHerd herd = ensureHerdExists(request.getHerdId());
+            PigletHerdGrowth growth = PigletHerdGrowth.builder()
                     .herdId(request.getHerdId())
                     .trackingDate(request.getTrackingDate())
                     .averageWeight(request.getAverageWeight())
+                    .averageLitterLength(request.getAverageLitterLength())
+                    .averageChestGirth(request.getAverageChestGirth())
                     .note(request.getNote())
                     .createdBy(createdBy)
                     .build();
+            applyCalculatedMetrics(growth, herd);
+            return growth;
         }).toList();
 
         List<PigletHerdGrowth> saved = pigletHerdGrowthRepository.saveAll(entities);
@@ -92,7 +104,11 @@ public class PigletHerdGrowthService {
 
         if (request.getTrackingDate() != null) growth.setTrackingDate(request.getTrackingDate());
         if (request.getAverageWeight() != null) growth.setAverageWeight(request.getAverageWeight());
+        if (request.getAverageLitterLength() != null) growth.setAverageLitterLength(request.getAverageLitterLength());
+        if (request.getAverageChestGirth() != null) growth.setAverageChestGirth(request.getAverageChestGirth());
         if (request.getNote() != null) growth.setNote(request.getNote());
+        PigletHerd herd = ensureHerdExists(growth.getHerdId());
+        applyCalculatedMetrics(growth, herd);
         growth.setUpdatedBy(updatedBy);
 
         PigletHerdGrowth saved = pigletHerdGrowthRepository.save(growth);
@@ -114,8 +130,53 @@ public class PigletHerdGrowthService {
         pigletHerdGrowthRepository.save(growth);
     }
 
-    private void ensureHerdExists(UUID herdId) {
-        pigletHerdRepository.findActiveById(herdId)
+    private PigletHerd ensureHerdExists(UUID herdId) {
+        return pigletHerdRepository.findActiveById(herdId)
                 .orElseThrow(() -> PigletHerdNotFoundException.byId(herdId.toString()));
+    }
+
+    private void applyCalculatedMetrics(PigletHerdGrowth growth, PigletHerd herd) {
+        growth.setGrowthRate(null);
+        growth.setAdg(null);
+        growth.setFcr(null);
+
+        if (growth.getHerdId() == null || growth.getTrackingDate() == null || growth.getAverageWeight() == null) {
+            return;
+        }
+
+        PigletHerdGrowth previous = pigletHerdGrowthRepository
+                .findPreviousActiveByHerdId(growth.getHerdId(), growth.getTrackingDate())
+                .stream()
+                .findFirst()
+                .orElse(null);
+        if (previous == null || previous.getAverageWeight() == null || previous.getTrackingDate() == null) {
+            return;
+        }
+
+        double growthRate = growth.getAverageWeight() - previous.getAverageWeight();
+        growth.setGrowthRate(growthRate);
+
+        long days = ChronoUnit.DAYS.between(previous.getTrackingDate(), growth.getTrackingDate());
+        if (days > 0) {
+            growth.setAdg(growthRate / days);
+        }
+
+        if (growthRate > 0) {
+            Double feedAmount = calculateAverageFeedForHerdPig(herd, previous.getTrackingDate(), growth.getTrackingDate());
+            if (feedAmount != null) {
+                growth.setFcr(feedAmount / growthRate);
+            }
+        }
+    }
+
+    private Double calculateAverageFeedForHerdPig(PigletHerd herd, LocalDate startDate, LocalDate endDate) {
+        if (herd == null || herd.getPenId() == null || herd.getQuantity() == null || herd.getQuantity() <= 0) {
+            return null;
+        }
+        Double totalFeed = feedingRationDetailRepository.sumTotalFeedByPenAndDateRange(herd.getPenId(), startDate, endDate);
+        if (totalFeed == null) {
+            return null;
+        }
+        return totalFeed / herd.getQuantity();
     }
 }

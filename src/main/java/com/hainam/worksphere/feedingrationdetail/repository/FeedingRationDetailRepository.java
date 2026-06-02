@@ -25,4 +25,14 @@ public interface FeedingRationDetailRepository extends JpaRepository<FeedingRati
            "WHERE fr.isDeleted = false AND frd.isDeleted = false AND fr.rationDate BETWEEN :startDate AND :endDate " +
            "GROUP BY fr.rationDate")
     List<Object[]> sumTotalFeedByDateRange(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT COALESCE(SUM(frd.totalFeedAmount), 0) " +
+           "FROM FeedingRationDetail frd JOIN com.hainam.worksphere.feedingration.domain.FeedingRation fr ON fr.id = frd.rationId " +
+           "WHERE fr.isDeleted = false AND frd.isDeleted = false " +
+           "AND fr.penId = :penId AND fr.rationDate BETWEEN :startDate AND :endDate")
+    Double sumTotalFeedByPenAndDateRange(
+            @Param("penId") UUID penId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 }
