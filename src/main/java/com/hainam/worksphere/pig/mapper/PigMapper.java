@@ -12,5 +12,6 @@ public interface PigMapper {
     @Mapping(target = "type", expression = "java(pig.getType() != null ? pig.getType().name() : null)")
     @Mapping(target = "status", expression = "java(pig.getStatus() != null ? pig.getStatus().name() : null)")
     @Mapping(target = "breedName", ignore = true)
+    @Mapping(target = "currentWeight", ignore = true)
     PigResponse toResponse(Pig pig);
 }

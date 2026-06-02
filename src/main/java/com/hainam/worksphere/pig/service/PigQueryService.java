@@ -102,12 +102,7 @@ public class PigQueryService {
         return pigs.stream().map(pig -> {
             GrowthTracking latest = latestGrowthByPigId.get(pig.getId());
             
-            String breedName = null;
-            if (pig.getSpecies() != null) {
-                breedName = breedRepository.findActiveByCode(pig.getSpecies())
-                        .map(com.hainam.worksphere.breed.domain.Breed::getName)
-                        .orElse(null);
-            }
+            String breedName = resolveBreedName(pig.getSpecies());
 
             return PigWithLatestGrowthResponse.builder()
                     .id(pig.getId())
@@ -168,12 +163,7 @@ public class PigQueryService {
                          c.getStatus().toUpperCase().contains(ReproductionCycleStatus.MISCARRIED.name())))
                     .count();
 
-            String breedName = null;
-            if (sow.getSpecies() != null) {
-                breedName = breedRepository.findActiveByCode(sow.getSpecies())
-                        .map(com.hainam.worksphere.breed.domain.Breed::getName)
-                        .orElse(null);
-            }
+            String breedName = resolveBreedName(sow.getSpecies());
 
             return SowResponse.builder()
                     .id(sow.getId())
@@ -297,5 +287,25 @@ public class PigQueryService {
         String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
         normalized = normalized.replaceAll("\\p{M}", "");
         return normalized.trim().toLowerCase();
+    }
+
+    private String resolveBreedName(String species) {
+        if (species == null || species.isBlank()) return null;
+        try {
+            UUID breedId = UUID.fromString(species);
+            return breedRepository.findActiveById(breedId)
+                    .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                    .orElseGet(() -> breedRepository.findActiveByCode(species)
+                            .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                            .orElseGet(() -> breedRepository.findActiveByName(species)
+                                    .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                                    .orElse(null)));
+        } catch (IllegalArgumentException ex) {
+            return breedRepository.findActiveByCode(species)
+                    .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                    .orElseGet(() -> breedRepository.findActiveByName(species)
+                            .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                            .orElse(null));
+        }
     }
 }

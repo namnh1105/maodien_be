@@ -94,8 +94,11 @@ public class PigDetailService {
 
         Double adg = calculateAdg(growths);
 
+        PigResponse pigResponse = toPigResponseWithBreedName(pig);
+        pigResponse.setCurrentWeight(currentWeight);
+
         return PigDetailResponse.builder()
-                .pig(toPigResponseWithBreedName(pig))
+                .pig(pigResponse)
                 .currentPenId(currentPen != null ? currentPen.getId() : null)
                 .currentPenName(currentPen != null ? currentPen.getName() : null)
                 .penEntryDate(currentAssignment != null ? currentAssignment.getEntryDate() : null)
@@ -110,11 +113,28 @@ public class PigDetailService {
 
         private PigResponse toPigResponseWithBreedName(Pig pig) {
                 PigResponse response = pigMapper.toResponse(pig);
-                if (pig.getSpecies() != null) {
-                        breedRepository.findActiveByCode(pig.getSpecies())
-                                        .ifPresent(breed -> response.setBreedName(breed.getName()));
-                }
+                response.setBreedName(resolveBreedName(pig.getSpecies()));
                 return response;
+        }
+
+        private String resolveBreedName(String species) {
+                if (species == null || species.isBlank()) return null;
+                try {
+                        UUID breedId = UUID.fromString(species);
+                        return breedRepository.findActiveById(breedId)
+                                        .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                                        .orElseGet(() -> breedRepository.findActiveByCode(species)
+                                                        .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                                                        .orElseGet(() -> breedRepository.findActiveByName(species)
+                                                                        .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                                                                        .orElse(null)));
+                } catch (IllegalArgumentException ex) {
+                        return breedRepository.findActiveByCode(species)
+                                        .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                                        .orElseGet(() -> breedRepository.findActiveByName(species)
+                                                        .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                                                        .orElse(null));
+                }
         }
 
     private Double calculateAdg(List<GrowthTracking> growths) {

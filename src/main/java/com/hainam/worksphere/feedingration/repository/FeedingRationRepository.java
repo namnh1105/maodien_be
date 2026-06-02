@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.time.LocalDate;
 
 @Repository
 public interface FeedingRationRepository extends JpaRepository<FeedingRation, UUID> {
@@ -21,4 +22,7 @@ public interface FeedingRationRepository extends JpaRepository<FeedingRation, UU
 
     @Query("SELECT fr FROM FeedingRation fr WHERE fr.penId = :penId AND fr.isDeleted = false ORDER BY fr.rationDate DESC, fr.createdAt DESC")
     List<FeedingRation> findActiveByPenIdOrderByLatest(@Param("penId") UUID penId);
+
+    @Query("SELECT COUNT(fr) FROM FeedingRation fr WHERE fr.penId = :penId AND fr.rationDate = :rationDate AND fr.isDeleted = false")
+    long countActiveByPenIdAndRationDate(@Param("penId") UUID penId, @Param("rationDate") LocalDate rationDate);
 }

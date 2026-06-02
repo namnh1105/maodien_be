@@ -1,8 +1,11 @@
 package com.hainam.worksphere.feedingration.controller;
 
 import com.hainam.worksphere.auth.security.UserPrincipal;
+import com.hainam.worksphere.feedingration.dto.request.CreatePenFeedingRequest;
 import com.hainam.worksphere.feedingration.dto.request.CreateFeedingRationRequest;
+import com.hainam.worksphere.feedingration.dto.request.CreatePigletHerdFeedingRequest;
 import com.hainam.worksphere.feedingration.dto.request.UpdateFeedingRationRequest;
+import com.hainam.worksphere.feedingration.dto.response.FeedingRecordResponse;
 import com.hainam.worksphere.feedingration.dto.response.FeedingRationResponse;
 import com.hainam.worksphere.feedingration.service.FeedingRationService;
 import com.hainam.worksphere.shared.dto.ApiResponse;
@@ -44,6 +47,28 @@ public class FeedingRationController {
         FeedingRationResponse response = feedingRationService.create(request, userPrincipal.getId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Feeding ration created successfully", response));
+    }
+
+    @PostMapping("/feed-pen")
+    @Operation(summary = "Record feeding for a pen")
+    public ResponseEntity<ApiResponse<FeedingRecordResponse>> feedPen(
+            @Valid @RequestBody CreatePenFeedingRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        FeedingRecordResponse response = feedingRationService.feedPen(request, userPrincipal.getId());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Pen feeding recorded successfully", response));
+    }
+
+    @PostMapping("/feed-piglet-herd")
+    @Operation(summary = "Record feeding for a piglet herd")
+    public ResponseEntity<ApiResponse<FeedingRecordResponse>> feedPigletHerd(
+            @Valid @RequestBody CreatePigletHerdFeedingRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        FeedingRecordResponse response = feedingRationService.feedPigletHerd(request, userPrincipal.getId());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Piglet herd feeding recorded successfully", response));
     }
 
     @GetMapping

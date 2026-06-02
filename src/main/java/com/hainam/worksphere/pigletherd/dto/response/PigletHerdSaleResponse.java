@@ -1,4 +1,4 @@
-package com.hainam.worksphere.sale.dto.response;
+package com.hainam.worksphere.pigletherd.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,22 +8,17 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
-import com.hainam.worksphere.sale.domain.SaleType;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SaleResponse {
-
+public class PigletHerdSaleResponse {
     private UUID id;
+    private UUID herdId;
+    private String herdName;
     private UUID customerId;
     private String customerName;
-    private UUID pigId;
-    private String pigEarTag;
-    private UUID pigletHerdId;
-    private String pigletHerdName;
-    private SaleType saleType;
     private Integer quantity;
     private LocalDate saleDate;
     private Double price;

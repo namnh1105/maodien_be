@@ -4,11 +4,13 @@ import com.hainam.worksphere.auth.security.UserPrincipal;
 import com.hainam.worksphere.authorization.security.RequirePermission;
 import com.hainam.worksphere.pigletherd.dto.request.CreatePigletHerdRequest;
 import com.hainam.worksphere.pigletherd.dto.request.MergePigletHerdRequest;
+import com.hainam.worksphere.pigletherd.dto.request.SellPigletHerdRequest;
 import com.hainam.worksphere.pigletherd.dto.request.SplitPigletHerdRequest;
 import com.hainam.worksphere.pigletherd.dto.request.UpdatePigletHerdRequest;
 import com.hainam.worksphere.pigletherd.dto.request.UpdatePigletHerdStatusRequest;
 import com.hainam.worksphere.pigletherd.dto.response.PigletHerdDetailResponse;
 import com.hainam.worksphere.pigletherd.dto.response.PigletHerdResponse;
+import com.hainam.worksphere.pigletherd.dto.response.PigletHerdSaleResponse;
 import com.hainam.worksphere.pigletherd.domain.PigletHerdStatus;
 import com.hainam.worksphere.pigletherd.service.PigletHerdService;
 import com.hainam.worksphere.shared.constant.PermissionType;
@@ -129,5 +131,17 @@ public class PigletHerdController {
     ) {
         PigletHerdResponse response = pigletHerdService.mergeHerd(request, userPrincipal.getId());
         return ResponseEntity.ok(ApiResponse.success("Piglet herds merged successfully", response));
+    }
+
+    @PostMapping("/{id}/sell")
+    @Operation(summary = "Sell piglet herd")
+    @RequirePermission(PermissionType.UPDATE_PIGLET_HERD)
+    public ResponseEntity<ApiResponse<PigletHerdSaleResponse>> sell(
+            @PathVariable UUID id,
+            @Valid @RequestBody SellPigletHerdRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        PigletHerdSaleResponse response = pigletHerdService.sellHerd(id, request, userPrincipal.getId());
+        return ResponseEntity.ok(ApiResponse.success("Piglet herd sold successfully", response));
     }
 }

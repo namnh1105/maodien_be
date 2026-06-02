@@ -1,10 +1,16 @@
-package com.hainam.worksphere.sale.domain;
+package com.hainam.worksphere.pigletherd.domain;
 
 import com.hainam.worksphere.customer.domain.Customer;
-import com.hainam.worksphere.pig.domain.Pig;
-import com.hainam.worksphere.pigletherd.domain.PigletHerd;
 import com.hainam.worksphere.shared.audit.annotation.AuditableEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,39 +23,30 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "sales")
+@Table(name = "piglet_herd_sales")
 @AuditableEntity(ignoreFields = {
-    "id", "updatedAt", "updatedBy", "createdAt", "createdBy",
-    "isDeleted", "deletedAt", "deletedBy"
+        "id", "updatedAt", "updatedBy", "createdAt", "createdBy",
+        "isDeleted", "deletedAt", "deletedBy"
 })
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Sale {
+public class PigletHerdSale {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "herd_id", nullable = false)
+    private PigletHerd herd;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pig_id")
-    private Pig pig;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "piglet_herd_id")
-    private PigletHerd pigletHerd;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "sale_type", length = 30)
-    @Builder.Default
-    private SaleType saleType = SaleType.PIG;
-
-    @Column(name = "quantity")
+    @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
     @Column(name = "sale_date", nullable = false)

@@ -122,38 +122,63 @@ public class PenPigService {
                 .orElseThrow(() -> new ResourceNotFoundException("Pen", request.getTargetPenCode()));
 
         java.time.LocalDate today = java.time.LocalDate.now();
-        List<PenPig> currentAssignments;
+        List<UUID> pigIds = request.getPigIds();
 
-        if (request.getPigId() != null) {
-            currentAssignments = penPigRepository.findCurrentByPigId(request.getPigId());
-        } else if (request.getHerdId() != null) {
-            currentAssignments = penPigRepository.findCurrentByHerdId(request.getHerdId());
-        } else {
-            throw new BusinessRuleViolationException("Phải cung cấp id Lợn hoặc id Đàn");
+        boolean hasSinglePig = request.getPigId() != null;
+        boolean hasPigList = pigIds != null && !pigIds.isEmpty();
+        boolean hasHerd = request.getHerdId() != null;
+
+        if ((hasSinglePig && hasPigList) || (hasHerd && (hasSinglePig || hasPigList)) || (!hasSinglePig && !hasPigList && !hasHerd)) {
+            throw new BusinessRuleViolationException("Chỉ cung cấp 1 đàn hoặc 1 con hoặc danh sách con");
         }
 
-        // 1. Close current assignments
-        for (PenPig assignment : currentAssignments) {
-            AuditContext.snapshot(assignment);
-            assignment.setExitDate(today);
-            assignment.setStatus("TRANSFERRED");
-            assignment.setUpdatedBy(updatedBy);
-            penPigRepository.save(assignment);
-            AuditContext.registerUpdated(assignment);
+        if (hasHerd) {
+            List<PenPig> currentAssignments = penPigRepository.findCurrentByHerdId(request.getHerdId());
+            for (PenPig assignment : currentAssignments) {
+                AuditContext.snapshot(assignment);
+                assignment.setExitDate(today);
+                assignment.setStatus("TRANSFERRED");
+                assignment.setUpdatedBy(updatedBy);
+                penPigRepository.save(assignment);
+                AuditContext.registerUpdated(assignment);
+            }
+
+            PenPig newAssignment = PenPig.builder()
+                    .penId(targetPen.getId())
+                    .herdId(request.getHerdId())
+                    .entryDate(today)
+                    .status("ACTIVE")
+                    .createdBy(updatedBy)
+                    .build();
+
+            PenPig saved = penPigRepository.save(newAssignment);
+            AuditContext.registerCreated(saved);
+            return;
         }
 
-        // 2. Create new assignment
-        PenPig newAssignment = PenPig.builder()
-                .penId(targetPen.getId())
-                .pigId(request.getPigId())
-                .herdId(request.getHerdId())
-                .entryDate(today)
-                .status("ACTIVE")
-                .createdBy(updatedBy)
-                .build();
+        List<UUID> effectivePigIds = hasSinglePig ? List.of(request.getPigId()) : pigIds;
+        for (UUID pigId : effectivePigIds) {
+            List<PenPig> currentAssignments = penPigRepository.findCurrentByPigId(pigId);
+            for (PenPig assignment : currentAssignments) {
+                AuditContext.snapshot(assignment);
+                assignment.setExitDate(today);
+                assignment.setStatus("TRANSFERRED");
+                assignment.setUpdatedBy(updatedBy);
+                penPigRepository.save(assignment);
+                AuditContext.registerUpdated(assignment);
+            }
 
-        PenPig saved = penPigRepository.save(newAssignment);
-        AuditContext.registerCreated(saved);
+            PenPig newAssignment = PenPig.builder()
+                    .penId(targetPen.getId())
+                    .pigId(pigId)
+                    .entryDate(today)
+                    .status("ACTIVE")
+                    .createdBy(updatedBy)
+                    .build();
+
+            PenPig saved = penPigRepository.save(newAssignment);
+            AuditContext.registerCreated(saved);
+        }
     }
 
     private PenPigResponse toResponseWithEarTagAndHerdName(PenPig penPig) {

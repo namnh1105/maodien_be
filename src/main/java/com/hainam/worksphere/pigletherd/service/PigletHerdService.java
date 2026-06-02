@@ -8,9 +8,11 @@ import com.hainam.worksphere.pigletherd.domain.PigletHerd;
 import com.hainam.worksphere.pigletherd.domain.PigletHerdGrowth;
 import com.hainam.worksphere.pigletherd.domain.PigletHerdMovement;
 import com.hainam.worksphere.pigletherd.domain.PigletHerdMovementType;
+import com.hainam.worksphere.pigletherd.domain.PigletHerdSale;
 import com.hainam.worksphere.pigletherd.domain.PigletHerdStatus;
 import com.hainam.worksphere.pigletherd.dto.request.CreatePigletHerdRequest;
 import com.hainam.worksphere.pigletherd.dto.request.MergePigletHerdRequest;
+import com.hainam.worksphere.pigletherd.dto.request.SellPigletHerdRequest;
 import com.hainam.worksphere.pigletherd.dto.request.SplitPigletHerdRequest;
 import com.hainam.worksphere.pigletherd.dto.request.UpdatePigletHerdRequest;
 import com.hainam.worksphere.pigletherd.dto.request.UpdatePigletHerdStatusRequest;
@@ -18,16 +20,20 @@ import com.hainam.worksphere.pigletherd.dto.response.PigletHerdDetailResponse;
 import com.hainam.worksphere.pigletherd.dto.response.PigletHerdGrowthResponse;
 import com.hainam.worksphere.pigletherd.dto.response.PigletHerdMovementResponse;
 import com.hainam.worksphere.pigletherd.dto.response.PigletHerdResponse;
+import com.hainam.worksphere.pigletherd.dto.response.PigletHerdSaleResponse;
 import com.hainam.worksphere.pigletherd.mapper.PigletHerdGrowthMapper;
 import com.hainam.worksphere.pigletherd.mapper.PigletHerdMapper;
 import com.hainam.worksphere.pigletherd.mapper.PigletHerdMovementMapper;
+import com.hainam.worksphere.pigletherd.mapper.PigletHerdSaleMapper;
 import com.hainam.worksphere.pigletherd.repository.PigletHerdGrowthRepository;
 import com.hainam.worksphere.pigletherd.repository.PigletHerdMovementRepository;
 import com.hainam.worksphere.pigletherd.repository.PigletHerdRepository;
+import com.hainam.worksphere.pigletherd.repository.PigletHerdSaleRepository;
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
 import com.hainam.worksphere.shared.exception.BusinessRuleViolationException;
+import com.hainam.worksphere.shared.exception.CustomerNotFoundException;
 import com.hainam.worksphere.shared.exception.PigNotFoundException;
 import com.hainam.worksphere.shared.exception.PigletHerdNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +60,10 @@ public class PigletHerdService {
     private final PigletHerdMovementRepository pigletHerdMovementRepository;
     private final PigletHerdGrowthMapper pigletHerdGrowthMapper;
     private final PigletHerdMovementMapper pigletHerdMovementMapper;
+    private final com.hainam.worksphere.breed.repository.BreedRepository breedRepository;
+    private final com.hainam.worksphere.customer.repository.CustomerRepository customerRepository;
+    private final PigletHerdSaleRepository pigletHerdSaleRepository;
+    private final PigletHerdSaleMapper pigletHerdSaleMapper;
 
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "PIGLET_HERD")
@@ -304,6 +314,53 @@ public class PigletHerdService {
         return toEnrichedResponse(savedTarget);
     }
 
+    @Transactional
+    @AuditAction(type = ActionType.UPDATE, entity = "PIGLET_HERD", actionCode = "SELL_PIGLET_HERD")
+    public PigletHerdSaleResponse sellHerd(UUID herdId, SellPigletHerdRequest request, UUID createdBy) {
+        PigletHerd herd = pigletHerdRepository.findActiveById(herdId)
+                .orElseThrow(() -> PigletHerdNotFoundException.byId(herdId.toString()));
+
+        var customer = customerRepository.findActiveById(request.getCustomerId())
+                .orElseThrow(() -> CustomerNotFoundException.byId(request.getCustomerId().toString()));
+
+        int currentQuantity = herd.getQuantity() == null ? 0 : herd.getQuantity();
+        if (request.getQuantity() > currentQuantity) {
+            throw new BusinessRuleViolationException("Sale quantity exceeds piglet herd quantity");
+        }
+
+        AuditContext.snapshot(herd);
+        herd.setQuantity(currentQuantity - request.getQuantity());
+        herd.setIsSold(herd.getQuantity() == 0);
+        herd.setUpdatedBy(createdBy);
+        PigletHerd savedHerd = pigletHerdRepository.save(herd);
+
+        saveMovement(
+                savedHerd.getId(),
+                PigletHerdMovementType.DECREASE,
+                savedHerd.getId(),
+                null,
+                request.getSaleDate(),
+                request.getQuantity(),
+                request.getNote() == null ? "Sell piglet herd" : request.getNote(),
+                createdBy
+        );
+
+        PigletHerdSale sale = PigletHerdSale.builder()
+                .customer(customer)
+                .herd(savedHerd)
+                .quantity(request.getQuantity())
+                .saleDate(request.getSaleDate())
+                .price(request.getPrice())
+                .note(request.getNote())
+                .createdBy(createdBy)
+                .build();
+
+        PigletHerdSale savedSale = pigletHerdSaleRepository.save(sale);
+        AuditContext.registerUpdated(savedHerd);
+        AuditContext.registerCreated(savedSale);
+        return pigletHerdSaleMapper.toResponse(savedSale);
+    }
+
     private Pig findPigOrNull(UUID pigId) {
         if (pigId == null) return null;
         return pigRepository.findActiveById(pigId)
@@ -349,6 +406,12 @@ public class PigletHerdService {
             Optional<Pen> pen = penRepository.findActiveById(herd.getPenId());
             response.setPenName(pen.map(Pen::getName).orElse(null));
         }
+        if (herd.getMother() != null) {
+            response.setMotherBreed(resolveBreedName(herd.getMother().getSpecies()));
+        }
+        if (herd.getFather() != null) {
+            response.setFatherBreed(resolveBreedName(herd.getFather().getSpecies()));
+        }
         response.setCurrentAverageWeight(getLatestAverageWeight(herd.getId()));
         return response;
     }
@@ -389,5 +452,25 @@ public class PigletHerdService {
         response.setSourceHerdName(herdNameMap.get(response.getSourceHerdId()));
         response.setTargetHerdName(herdNameMap.get(response.getTargetHerdId()));
         return response;
+    }
+
+    private String resolveBreedName(String species) {
+        if (species == null || species.isBlank()) return null;
+        try {
+            UUID breedId = UUID.fromString(species);
+            return breedRepository.findActiveById(breedId)
+                    .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                    .orElseGet(() -> breedRepository.findActiveByCode(species)
+                            .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                            .orElseGet(() -> breedRepository.findActiveByName(species)
+                                    .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                                    .orElse(null)));
+        } catch (IllegalArgumentException ex) {
+            return breedRepository.findActiveByCode(species)
+                    .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                    .orElseGet(() -> breedRepository.findActiveByName(species)
+                            .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                            .orElse(null));
+        }
     }
 }

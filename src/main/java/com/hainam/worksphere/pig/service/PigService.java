@@ -8,6 +8,8 @@ import com.hainam.worksphere.pig.dto.request.UpdatePigRequest;
 import com.hainam.worksphere.pig.dto.response.PigResponse;
 import com.hainam.worksphere.pig.mapper.PigMapper;
 import com.hainam.worksphere.pig.repository.PigRepository;
+import com.hainam.worksphere.growthtracking.domain.GrowthTracking;
+import com.hainam.worksphere.growthtracking.repository.GrowthTrackingRepository;
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
@@ -19,8 +21,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +34,7 @@ public class PigService {
     private final PigRepository pigRepository;
     private final PigMapper pigMapper;
     private final com.hainam.worksphere.breed.repository.BreedRepository breedRepository;
+    private final GrowthTrackingRepository growthTrackingRepository;
 
     @Transactional
     @AuditAction(type = ActionType.CREATE, entity = "PIG")
@@ -61,20 +67,22 @@ public class PigService {
 
     @Transactional(readOnly = true)
     public List<PigResponse> getAll() {
-        return pigRepository.findAllActive().stream().map(this::toResponseWithBreedName).toList();
+        return buildResponsesWithLatestWeight(pigRepository.findAllActive());
     }
 
     @Transactional(readOnly = true)
     public PigResponse getById(UUID id) {
         Pig pig = pigRepository.findActiveById(id)
                 .orElseThrow(() -> PigNotFoundException.byId(id.toString()));
-        return toResponseWithBreedName(pig);
+        PigResponse response = toResponseWithBreedName(pig);
+        response.setCurrentWeight(getLatestWeight(pig.getId(), pig.getBirthWeight()));
+        return response;
     }
 
     @Transactional(readOnly = true)
     public List<PigResponse> getByStatus(String status) {
         PigStatus parsedStatus = parsePigStatus(status);
-        return pigRepository.findActiveByStatus(parsedStatus).stream().map(this::toResponseWithBreedName).toList();
+        return buildResponsesWithLatestWeight(pigRepository.findActiveByStatus(parsedStatus));
     }
 
     @Transactional
@@ -157,10 +165,66 @@ public class PigService {
 
     private PigResponse toResponseWithBreedName(Pig pig) {
         PigResponse response = pigMapper.toResponse(pig);
-        if (pig.getSpecies() != null) {
-            breedRepository.findActiveByCode(pig.getSpecies())
-                    .ifPresent(breed -> response.setBreedName(breed.getName()));
-        }
+        response.setBreedName(resolveBreedName(pig.getSpecies()));
         return response;
+    }
+
+    private List<PigResponse> buildResponsesWithLatestWeight(List<Pig> pigs) {
+        if (pigs.isEmpty()) return List.of();
+
+        List<UUID> pigIds = pigs.stream().map(Pig::getId).toList();
+        List<GrowthTracking> allGrowths = growthTrackingRepository.findActiveByPigIds(pigIds);
+
+        Map<UUID, GrowthTracking> latestGrowthByPigId = allGrowths.stream()
+                .collect(Collectors.toMap(
+                        GrowthTracking::getPigId,
+                        g -> g,
+                        (g1, g2) -> {
+                            if (g1.getTrackingDate() == null) return g2;
+                            if (g2.getTrackingDate() == null) return g1;
+                            return g1.getTrackingDate().isAfter(g2.getTrackingDate()) ? g1 : g2;
+                        }
+                ));
+
+        return pigs.stream().map(pig -> {
+            PigResponse response = toResponseWithBreedName(pig);
+            GrowthTracking latest = latestGrowthByPigId.get(pig.getId());
+            Double currentWeight = latest != null && latest.getWeight() != null
+                    ? latest.getWeight()
+                    : pig.getBirthWeight();
+            response.setCurrentWeight(currentWeight);
+            return response;
+        }).toList();
+    }
+
+    private Double getLatestWeight(UUID pigId, Double fallbackWeight) {
+        if (pigId == null) return fallbackWeight;
+        List<GrowthTracking> growths = growthTrackingRepository.findActiveByPigId(pigId);
+        if (growths.isEmpty()) return fallbackWeight;
+        return growths.stream()
+                .filter(g -> g.getWeight() != null)
+                .max(Comparator.comparing(GrowthTracking::getTrackingDate, Comparator.nullsLast(Comparator.naturalOrder())))
+                .map(GrowthTracking::getWeight)
+                .orElse(fallbackWeight);
+    }
+
+    private String resolveBreedName(String species) {
+        if (species == null || species.isBlank()) return null;
+        try {
+            UUID breedId = UUID.fromString(species);
+            return breedRepository.findActiveById(breedId)
+                    .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                    .orElseGet(() -> breedRepository.findActiveByCode(species)
+                            .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                            .orElseGet(() -> breedRepository.findActiveByName(species)
+                                    .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                                    .orElse(null)));
+        } catch (IllegalArgumentException ex) {
+            return breedRepository.findActiveByCode(species)
+                    .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                    .orElseGet(() -> breedRepository.findActiveByName(species)
+                            .map(com.hainam.worksphere.breed.domain.Breed::getName)
+                            .orElse(null));
+        }
     }
 }

@@ -5,6 +5,7 @@ import com.hainam.worksphere.customer.repository.CustomerRepository;
 import com.hainam.worksphere.pig.domain.Pig;
 import com.hainam.worksphere.pig.repository.PigRepository;
 import com.hainam.worksphere.sale.domain.Sale;
+import com.hainam.worksphere.sale.domain.SaleType;
 import com.hainam.worksphere.sale.dto.request.CreateSaleRequest;
 import com.hainam.worksphere.sale.dto.request.UpdateSaleRequest;
 import com.hainam.worksphere.sale.dto.response.SaleResponse;
@@ -45,6 +46,8 @@ public class SaleService {
         Sale sale = Sale.builder()
                 .customer(customer)
                 .pig(pig)
+                .saleType(SaleType.PIG)
+                .quantity(1)
                 .saleDate(request.getSaleDate())
                 .price(request.getPrice())
                 .note(request.getNote())

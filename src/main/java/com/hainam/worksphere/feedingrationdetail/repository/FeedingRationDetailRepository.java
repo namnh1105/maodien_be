@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.time.LocalDate;
 
 @Repository
 public interface FeedingRationDetailRepository extends JpaRepository<FeedingRationDetail, UUID> {
@@ -18,4 +19,10 @@ public interface FeedingRationDetailRepository extends JpaRepository<FeedingRati
 
     @Query("SELECT frd FROM FeedingRationDetail frd WHERE frd.id = :id AND frd.isDeleted = false")
     Optional<FeedingRationDetail> findActiveById(@Param("id") UUID id);
+
+    @Query("SELECT fr.rationDate, SUM(frd.totalFeedAmount) " +
+           "FROM FeedingRationDetail frd JOIN com.hainam.worksphere.feedingration.domain.FeedingRation fr ON fr.id = frd.rationId " +
+           "WHERE fr.isDeleted = false AND frd.isDeleted = false AND fr.rationDate BETWEEN :startDate AND :endDate " +
+           "GROUP BY fr.rationDate")
+    List<Object[]> sumTotalFeedByDateRange(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 }
