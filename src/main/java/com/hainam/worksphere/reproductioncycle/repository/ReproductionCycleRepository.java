@@ -16,6 +16,14 @@ public interface ReproductionCycleRepository extends JpaRepository<ReproductionC
     @Query("SELECT rc FROM ReproductionCycle rc WHERE rc.isDeleted = false")
     List<ReproductionCycle> findAllActive();
 
+    @Query("SELECT MONTH(rc.actualFarrowDate), COALESCE(SUM(rc.aliveCount), 0) " +
+           "FROM ReproductionCycle rc " +
+           "WHERE rc.isDeleted = false " +
+           "AND rc.actualFarrowDate IS NOT NULL " +
+           "AND YEAR(rc.actualFarrowDate) = :year " +
+           "GROUP BY MONTH(rc.actualFarrowDate)")
+    List<Object[]> sumAliveCountByActualFarrowMonth(@Param("year") Integer year);
+
     @Query("SELECT rc FROM ReproductionCycle rc WHERE rc.id = :id AND rc.isDeleted = false")
     Optional<ReproductionCycle> findActiveById(@Param("id") UUID id);
 

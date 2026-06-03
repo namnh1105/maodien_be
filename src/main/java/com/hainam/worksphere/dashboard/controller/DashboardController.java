@@ -6,6 +6,7 @@ import com.hainam.worksphere.dashboard.dto.response.DashboardOverviewResponse;
 import com.hainam.worksphere.dashboard.dto.response.DashboardSummaryResponse;
 import com.hainam.worksphere.dashboard.dto.response.MatingSuccessRateResponse;
 import com.hainam.worksphere.dashboard.dto.response.MonthlyCostResponse;
+import com.hainam.worksphere.dashboard.dto.response.MonthlyLiveBirthResponse;
 import com.hainam.worksphere.dashboard.dto.response.MonthlyRevenueResponse;
 import com.hainam.worksphere.dashboard.dto.response.SurvivalRateResponse;
 import com.hainam.worksphere.dashboard.service.DashboardService;
@@ -60,6 +61,14 @@ public class DashboardController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate weekStart
     ) {
         return ResponseEntity.ok(ApiResponse.success(dashboardService.getFeedConsumption(weekStart)));
+    }
+
+    @GetMapping("/monthly-live-births")
+    @Operation(summary = "Get live piglet births by month")
+    public ResponseEntity<ApiResponse<List<MonthlyLiveBirthResponse>>> getMonthlyLiveBirths(
+            @RequestParam(required = false) Integer year
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(dashboardService.getMonthlyLiveBirths(year)));
     }
 
     @GetMapping("/survival-rate")

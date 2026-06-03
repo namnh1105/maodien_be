@@ -6,6 +6,7 @@ import com.hainam.worksphere.dashboard.dto.response.DashboardOverviewResponse;
 import com.hainam.worksphere.dashboard.dto.response.DashboardSummaryResponse;
 import com.hainam.worksphere.dashboard.dto.response.MatingSuccessRateResponse;
 import com.hainam.worksphere.dashboard.dto.response.MonthlyCostResponse;
+import com.hainam.worksphere.dashboard.dto.response.MonthlyLiveBirthResponse;
 import com.hainam.worksphere.dashboard.dto.response.MonthlyRevenueResponse;
 import com.hainam.worksphere.dashboard.dto.response.SurvivalRateResponse;
 import com.hainam.worksphere.employee.domain.EmploymentStatus;
@@ -171,6 +172,23 @@ public class DashboardService {
             result.add(DailyFeedConsumptionResponse.builder()
                     .date(date)
                     .totalFeedAmount(feedByDate.getOrDefault(date, 0D))
+                    .build());
+        }
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    public List<MonthlyLiveBirthResponse> getMonthlyLiveBirths(Integer year) {
+        int effectiveYear = year == null ? LocalDate.now().getYear() : year;
+        Map<Integer, Long> liveBirthsByMonth = new HashMap<>();
+        reproductionCycleRepository.sumAliveCountByActualFarrowMonth(effectiveYear)
+                .forEach(row -> liveBirthsByMonth.put(((Number) row[0]).intValue(), ((Number) row[1]).longValue()));
+
+        List<MonthlyLiveBirthResponse> result = new ArrayList<>();
+        for (int month = 1; month <= 12; month++) {
+            result.add(MonthlyLiveBirthResponse.builder()
+                    .month(month)
+                    .alivePigletCount(liveBirthsByMonth.getOrDefault(month, 0L))
                     .build());
         }
         return result;
