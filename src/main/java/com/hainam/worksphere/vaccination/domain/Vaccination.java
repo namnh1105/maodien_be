@@ -2,6 +2,7 @@ package com.hainam.worksphere.vaccination.domain;
 
 import com.hainam.worksphere.employee.domain.Employee;
 import com.hainam.worksphere.pig.domain.Pig;
+import com.hainam.worksphere.pigletherd.domain.PigletHerd;
 import com.hainam.worksphere.shared.audit.annotation.AuditableEntity;
 import com.hainam.worksphere.livestockmaterial.domain.LivestockMaterial;
 import jakarta.persistence.*;
@@ -33,8 +34,12 @@ public class Vaccination {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pig_id", nullable = false)
+    @JoinColumn(name = "pig_id")
     private Pig pig;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "herd_id")
+    private PigletHerd herd;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vaccine_id", nullable = false)

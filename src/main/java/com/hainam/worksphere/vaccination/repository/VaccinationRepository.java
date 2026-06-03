@@ -22,6 +22,9 @@ public interface VaccinationRepository extends JpaRepository<Vaccination, UUID> 
     @Query("SELECT v FROM Vaccination v WHERE v.pig.id = :pigId AND v.isDeleted = false")
     List<Vaccination> findActiveByPigId(@Param("pigId") UUID pigId);
 
+    @Query("SELECT v FROM Vaccination v WHERE v.herd.id = :herdId AND v.isDeleted = false")
+    List<Vaccination> findActiveByHerdId(@Param("herdId") UUID herdId);
+
     @Query("SELECT v FROM Vaccination v WHERE v.employee.id = :employeeId AND v.isDeleted = false")
     List<Vaccination> findActiveByEmployeeId(@Param("employeeId") UUID employeeId);
 }

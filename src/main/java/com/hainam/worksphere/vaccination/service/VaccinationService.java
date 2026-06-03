@@ -4,17 +4,22 @@ import com.hainam.worksphere.employee.domain.Employee;
 import com.hainam.worksphere.employee.repository.EmployeeRepository;
 import com.hainam.worksphere.pig.domain.Pig;
 import com.hainam.worksphere.pig.repository.PigRepository;
+import com.hainam.worksphere.pigletherd.domain.PigletHerd;
+import com.hainam.worksphere.pigletherd.repository.PigletHerdRepository;
 import com.hainam.worksphere.shared.audit.annotation.AuditAction;
 import com.hainam.worksphere.shared.audit.domain.ActionType;
 import com.hainam.worksphere.shared.audit.util.AuditContext;
+import com.hainam.worksphere.shared.exception.BusinessRuleViolationException;
 import com.hainam.worksphere.shared.exception.EmployeeNotFoundException;
 import com.hainam.worksphere.shared.exception.PigNotFoundException;
+import com.hainam.worksphere.shared.exception.PigletHerdNotFoundException;
 import com.hainam.worksphere.shared.exception.VaccinationNotFoundException;
 import com.hainam.worksphere.livestockmaterial.domain.LivestockMaterial;
 import com.hainam.worksphere.livestockmaterial.repository.LivestockMaterialRepository;
 import com.hainam.worksphere.shared.exception.LivestockMaterialNotFoundException;
 import com.hainam.worksphere.livestockmaterial.domain.MaterialType;
 import com.hainam.worksphere.vaccination.domain.Vaccination;
+import com.hainam.worksphere.vaccination.dto.request.CreateBulkVaccinationRequest;
 import com.hainam.worksphere.vaccination.dto.request.CreateVaccinationRequest;
 import com.hainam.worksphere.vaccination.dto.request.UpdateVaccinationRequest;
 import com.hainam.worksphere.vaccination.dto.response.VaccinationResponse;
@@ -34,6 +39,7 @@ public class VaccinationService {
 
     private final VaccinationRepository vaccinationRepository;
     private final PigRepository pigRepository;
+    private final PigletHerdRepository pigletHerdRepository;
     private final LivestockMaterialRepository livestockMaterialRepository;
     private final EmployeeRepository employeeRepository;
     private final VaccinationMapper vaccinationMapper;
@@ -44,12 +50,7 @@ public class VaccinationService {
         Pig pig = pigRepository.findActiveById(request.getPigId())
                 .orElseThrow(() -> PigNotFoundException.byId(request.getPigId().toString()));
 
-        LivestockMaterial vaccine = livestockMaterialRepository.findActiveById(request.getVaccineId())
-                .orElseThrow(() -> LivestockMaterialNotFoundException.byId(request.getVaccineId().toString()));
-
-        if (vaccine.getMaterialType() != MaterialType.VACCINE) {
-            throw new IllegalArgumentException("Material is not a vaccine");
-        }
+        LivestockMaterial vaccine = findVaccine(request.getVaccineId());
 
         Vaccination vaccination = Vaccination.builder()
                 .pig(pig)
@@ -64,6 +65,38 @@ public class VaccinationService {
         Vaccination saved = vaccinationRepository.save(vaccination);
         AuditContext.registerCreated(saved);
         return vaccinationMapper.toResponse(saved);
+    }
+
+    @Transactional
+    @AuditAction(type = ActionType.CREATE, entity = "VACCINATION", actionCode = "BULK_CREATE")
+    public List<VaccinationResponse> createBulk(CreateBulkVaccinationRequest request, UUID createdBy) {
+        if ((request.getPigIds() == null || request.getPigIds().isEmpty())
+                && (request.getHerdIds() == null || request.getHerdIds().isEmpty())) {
+            throw new BusinessRuleViolationException("At least one pig id or herd id is required");
+        }
+
+        LivestockMaterial vaccine = findVaccine(request.getVaccineId());
+        Employee employee = findEmployeeOrNull(request.getEmployeeId());
+
+        List<Vaccination> vaccinations = new java.util.ArrayList<>();
+        if (request.getPigIds() != null) {
+            request.getPigIds().forEach(pigId -> {
+                Pig pig = pigRepository.findActiveById(pigId)
+                        .orElseThrow(() -> PigNotFoundException.byId(pigId.toString()));
+                vaccinations.add(buildVaccination(pig, null, vaccine, employee, request, createdBy));
+            });
+        }
+        if (request.getHerdIds() != null) {
+            request.getHerdIds().forEach(herdId -> {
+                PigletHerd herd = pigletHerdRepository.findActiveById(herdId)
+                        .orElseThrow(() -> PigletHerdNotFoundException.byId(herdId.toString()));
+                vaccinations.add(buildVaccination(null, herd, vaccine, employee, request, createdBy));
+            });
+        }
+
+        List<Vaccination> savedList = vaccinationRepository.saveAll(vaccinations);
+        savedList.forEach(AuditContext::registerCreated);
+        return savedList.stream().map(vaccinationMapper::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
@@ -81,6 +114,11 @@ public class VaccinationService {
     @Transactional(readOnly = true)
     public List<VaccinationResponse> getByPigId(UUID pigId) {
         return vaccinationRepository.findActiveByPigId(pigId).stream().map(vaccinationMapper::toResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<VaccinationResponse> getByHerdId(UUID herdId) {
+        return vaccinationRepository.findActiveByHerdId(herdId).stream().map(vaccinationMapper::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
@@ -103,12 +141,7 @@ public class VaccinationService {
         }
 
         if (request.getVaccineId() != null) {
-            LivestockMaterial vaccine = livestockMaterialRepository.findActiveById(request.getVaccineId())
-                    .orElseThrow(() -> LivestockMaterialNotFoundException.byId(request.getVaccineId().toString()));
-            if (vaccine.getMaterialType() != MaterialType.VACCINE) {
-                throw new IllegalArgumentException("Material is not a vaccine");
-            }
-            vaccination.setVaccine(vaccine);
+            vaccination.setVaccine(findVaccine(request.getVaccineId()));
         }
 
         if (request.getVaccinationDate() != null) vaccination.setVaccinationDate(request.getVaccinationDate());
@@ -142,5 +175,34 @@ public class VaccinationService {
         }
         return employeeRepository.findActiveById(employeeId)
                 .orElseThrow(() -> EmployeeNotFoundException.byId(employeeId.toString()));
+    }
+
+    private LivestockMaterial findVaccine(UUID vaccineId) {
+        LivestockMaterial vaccine = livestockMaterialRepository.findActiveById(vaccineId)
+                .orElseThrow(() -> LivestockMaterialNotFoundException.byId(vaccineId.toString()));
+        if (vaccine.getMaterialType() != MaterialType.VACCINE) {
+            throw new BusinessRuleViolationException("Material is not a vaccine");
+        }
+        return vaccine;
+    }
+
+    private Vaccination buildVaccination(
+            Pig pig,
+            PigletHerd herd,
+            LivestockMaterial vaccine,
+            Employee employee,
+            CreateBulkVaccinationRequest request,
+            UUID createdBy
+    ) {
+        return Vaccination.builder()
+                .pig(pig)
+                .herd(herd)
+                .vaccine(vaccine)
+                .vaccinationDate(request.getVaccinationDate())
+                .dosage(request.getDosage())
+                .employee(employee)
+                .note(request.getNote())
+                .createdBy(createdBy)
+                .build();
     }
 }

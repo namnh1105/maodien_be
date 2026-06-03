@@ -4,6 +4,7 @@ import com.hainam.worksphere.auth.security.UserPrincipal;
 import com.hainam.worksphere.authorization.security.RequirePermission;
 import com.hainam.worksphere.shared.constant.PermissionType;
 import com.hainam.worksphere.shared.dto.ApiResponse;
+import com.hainam.worksphere.vaccination.dto.request.CreateBulkVaccinationRequest;
 import com.hainam.worksphere.vaccination.dto.request.CreateVaccinationRequest;
 import com.hainam.worksphere.vaccination.dto.request.UpdateVaccinationRequest;
 import com.hainam.worksphere.vaccination.dto.response.VaccinationResponse;
@@ -42,15 +43,31 @@ public class VaccinationController {
                 .body(ApiResponse.success("Vaccination created successfully", response));
     }
 
+    @PostMapping("/bulk")
+    @Operation(summary = "Create vaccinations for pigs and piglet herds")
+    @RequirePermission(PermissionType.CREATE_VACCINATION)
+    public ResponseEntity<ApiResponse<List<VaccinationResponse>>> createBulk(
+            @Valid @RequestBody CreateBulkVaccinationRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        List<VaccinationResponse> response = vaccinationService.createBulk(request, userPrincipal.getId());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Vaccinations created successfully", response));
+    }
+
     @GetMapping
     @Operation(summary = "Get all vaccinations")
     @RequirePermission(PermissionType.VIEW_VACCINATION)
     public ResponseEntity<ApiResponse<List<VaccinationResponse>>> getAll(
             @RequestParam(required = false) UUID pigId,
+            @RequestParam(required = false) UUID herdId,
             @RequestParam(required = false) UUID employeeId
     ) {
         if (pigId != null) {
             return ResponseEntity.ok(ApiResponse.success(vaccinationService.getByPigId(pigId)));
+        }
+        if (herdId != null) {
+            return ResponseEntity.ok(ApiResponse.success(vaccinationService.getByHerdId(herdId)));
         }
         if (employeeId != null) {
             return ResponseEntity.ok(ApiResponse.success(vaccinationService.getByEmployeeId(employeeId)));

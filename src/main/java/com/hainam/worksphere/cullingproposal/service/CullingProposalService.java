@@ -215,17 +215,15 @@ public class CullingProposalService {
             return;
         }
 
-        if (pig.getStatus() == PigStatus.ACTIVE) {
-            if (nextStatus != null) {
-                pig.setStatus(nextStatus);
-            }
-            if (nextType != null) {
-                pig.setType(nextType);
-            }
-            pig.setUpdatedBy(updatedBy);
-            Pig savedPig = pigRepository.save(pig);
-            AuditContext.registerUpdated(savedPig);
+        if (nextStatus != null) {
+            pig.setStatus(nextStatus);
         }
+        if (nextType != null) {
+            pig.setType(nextType);
+        }
+        pig.setUpdatedBy(updatedBy);
+        Pig savedPig = pigRepository.save(pig);
+        AuditContext.registerUpdated(savedPig);
     }
 
     private PigStatus resolvePigStatusForApprovedProposal(String proposalType) {
@@ -233,7 +231,7 @@ public class CullingProposalService {
             return null;
         }
         String normalized = normalizeText(proposalType);
-        if (normalized.contains("tieu huy")) {
+        if (normalized.contains("tieu huy") || normalized.contains("culling")) {
             return PigStatus.CULLING;
         }
         if (normalized.contains("ban loai")) {

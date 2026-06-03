@@ -11,6 +11,8 @@ public interface VaccinationMapper {
 
     @Mapping(target = "pigId", source = "pig.id")
     @Mapping(target = "pigEarTag", source = "pig.earTag")
+    @Mapping(target = "herdId", source = "herd.id")
+    @Mapping(target = "herdName", source = "herd.herdName")
     @Mapping(target = "vaccineId", source = "vaccine.id")
     @Mapping(target = "vaccineName", source = "vaccine.name")
     @Mapping(target = "employeeId", source = "employee.id")

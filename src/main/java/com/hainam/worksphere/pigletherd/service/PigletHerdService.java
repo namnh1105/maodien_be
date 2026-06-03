@@ -245,7 +245,7 @@ public class PigletHerdService {
                 .isSold(source.getIsSold())
                 .createdBy(updatedBy)
                 .build();
-        target.setHerdName(buildHerdName(target.getMother(), target.getLitterNumber()));
+        target.setHerdName(buildSplitHerdName(source));
         PigletHerd savedTarget = pigletHerdRepository.save(target);
 
         saveMovement(
@@ -375,6 +375,29 @@ public class PigletHerdService {
                 ? mother.getEarTag()
                 : "";
         return motherTag + "-" + litterNumber;
+    }
+
+    private String buildSplitHerdName(PigletHerd source) {
+        String sourceName = source.getHerdName();
+        if (sourceName == null || sourceName.isBlank()) {
+            sourceName = buildHerdName(source.getMother(), source.getLitterNumber());
+        }
+        if (sourceName == null || sourceName.isBlank()) {
+            return null;
+        }
+
+        var existingNames = pigletHerdRepository.findAllActive().stream()
+                .map(PigletHerd::getHerdName)
+                .filter(name -> name != null && !name.isBlank())
+                .collect(Collectors.toSet());
+
+        int suffix = 1;
+        String candidate = sourceName + "-" + suffix;
+        while (existingNames.contains(candidate)) {
+            suffix++;
+            candidate = sourceName + "-" + suffix;
+        }
+        return candidate;
     }
 
     private void saveMovement(
