@@ -1,5 +1,6 @@
 package com.hainam.worksphere.cullingproposal.dto.request;
 
+import com.hainam.worksphere.cullingproposal.domain.CullingProposalStatus;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,4 +20,5 @@ public class CreateCullingProposalBulkRequest {
     private String proposalType;
 
     private String reason;
+    private CullingProposalStatus status;
 }

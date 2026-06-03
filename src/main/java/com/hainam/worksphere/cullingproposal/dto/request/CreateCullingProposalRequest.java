@@ -1,5 +1,6 @@
 package com.hainam.worksphere.cullingproposal.dto.request;
 
+import com.hainam.worksphere.cullingproposal.domain.CullingProposalStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -25,5 +26,5 @@ public class CreateCullingProposalRequest {
     @NotNull(message = "Employee id is required")
     private UUID employeeId;
 
-    private String status;
+    private CullingProposalStatus status;
 }

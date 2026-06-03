@@ -3,6 +3,8 @@ package com.hainam.worksphere.cullingproposal.domain;
 import com.hainam.worksphere.shared.audit.annotation.AuditableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -44,8 +46,9 @@ public class CullingProposal {
     @Column(name = "employee_id", nullable = false)
     private UUID employeeId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 50)
-    private String status;
+    private CullingProposalStatus status;
 
     @CreationTimestamp
     @Column(name = "created_at")

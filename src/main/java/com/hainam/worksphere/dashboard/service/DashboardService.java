@@ -21,8 +21,10 @@ import com.hainam.worksphere.pig.domain.Pig;
 import com.hainam.worksphere.pig.domain.PigType;
 import com.hainam.worksphere.pig.repository.PigRepository;
 import com.hainam.worksphere.pigletherd.domain.PigletHerd;
+import com.hainam.worksphere.pigletherd.domain.PigletHerdGrowth;
 import com.hainam.worksphere.pigletherd.domain.PigletHerdSale;
 import com.hainam.worksphere.pigletherd.domain.PigletHerdStatus;
+import com.hainam.worksphere.pigletherd.repository.PigletHerdGrowthRepository;
 import com.hainam.worksphere.pigletherd.repository.PigletHerdRepository;
 import com.hainam.worksphere.pigletherd.repository.PigletHerdSaleRepository;
 import com.hainam.worksphere.reproductioncycle.domain.ReproductionCycle;
@@ -62,6 +64,7 @@ public class DashboardService {
     private final SaleRepository saleRepository;
     private final PigletHerdSaleRepository pigletHerdSaleRepository;
     private final MaterialReceiptRepository materialReceiptRepository;
+    private final PigletHerdGrowthRepository pigletHerdGrowthRepository;
 
     @Transactional(readOnly = true)
     public DashboardOverviewResponse getOverview(Integer year, LocalDate weekStart) {
@@ -107,12 +110,24 @@ public class DashboardService {
     @Transactional(readOnly = true)
     public List<DashboardBucketResponse> getWeightDistribution() {
         List<Pig> pigs = pigRepository.findAllActive();
+        List<PigletHerd> herds = pigletHerdRepository.findAllActive().stream()
+                .filter(herd -> !Boolean.TRUE.equals(herd.getIsSold()))
+                .toList();
         List<UUID> pigIds = pigs.stream().map(Pig::getId).toList();
         Map<UUID, GrowthTracking> latestGrowthByPigId = pigIds.isEmpty()
                 ? Map.of()
                 : growthTrackingRepository.findActiveByPigIds(pigIds).stream()
                         .collect(Collectors.toMap(
                                 GrowthTracking::getPigId,
+                                Function.identity(),
+                                (first, ignored) -> first
+                        ));
+        List<UUID> herdIds = herds.stream().map(PigletHerd::getId).toList();
+        Map<UUID, PigletHerdGrowth> latestGrowthByHerdId = herdIds.isEmpty()
+                ? Map.of()
+                : pigletHerdGrowthRepository.findActiveByHerdIds(herdIds).stream()
+                        .collect(Collectors.toMap(
+                                PigletHerdGrowth::getHerdId,
                                 Function.identity(),
                                 (first, ignored) -> first
                         ));
@@ -124,6 +139,17 @@ public class DashboardService {
                     : pig.getBirthWeight();
             String bucket = toWeightBucket(weight);
             counts.put(bucket, counts.get(bucket) + 1);
+        }
+        for (PigletHerd herd : herds) {
+            Integer quantity = herd.getQuantity();
+            if (quantity == null || quantity <= 0) {
+                continue;
+            }
+            Double weight = latestGrowthByHerdId.containsKey(herd.getId())
+                    ? latestGrowthByHerdId.get(herd.getId()).getAverageWeight()
+                    : herd.getAverageBirthWeight();
+            String bucket = toWeightBucket(weight);
+            counts.put(bucket, counts.get(bucket) + quantity);
         }
 
         return WEIGHT_BUCKETS.stream()

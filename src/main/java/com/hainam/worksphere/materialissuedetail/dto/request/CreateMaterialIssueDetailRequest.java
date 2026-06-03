@@ -17,6 +17,9 @@ public class CreateMaterialIssueDetailRequest {
     @NotNull(message = "Issue id is required")
     private UUID issueId;
 
+    @NotNull(message = "Item id is required")
+    private UUID itemId;
+
     private String unit;
 
     @NotNull(message = "Quantity is required")

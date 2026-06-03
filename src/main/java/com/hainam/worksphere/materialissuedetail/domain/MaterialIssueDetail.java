@@ -36,6 +36,9 @@ public class MaterialIssueDetail {
     @Column(name = "issue_id", nullable = false)
     private UUID issueId;
 
+    @Column(name = "item_id")
+    private UUID itemId;
+
     @Column(name = "unit", length = 50)
     private String unit;
 

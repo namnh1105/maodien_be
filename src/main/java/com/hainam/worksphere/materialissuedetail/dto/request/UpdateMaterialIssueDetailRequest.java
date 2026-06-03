@@ -14,6 +14,7 @@ import java.util.UUID;
 public class UpdateMaterialIssueDetailRequest {
 
     private UUID issueId;
+    private UUID itemId;
     private String unit;
     private Double quantity;
     private Double unitPrice;

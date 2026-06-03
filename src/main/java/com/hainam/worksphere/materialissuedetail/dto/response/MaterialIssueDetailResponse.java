@@ -16,6 +16,7 @@ public class MaterialIssueDetailResponse {
 
     private UUID id;
     private UUID issueId;
+    private UUID itemId;
     private String unit;
     private Double quantity;
     private Double unitPrice;

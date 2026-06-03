@@ -1,5 +1,6 @@
 package com.hainam.worksphere.cullingproposal.dto.request;
 
+import com.hainam.worksphere.cullingproposal.domain.CullingProposalStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,5 +17,5 @@ public class UpdateCullingProposalRequest {
     private String proposalType;
     private String reason;
     private UUID employeeId;
-    private String status;
+    private CullingProposalStatus status;
 }

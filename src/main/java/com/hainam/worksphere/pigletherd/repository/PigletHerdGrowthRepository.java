@@ -23,6 +23,9 @@ public interface PigletHerdGrowthRepository extends JpaRepository<PigletHerdGrow
     @Query("SELECT g FROM PigletHerdGrowth g WHERE g.herdId = :herdId AND g.isDeleted = false ORDER BY g.trackingDate DESC")
     List<PigletHerdGrowth> findActiveByHerdId(@Param("herdId") UUID herdId);
 
+    @Query("SELECT g FROM PigletHerdGrowth g WHERE g.herdId IN :herdIds AND g.isDeleted = false ORDER BY g.trackingDate DESC, g.createdAt DESC")
+    List<PigletHerdGrowth> findActiveByHerdIds(@Param("herdIds") List<UUID> herdIds);
+
     @Query("SELECT g FROM PigletHerdGrowth g WHERE g.herdId = :herdId AND g.trackingDate < :trackingDate AND g.isDeleted = false ORDER BY g.trackingDate DESC, g.createdAt DESC")
     List<PigletHerdGrowth> findPreviousActiveByHerdId(
             @Param("herdId") UUID herdId,

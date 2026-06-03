@@ -1,6 +1,7 @@
 package com.hainam.worksphere.cullingproposal.service;
 
 import com.hainam.worksphere.cullingproposal.domain.CullingProposal;
+import com.hainam.worksphere.cullingproposal.domain.CullingProposalStatus;
 import com.hainam.worksphere.cullingproposal.dto.request.CreateCullingProposalBulkRequest;
 import com.hainam.worksphere.cullingproposal.dto.request.CreateCullingProposalRequest;
 import com.hainam.worksphere.cullingproposal.dto.request.UpdateCullingProposalRequest;
@@ -81,7 +82,7 @@ public class CullingProposalService {
                 .proposalType(request.getProposalType())
                 .reason(request.getReason())
                 .employeeId(employee.getId())
-                .status(normalizeStatus(null))
+                .status(normalizeStatus(request.getStatus()))
                 .createdBy(userId)
                 .build();
         }).toList();
@@ -149,7 +150,7 @@ public class CullingProposalService {
                     .orElseThrow(() -> new ResourceNotFoundException("CullingProposal", request.getId()));
 
             AuditContext.snapshot(cullingProposal);
-            String normalizedStatus = normalizeStatus(request.getStatus());
+            CullingProposalStatus normalizedStatus = normalizeStatus(request.getStatus());
             cullingProposal.setStatus(normalizedStatus);
             cullingProposal.setUpdatedBy(updatedBy);
 
@@ -189,19 +190,15 @@ public class CullingProposalService {
         return response;
     }
 
-    private String normalizeStatus(String status) {
-        if (status == null || status.isBlank()) {
-            return "Chờ duyệt";
+    private CullingProposalStatus normalizeStatus(CullingProposalStatus status) {
+        if (status == null) {
+            return CullingProposalStatus.PENDING;
         }
-        return status.trim();
+        return status;
     }
 
-    private boolean isApprovedStatus(String status) {
-        if (status == null || status.isBlank()) {
-            return false;
-        }
-        String normalized = normalizeText(status);
-        return normalized.contains("duyet") || normalized.contains("approve") || normalized.contains("approved");
+    private boolean isApprovedStatus(CullingProposalStatus status) {
+        return status == CullingProposalStatus.APPROVED;
     }
 
     private void updatePigStatusForApprovedProposal(CullingProposal proposal, UUID updatedBy) {
@@ -263,12 +260,8 @@ public class CullingProposalService {
         return null;
     }
 
-    private boolean isPendingStatus(String status) {
-        if (status == null || status.isBlank()) {
-            return true;
-        }
-        String normalized = normalizeText(status);
-        return normalized.equals("cho duyet") || normalized.equals("dang cho") || normalized.equals("pending");
+    private boolean isPendingStatus(CullingProposalStatus status) {
+        return status == null || status == CullingProposalStatus.PENDING;
     }
 
     private String normalizeText(String input) {
